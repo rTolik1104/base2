@@ -443,6 +443,11 @@ namespace Sungero.Docflow.Server
       return block;
     }
     
+    /// <summary>
+    /// Добавить маршрут в предметное отображение простой задачи.
+    /// </summary>
+    /// <param name="mainBlock">Блок задачи.</param>
+    /// <param name="assignments">Задания по задаче.</param>
     private static void AddSimpleTaskIterationsBlocks(StateBlock mainBlock, List<IAssignment> assignments)
     {
       var statusGroups = assignments.OrderByDescending(a => a.Status == Workflow.AssignmentBase.Status.Completed).GroupBy(a => a.Status);
@@ -804,6 +809,47 @@ namespace Sungero.Docflow.Server
       return documents;
     }
     
+    /// <summary>
+    /// Связать с основным документом документы из списка, если они не были связаны ранее.
+    /// </summary>
+    /// <param name="documents">Список документов.</param>
+    [Public]
+    public virtual void RelateDocumentsToPrimaryDocumentAsAddenda(List<IOfficialDocument> documents)
+    {
+      var primaryDocumentAddenda = Functions.Module.GetAddenda(_obj);
+      var notRelatedToPrimaryDocumentAddenda = documents.Except(primaryDocumentAddenda);
+      foreach (var addendum in notRelatedToPrimaryDocumentAddenda)
+      {
+        var addendumIsAlreadyRelatedToThePrimary = Sungero.Content.DocumentRelations.GetAll()
+          .Any(x => Equals(x.Source, _obj) && Equals(x.Target, addendum) ||
+               Equals(x.Source, addendum) && Equals(x.Target, _obj));
+        var addendumAsAddendum = Addendums.As(addendum);
+        if (addendumIsAlreadyRelatedToThePrimary ||
+            addendumAsAddendum != null && !Equals(addendumAsAddendum.LeadingDocument, _obj))
+          continue;
+        
+        // При одновременном связывании из параллельных задач может возникать исключение, что приостанавливает задачи. Bug 187215. 
+        var relationAdded = false;
+        try
+        {
+          addendum.Relations.AddFromOrUpdate(Docflow.PublicConstants.Module.AddendumRelationName, null, _obj);
+          addendum.Save();
+          relationAdded = true;
+        }
+        catch (Sungero.Domain.Shared.Exceptions.SessionException ex)
+        {
+          Logger.ErrorFormat("RelateDocumentsToPrimaryDocumentAsAddenda: Error while relate document (ID={0}) to addendum (ID={1})", _obj.Id, addendum.Id, ex.Message);
+        }
+        
+        if (relationAdded)
+          Logger.DebugFormat("Success: Linking the primary document (ID={0}) to addendum (ID={1})",
+                             _obj.Id, addendum.Id);
+        else
+          Logger.DebugFormat("Failed: Linking the primary document (ID={0}) to addendum (ID={1})",
+                             _obj.Id, addendum.Id);
+      }
+    }
+    
     #endregion
     
     #region Запрос подготовки предпросмотра
@@ -971,6 +1017,10 @@ namespace Sungero.Docflow.Server
       return onlyBodyPropertiesChanged && !locationChanged;
     }
     
+    /// <summary>
+    /// Получить местонахождение предыдущих версий документа в сервисе обмена.
+    /// </summary>
+    /// <returns>Список местонахождений предыдущих версий.</returns>
     private List<string> GetOldVersionsExchangeLocation()
     {
       var result = new List<string>();
@@ -998,6 +1048,11 @@ namespace Sungero.Docflow.Server
       return result;
     }
     
+    /// <summary>
+    /// Получить статус документа в сервисе обмена.
+    /// </summary>
+    /// <param name="exchangeDocumentInfo">Информация о документе.</param>
+    /// <returns>Статус в сервисе обмена.</returns>
     private string GetExchangeState(Exchange.IExchangeDocumentInfo exchangeDocumentInfo)
     {
       var result = string.Empty;
@@ -1045,9 +1100,9 @@ namespace Sungero.Docflow.Server
       var lastVersionIsSigned = exchangeDocumentInfo != null && exchangeDocumentInfo.ExchangeState == ExchangeState.Signed;
       if (_obj.Versions.Count > 1 && !lastVersionIsSigned && !isFormalized)
       {
-        var oldVersions = this.GetOldVersionsExchangeLocation();
-        if (oldVersions.Any())
-          result = string.Join("; \n", oldVersions);
+        var oldVersionLocations = this.GetOldVersionsExchangeLocation();
+        if (oldVersionLocations.Any())
+          result = string.Join("; \n", oldVersionLocations);
       }
 
       if (exchangeDocumentInfo == null)
@@ -1070,9 +1125,9 @@ namespace Sungero.Docflow.Server
     }
     
     /// <summary>
-    /// Получить id задач, в которых документ вложен в обязательные группы.
+    /// Получить ИД задач, в которых документ вложен в обязательные группы.
     /// </summary>
-    /// <returns>Список id задач.</returns>
+    /// <returns>Список ИД задач.</returns>
     [Remote]
     public virtual List<int> GetTaskIdsWhereDocumentInRequredGroup()
     {
@@ -1131,12 +1186,42 @@ namespace Sungero.Docflow.Server
       var tasks = RecordManagement.AcquaintanceTasks.GetAll()
         .Where(x => x.Status == Workflow.Task.Status.InProcess ||
                x.Status == Workflow.Task.Status.Suspended ||
-               x.Status == Workflow.Task.Status.Completed)
+               x.Status == Workflow.Task.Status.Completed ||
+               x.Status == Workflow.Task.Status.Aborted)
         .Where(x => x.AttachmentDetails.Any(d => d.GroupId.ToString() == "19c1e8c9-e896-4d93-a1e8-4e22b932c1ce" &&
                                             d.AttachmentId == _obj.Id))
         .ToList();
       
       return tasks;
+    }
+    
+    /// <summary>
+    /// Определить, есть ли задачи на ознакомление документа.
+    /// </summary>
+    /// <param name="versionNumber">Номер версии.</param>
+    /// <param name="includeCompleted">Учитывать выполненные задачи.</param>
+    /// <param name="includeAborted">Учитывать прекращенные задачи.</param>
+    /// <returns>True, если есть.</returns>
+    [Public, Remote(IsPure = true)]
+    public virtual bool HasAcquaintanceTasks(int? versionNumber, bool includeCompleted, bool includeAborted)
+    {
+      var anyTasks = false;
+      Sungero.Core.AccessRights.AllowRead(
+        () =>
+        {
+          // Искать не только задачи, где документ является основным (IsMainDocument == true),
+          // т.к. Solo и Jazz проверяют ещё и приложения.
+          anyTasks = RecordManagement.AcquaintanceTasks.GetAll()
+            .Where(x => x.Status == Workflow.Task.Status.InProcess ||
+                   x.Status == Workflow.Task.Status.Suspended ||
+                   includeCompleted && x.Status == Workflow.Task.Status.Completed ||
+                   includeAborted && x.Status == Workflow.Task.Status.Aborted)
+            .Where(x => x.AcquaintanceVersions.Any(v => v.DocumentId == _obj.Id &&
+                                                   v.Number == versionNumber))
+            .Any();
+        });
+      
+      return anyTasks;
     }
     
     /// <summary>
@@ -1175,7 +1260,7 @@ namespace Sungero.Docflow.Server
     /// Возвращает список подписывающих по правилу.
     /// </summary>
     /// <returns>Список тех, кто имеет право подписи.</returns>
-    [Remote(IsPure = true)]
+    [Remote(IsPure = true), Obsolete("Используйте методы: GetSignatoriesIds, SignatorySettingWithAllUsersExist, GetSignatureSettingsByEmployee, CanSignByEmployee.")]
     public virtual List<Sungero.Docflow.Structures.SignatureSetting.Signatory> GetSignatories()
     {
       var signatories = new List<Sungero.Docflow.Structures.SignatureSetting.Signatory>();
@@ -1216,6 +1301,79 @@ namespace Sungero.Docflow.Server
     }
     
     /// <summary>
+    /// Возвращает список Id подписывающих по критериям.
+    /// </summary>
+    /// <returns>Список тех, кто имеет право подписи.</returns>
+    /// <remarks>Исключаются права подписи, выданные всем пользователям.</remarks>
+    [Remote(IsPure = true)]
+    public virtual List<int> GetSignatoriesIds()
+    {
+      if (_obj == null)
+        return new List<int>();
+
+      var settings = Functions.OfficialDocument.GetSignatureSettingsQuery(_obj);
+
+      return this.ExpandSignatoriesBySignatureSettings(settings);
+    }
+    
+    /// <summary>
+    /// Получить развернутый список подписывающих по правам подписи.
+    /// </summary>
+    /// <param name="settings">Список прав подписи.</param>
+    /// <returns>Список ид сотрудников. </returns>
+    /// <remarks>Исключаются права подписи, выданные всем пользователям.</remarks>
+    public virtual List<int> ExpandSignatoriesBySignatureSettings(IQueryable<ISignatureSetting> settings)
+    {
+      var signatories = new List<int>();
+      
+      // Права подписи с сотрудником.
+      signatories.AddRange(settings.Where(s => Employees.Is(s.Recipient)).Select(s => s.Recipient.Id));
+      
+      // Права подписи по группам.
+      var groupIds = settings.Where(s => Groups.Is(s.Recipient) && s.Recipient.Sid != Constants.OfficialDocument.AllUsersSid)
+        .Select(s => s.Recipient.Id)
+        .ToList();
+      
+      foreach (var groupId in groupIds)
+        signatories.AddRange(Functions.OfficialDocument.GetAllRecipientMembersIdsInGroup(groupId));
+
+      return signatories.Distinct().ToList();
+    }
+    
+    /// <summary>
+    /// Проверить наличие права подписи со всеми сотрудниками.
+    /// </summary>
+    /// <returns>True - Если есть право подписи со всеми сотрудниками.</returns>
+    [Remote(IsPure = true)]
+    public virtual bool SignatorySettingWithAllUsersExist()
+    {
+      var settings = Functions.OfficialDocument.GetSignatureSettingsQuery(_obj);
+      
+      return settings.Any(s => s.Recipient.Sid == Constants.OfficialDocument.AllUsersSid);
+    }
+    
+    /// <summary>
+    /// Получить подписывающего по умолчанию.
+    /// </summary>
+    /// <returns>Подписывающий по умолчанию.</returns>
+    public virtual Sungero.Company.IEmployee GetDefaultSignatory()
+    {
+      var settingsQuery = Functions.OfficialDocument.GetSignatureSettingsQuery(_obj);
+      var maxPriority = settingsQuery.Max(s => s.Priority);
+      var signatoriesMaxPriority = settingsQuery.Where(s => s.Priority == maxPriority);
+      
+      if (signatoriesMaxPriority.Any(s => Groups.Is(s.Recipient) && s.Recipient.Sid == Constants.OfficialDocument.AllUsersSid))
+        return null;
+      
+      var signatoriesIds = this.ExpandSignatoriesBySignatureSettings(signatoriesMaxPriority);
+      
+      if (signatoriesIds.Count() == 1)
+        return Employees.Get(signatoriesIds.First());
+      
+      return null;
+    }
+    
+    /// <summary>
     /// Получить список Ид участников группы.
     /// </summary>
     /// <param name="groupId">Ид группы.</param>
@@ -1238,10 +1396,41 @@ namespace Sungero.Docflow.Server
     }
     
     /// <summary>
+    /// Проверить наличие права подписи у сотрудника.
+    /// </summary>
+    /// <param name="employee">Сотрудник.</param>
+    /// <returns>True, если сотрудник имеет право подписи, иначе - False.</returns>
+    [Public, Remote(IsPure = true)]
+    public virtual bool CanSignByEmployee(IEmployee employee)
+    {
+      if (_obj == null || employee == null)
+        return false;
+      
+      return this.GetSignatureSettingsByEmployee(employee).Any();
+    }
+    
+    /// <summary>
+    /// Получить права подписи у сотрудника.
+    /// </summary>
+    /// <param name="employee">Сотрудник.</param>
+    /// <returns>Список прав подписи.</returns>
+    [Public, Remote(IsPure = true)]
+    public virtual IQueryable<ISignatureSetting> GetSignatureSettingsByEmployee(IEmployee employee)
+    {
+      if (_obj == null || employee == null)
+        return Enumerable.Empty<ISignatureSetting>().AsQueryable();
+
+      var groupIds = Recipients.OwnRecipientIdsFor(employee);
+      groupIds.Append(employee.Id);
+      
+      return Functions.OfficialDocument.GetSignatureSettingsQuery(_obj).Where(s => groupIds.Contains(s.Recipient.Id));
+    }
+    
+    /// <summary>
     /// Возвращает список подписывающих по правилу.
     /// </summary>
     /// <returns>Список Ид тех, кто имеет право подписи.</returns>
-    [Public, Remote(IsPure = true)]
+    [Public, Remote(IsPure = true), Obsolete("Используйте методы: GetSignatoriesIds, GetSignatureSettingsByEmployee.")]
     public virtual List<int> GetEmployeeSignatories()
     {
       var signatories = this.GetSignatories();
@@ -1252,7 +1441,7 @@ namespace Sungero.Docflow.Server
     /// Получить права подписания документов.
     /// </summary>
     /// <returns>Список подходящих правил.</returns>
-    [Public, Remote(IsPure = true)]
+    [Public, Remote(IsPure = true), Obsolete("Используйте метод GetSignatureSettingsQuery")]
     public virtual List<ISignatureSetting> GetSignatureSettings()
     {
       if (_obj.DocumentKind == null)
@@ -1276,21 +1465,36 @@ namespace Sungero.Docflow.Server
     /// <summary>
     /// Получить права подписания документов.
     /// </summary>
+    /// <returns>Список подходящих правил.</returns>
+    [Public, Remote(IsPure = true)]
+    public virtual IQueryable<ISignatureSetting> GetSignatureSettingsQuery()
+    {
+      if (_obj.DocumentKind == null)
+        return Enumerable.Empty<ISignatureSetting>().AsQueryable();
+      
+      var docflow = _obj.DocumentKind.DocumentFlow;
+      var businessUnits = new List<IBusinessUnit>() { };
+      if (_obj.BusinessUnit != null)
+        businessUnits.Add(_obj.BusinessUnit);
+      var kinds = new List<IDocumentKind>() { };
+      if (_obj.DocumentKind != null)
+        kinds.Add(_obj.DocumentKind);
+      
+      var settings = Functions.SignatureSetting.GetSignatureSettings(businessUnits, kinds)
+        .Where(s => s.DocumentFlow == Docflow.SignatureSetting.DocumentFlow.All || s.DocumentFlow == docflow)
+        .Where(s => !s.Departments.Any() || s.Departments.Any(d => Equals(d.Department, _obj.Department)) || _obj.Department == null);
+      return settings;
+    }
+    
+    /// <summary>
+    /// Получить права подписания документов.
+    /// </summary>
     /// <param name="employee">Сотрудник, для которого запрашиваются права.</param>
     /// <returns>Список подходящих правил.</returns>
     [Public, Remote(IsPure = true)]
     public virtual List<ISignatureSetting> GetSignatureSettings(IEmployee employee)
     {
-      var result = new List<ISignatureSetting>();
-      var documentSettings = Functions.OfficialDocument.GetSignatureSettings(_obj);
-      foreach (var setting in documentSettings)
-      {
-        if (Groups.Is(setting.Recipient) && Groups.GetAllUsersInGroup(Groups.As(setting.Recipient)).Contains(employee))
-          result.Add(setting);
-        else if (Equals(setting.Recipient, employee))
-          result.Add(setting);
-      }
-      return result;
+      return this.GetSignatureSettingsByEmployee(employee).ToList();
     }
 
     /// <summary>
@@ -1382,18 +1586,16 @@ namespace Sungero.Docflow.Server
     [Remote(IsPure = true), Public]
     public virtual List<string> GetApprovalValidationErrors(bool checkSignatureSettings)
     {
-      var employee = Users.Current;
       var errors = new List<string>();
       if (!_obj.AccessRights.CanApprove())
         errors.Add(Docflow.Resources.NoAccessRightsToApprove);
       
-      var signatories = new List<Docflow.Structures.SignatureSetting.Signatory>();
       if (checkSignatureSettings)
       {
         // Поиск прав подписи документа.
-        signatories = Functions.OfficialDocument.GetSignatories(_obj);
+        var canSignByEmployee = Functions.OfficialDocument.CanSignByEmployee(_obj, Employees.Current);
         
-        if (_obj.AccessRights.CanApprove() && (!signatories.Any() || !signatories.Any(s => Equals(s.EmployeeId, employee.Id))))
+        if (_obj.AccessRights.CanApprove() && !canSignByEmployee)
           errors.Add(Docflow.Resources.NoRightsToApproveDocument);
       }
       
@@ -1490,6 +1692,45 @@ namespace Sungero.Docflow.Server
     }
     
     /// <summary>
+    /// Получить параметры для кеширования.
+    /// </summary>
+    /// <returns>Структура с параметрами документа.</returns>
+    [Remote(IsPure = true)]
+    public virtual Structures.OfficialDocument.IOfficialDocumentParams GetOfficialDocumentParams()
+    {
+      var parameters = Structures.OfficialDocument.OfficialDocumentParams.Create();
+      
+      var lockInfo = Locks.GetLockInfo(_obj);
+      if (_obj.AccessRights.CanUpdate() && !(lockInfo != null && lockInfo.IsLockedByOther))
+      {
+        parameters.HasReservationSetting = PublicFunctions.Module.Remote.GetRegistrationSettings(Docflow.RegistrationSetting.SettingType.Reservation, _obj.BusinessUnit, _obj.DocumentKind, _obj.Department).Any();
+      }
+      
+      if (_obj.DocumentKind != null &&
+          _obj.DocumentKind.AutoNumbering == true &&
+          _obj.RegistrationState == RegistrationState.NotRegistered &&
+          !Functions.OfficialDocument.IsObsolete(_obj, _obj.LifeCycleState))
+      {
+        parameters.HasNumerationSetting = Functions.OfficialDocument.HasDocumentRegistersByDocument(_obj, Docflow.RegistrationSetting.SettingType.Numeration);
+      }
+      
+      parameters.NeedShowRegistrationPane = PublicFunctions.PersonalSetting.Remote.GetShowRegistrationPaneParam(null);
+      
+      if (_obj.State.Properties.Assignee.IsVisible)
+      {
+        // Для зарегистрированных документов "Исполнитель" должно быть доступно только группе регистрации.
+        if (_obj.AccessRights.CanRegister() && _obj.DocumentKind != null && _obj.DocumentKind.NumberingType == Docflow.DocumentKind.NumberingType.Registrable
+            && _obj.AccessRights.CanUpdate() && _obj.RegistrationState == RegistrationState.Registered &&
+            _obj.DocumentRegister != null && _obj.DocumentRegister.RegistrationGroup != null)
+        {
+          parameters.CanChangeAssignee = this.CanChangeAssignee();
+        }
+      }
+      
+      return parameters;
+    }
+    
+    /// <summary>
     /// Признак того, что необходимо проверять наличие прав подписи на документ у сотрудника, указанного в качестве подписанта с нашей стороны.
     /// </summary>
     /// <returns>True - необходимо проверять, False - иначе.</returns>
@@ -1507,6 +1748,7 @@ namespace Sungero.Docflow.Server
     /// </summary>
     /// <param name="versionId">ИД версии.</param>
     /// <returns>True - если документ участвовал в сервисе обмена, либо формализованный.</returns>
+    [Remote(IsPure = true)]
     public virtual bool IsExchangeDocument(int versionId)
     {
       return Exchange.ExchangeDocumentInfos.GetAll().Any(x => Equals(x.Document, _obj) && x.VersionId == versionId) ||
@@ -1746,13 +1988,13 @@ namespace Sungero.Docflow.Server
       var lastVersion = _obj.LastVersion;
       
       var supportedExtensions = Functions.Module.GetSupportedExtensionsForActionItems();
-      var extension = lastVersion.AssociatedApplication.Extension;
+      var extension = lastVersion.BodyAssociatedApplication.Extension;
       if (!supportedExtensions.Contains(extension.ToLower()))
       {
         Logger.DebugFormat("CreateActionItemsFromDocument. Extension {0} is not supported, document with Id {1}.", extension, _obj.Id);
         throw new AppliedCodeException(OfficialDocuments.Resources.ActionItemCreationDialogOnlyForWordDocumentFormat(string.Join(", ", supportedExtensions)));
       }
-        
+      
       var culture = TenantInfo.Culture;
       
       // TODO 63572 Криво парсятся даты вида 27.02 на 2008 сервере.
@@ -1792,8 +2034,8 @@ namespace Sungero.Docflow.Server
           for (int i = 0; i < tagTexts[OfficialDocuments.Resources.ActionItemCreationDialogActionItemTag].Length; i++)
           {
             var skipCreateActionItemByDeadline = (tagTexts[OfficialDocuments.Resources.ActionItemCreationDialogDeadlineTag].Length == 0 ||
-                                                  tagTexts[OfficialDocuments.Resources.ActionItemCreationDialogDeadlineTag][i] == string.Empty) && 
-                                                  !allowActionItemsWithIndefiniteDeadline;
+                                                  tagTexts[OfficialDocuments.Resources.ActionItemCreationDialogDeadlineTag][i] == string.Empty) &&
+              !allowActionItemsWithIndefiniteDeadline;
             
             if (tagTexts[OfficialDocuments.Resources.ActionItemCreationDialogActionItemTag].Length == 0
                 || tagTexts[OfficialDocuments.Resources.ActionItemCreationDialogActionItemTag][i] == string.Empty
@@ -1809,7 +2051,7 @@ namespace Sungero.Docflow.Server
                   tagTexts[OfficialDocuments.Resources.ActionItemCreationDialogActionItemTag][i] != string.Empty)
                 actionItem.ActiveText = tagTexts[OfficialDocuments.Resources.ActionItemCreationDialogActionItemTag][i];
 
-              // Заполнение срока поручения.              
+              // Заполнение срока поручения.
               if (tagTexts[OfficialDocuments.Resources.ActionItemCreationDialogDeadlineTag].Length > 0 &&
                   tagTexts[OfficialDocuments.Resources.ActionItemCreationDialogDeadlineTag][i] != string.Empty)
               {
@@ -1939,6 +2181,11 @@ namespace Sungero.Docflow.Server
         Exchange.PublicFunctions.Module.Remote.GeneratePublicBody(_obj.Id);
         info.IsOnConvertion = true;
         info.HasErrors = false;
+        
+        Logger.DebugFormat("Signature mark. Exchange document. Added async. Document id - {0}, kind - {1}, format - {2}, application - {3}.",
+                           _obj.Id, _obj.DocumentKind.DisplayValue,
+                           _obj.LastVersion.BodyAssociatedApplication.Extension, _obj.LastVersion.BodyAssociatedApplication);
+
       }
       else if (this.CanConvertToPdfInteractively())
       {
@@ -1946,6 +2193,10 @@ namespace Sungero.Docflow.Server
         info = this.ConvertToPdfAndAddSignatureMark(versionId);
         info.IsFastConvertion = true;
         info.ErrorTitle = OfficialDocuments.Resources.ConvertionErrorTitleBase;
+        
+        Logger.DebugFormat("Signature mark. Added interactively. Document id - {0}, kind - {1}, format - {2}, application - {3}.",
+                           _obj.Id, _obj.DocumentKind.DisplayValue,
+                           _obj.LastVersion.BodyAssociatedApplication.Extension, _obj.LastVersion.BodyAssociatedApplication);
       }
       else
       {
@@ -1954,10 +2205,17 @@ namespace Sungero.Docflow.Server
         asyncConvertToPdf.DocumentId = _obj.Id;
         asyncConvertToPdf.VersionId = versionId;
         asyncConvertToPdf.UserId = Users.Current.Id;
-        asyncConvertToPdf.ExecuteAsync();
+        
+        var startedNotificationText = OfficialDocuments.Resources.ConvertionInProgress;
+        var completedNotificationText = OfficialDocuments.Resources.ConvertToPdfCompleteNotificationFormat(Hyperlinks.Get(_obj));
+        asyncConvertToPdf.ExecuteAsync(startedNotificationText, completedNotificationText);
         
         info.IsOnConvertion = true;
         info.HasErrors = false;
+        
+        Logger.DebugFormat("Signature mark. Added async. Document id - {0}, kind - {1}, format - {2}, application - {3}.",
+                           _obj.Id, _obj.DocumentKind.DisplayValue,
+                           _obj.LastVersion.BodyAssociatedApplication.Extension, _obj.LastVersion.BodyAssociatedApplication);
       }
       
       return info;
@@ -2019,13 +2277,8 @@ namespace Sungero.Docflow.Server
       
       // Формат не поддерживается.
       var versionExtension = version.BodyAssociatedApplication.Extension.ToLower();
-      var versionExtensionIsSupported = AsposeExtensions.Converter.CheckIfExtensionIsSupported(versionExtension);
-      if (!versionExtensionIsSupported)
-      {
-        info.ErrorTitle = OfficialDocuments.Resources.ConvertionErrorTitleBase;
-        info.ErrorMessage = OfficialDocuments.Resources.ExtensionNotSupportedFormat(versionExtension);
-        return info;
-      }
+      if (!this.CheckPdfConvertibilityByExtension(versionExtension))
+        return Functions.OfficialDocument.GetExtensionValidationError(_obj, versionExtension);
       
       // Валидация подписи.
       var signature = Functions.OfficialDocument.GetSignatureForMark(_obj, versionId);
@@ -2113,6 +2366,44 @@ namespace Sungero.Docflow.Server
     public virtual bool CanConvertToPdfInteractively()
     {
       return Functions.Module.CanConvertToPdfInteractively(_obj);
+    }
+    
+    /// <summary>
+    /// Определить, поддерживается ли преобразование в PDF для переданного расширения.
+    /// </summary>
+    /// <param name="extension">Расширение.</param>
+    /// <returns>True, если поддерживается, иначе False.</returns>
+    [Public]
+    public virtual bool CheckPdfConvertibilityByExtension(string extension)
+    {
+      return AsposeExtensions.Converter.CheckIfExtensionIsSupported(extension);
+    }
+    
+    #endregion
+    
+    #region Генерация PDF с отметкой о регистрации
+    
+    /// <summary>
+    /// Преобразовать в PDF с отметкой о регистрации в новую версию документа.
+    /// </summary>
+    /// <param name="versionId">ИД преобразуемой версии.</param>
+    /// <param name="registrationStamp">Отметка о регистрации (html).</param>
+    /// <param name="rightIndent">Значение отступа справа.</param>
+    /// <param name="bottomIndent">Значение отступа снизу.</param>
+    /// <returns>Информация о результате создания новой версии документа в PDF.</returns>
+    public virtual Structures.OfficialDocument.СonversionToPdfResult ConvertToPdfAndAddRegistrationStamp(int versionId, string registrationStamp, double rightIndent, double bottomIndent)
+    {
+      return Docflow.Functions.Module.ConvertToPdfWithStamp(_obj, versionId, registrationStamp, false, rightIndent, bottomIndent);
+    }
+    
+    /// <summary>
+    /// Получить отметку о регистрации.
+    /// </summary>
+    /// <returns>Изображение отметки о регистрации в виде html.</returns>
+    [Public]
+    public virtual string GetRegistrationStampAsHtml()
+    {
+      return Functions.Module.GetRegistrationStampAsHtml(_obj);
     }
     
     #endregion
@@ -2363,6 +2654,16 @@ namespace Sungero.Docflow.Server
         Docflow.PublicFunctions.Module.GrantAccessRightsOnEntity(document, accessRight.Recipient, rightsTypeToGrant);
         Logger.DebugFormat("Grant Access Rights ({0}) For document ({1}), employee: ({2})", rightsTypeToGrant, document.Id, accessRight.Recipient.Id);
       }
+    }
+    
+    /// <summary>
+    /// Проверить, связан ли документ специализированной связью.
+    /// </summary>
+    /// <returns>True - если связан, иначе - false.</returns>
+    [Remote(IsPure = true)]
+    public virtual bool HasSpecifiedTypeRelations()
+    {
+      return false;
     }
   }
 }

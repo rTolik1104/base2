@@ -9,12 +9,13 @@ using Sungero.Domain;
 namespace Sungero.Docflow.Server
 {
   partial class AccountingDocumentBaseFunctions
-  {    
-  
+  {
+    
     /// <summary>
     /// Получить права подписания финансовых документов.
     /// </summary>
     /// <returns>Список подходящих правил.</returns>
+    [Obsolete("Используйте метод GetSignatureSettingsQuery")]
     public override List<ISignatureSetting> GetSignatureSettings()
     {
       var basedSettings = base.GetSignatureSettings()
@@ -28,6 +29,25 @@ namespace Sungero.Docflow.Server
         basedSettings = basedSettings
           .Where(s => !s.Categories.Any() || s.Categories.Any(c => Equals(c.Category, category)))
           .ToList();
+      }
+      return basedSettings;
+    }
+    
+    /// <summary>
+    /// Получить права подписания финансовых документов.
+    /// </summary>
+    /// <returns>Список подходящих правил.</returns>
+    public override IQueryable<ISignatureSetting> GetSignatureSettingsQuery()
+    {
+      var basedSettings = base.GetSignatureSettingsQuery()
+        .Where(s => s.Limit == Docflow.SignatureSetting.Limit.NoLimit || (s.Limit == Docflow.SignatureSetting.Limit.Amount &&
+                                                                          s.Amount >= _obj.TotalAmount && Equals(s.Currency, _obj.Currency)));
+      
+      if (_obj.DocumentKind != null && _obj.DocumentKind.DocumentFlow == Docflow.DocumentKind.DocumentFlow.Contracts)
+      {
+        var category = Docflow.PublicFunctions.OfficialDocument.GetDocumentGroup(_obj);
+        basedSettings = basedSettings
+          .Where(s => !s.Categories.Any() || s.Categories.Any(c => Equals(c.Category, category)));
       }
       return basedSettings;
     }
@@ -132,12 +152,6 @@ namespace Sungero.Docflow.Server
     [Remote, Public]
     public virtual void GenerateDefaultAnswer(Company.IEmployee signatory, bool isAgent)
     {
-      if (_obj.BusinessUnitBox != null && Equals(_obj.BusinessUnitBox.ExchangeService.ExchangeProvider, ExchangeCore.ExchangeService.ExchangeProvider.Sbis) && 
-          Exchange.PublicFunctions.Module.Remote.IsInvoiceAmendmentRequest(_obj))
-      {
-        throw AppliedCodeException.Create(Exchange.Resources.AnswerIsAlreadySent);
-      }
-      
       IPowerOfAttorney signatoryPowerOfAttorney = null;
       IPowerOfAttorney consigneePowerOfAttorney = null;
       var signatoryOtherReason = string.Empty;
@@ -173,7 +187,7 @@ namespace Sungero.Docflow.Server
       buyerTitle.SignatoryPowersBase = basis;
       buyerTitle.Consignee = null;
       buyerTitle.ConsigneePowersBase = string.Empty;
-      buyerTitle.SignResult = true;
+      buyerTitle.BuyerAcceptanceStatus = Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Accepted;
       buyerTitle.SignatoryPowers = authority;
       buyerTitle.AcceptanceDate = Calendar.Now;
       buyerTitle.SignatoryPowerOfAttorney = signatoryPowerOfAttorney;
@@ -310,5 +324,20 @@ namespace Sungero.Docflow.Server
       return string.Empty;
     }
 
+    /// <summary>
+    /// Проверить, связан ли документ специализированной связью.
+    /// </summary>
+    /// <returns>True - если связан, иначе - false.</returns>
+    [Remote(IsPure = true)]
+    public override bool HasSpecifiedTypeRelations()
+    {
+      var hasSpecifiedTypeRelations = false;
+      AccessRights.AllowRead(
+        () =>
+        {
+          hasSpecifiedTypeRelations = AccountingDocumentBases.GetAll().Any(x => Equals(x.Corrected, _obj));
+        });
+      return base.HasSpecifiedTypeRelations() || hasSpecifiedTypeRelations;
+    }
   }
 }

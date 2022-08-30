@@ -45,6 +45,8 @@ namespace Sungero.Docflow
     {
       if (!Functions.ApprovalTask.SchemeVersionSupportsRework(ApprovalTasks.As(_obj.Task)))
         e.HideAction(_obj.Info.Actions.Forward);
+      
+      Functions.ApprovalReworkAssignment.Remote.CreateParamsCache(_obj);
     }
 
     public virtual void DeliveryMethodValueInput(Sungero.Docflow.Client.ApprovalReworkAssignmentDeliveryMethodValueInputEventArgs e)
@@ -79,7 +81,7 @@ namespace Sungero.Docflow
         _obj.State.Properties.Approvers.Properties.Action.IsEnabled = false;
       
       var document = _obj.DocumentGroup.OfficialDocuments.FirstOrDefault();
-      var refreshParameters = Functions.ApprovalTask.Remote.GetFullStagesInfoForRefresh(ApprovalTasks.As(_obj.Task));
+      var refreshParameters = Functions.ApprovalTask.GetOrUpdateAssignmentRefreshParams(ApprovalTasks.As(_obj.Task), _obj, false);
 
       _obj.State.Properties.Addressee.IsVisible = refreshParameters.AddresseeIsVisible;
       _obj.State.Properties.Addressee.IsRequired = refreshParameters.AddresseeIsRequired;

@@ -950,6 +950,40 @@
       "ReturnTypeFullName": "System.Linq.IQueryable"
     },
     {
+      "Name": "HasDocumentRegistersByParams",
+      "IsRemote": true,
+      "Parameters": [
+        {
+          "Name": "kind",
+          "ParameterType": "global::Sungero.Docflow.IDocumentKind",
+          "ParameterTypeFullName": "Sungero.Docflow.IDocumentKind, Sungero.Domain.Interfaces"
+        },
+        {
+          "Name": "unit",
+          "ParameterType": "global::Sungero.Company.IBusinessUnit",
+          "ParameterTypeFullName": "Sungero.Company.IBusinessUnit, Sungero.Domain.Interfaces"
+        },
+        {
+          "Name": "department",
+          "ParameterType": "global::Sungero.Company.IDepartment",
+          "ParameterTypeFullName": "Sungero.Company.IDepartment, Sungero.Domain.Interfaces"
+        },
+        {
+          "Name": "settingType",
+          "ParameterType": "global::System.Nullable<global::Sungero.Core.Enumeration>",
+          "ParameterTypeFullName": "System.Nullable"
+        },
+        {
+          "Name": "forCurrentUser",
+          "ParameterType": "global::System.Boolean",
+          "ParameterTypeFullName": "System.Boolean"
+        }
+      ],
+      "Placement": "Shared",
+      "ReturnType": "global::System.Boolean",
+      "ReturnTypeFullName": "System.Boolean"
+    },
+    {
       "Name": "IsRegistrationNumberUnique",
       "IsRemote": true,
       "Parameters": [

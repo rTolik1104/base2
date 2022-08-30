@@ -191,9 +191,6 @@ Exchange service: {4}.</value>
   <data name="WizardCompleted" xml:space="preserve">
     <value>Finish</value>
   </data>
-  <data name="WizardMailRegisterSynerdocs" xml:space="preserve">
-    <value>https://client.synerdocs.ru/Account/Register</value>
-  </data>
   <data name="WizardCounterpartyView" xml:space="preserve">
     <value>{0} (TIN {1}, TRRC {2}, {3})</value>
   </data>

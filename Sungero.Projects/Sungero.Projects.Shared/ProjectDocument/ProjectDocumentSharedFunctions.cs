@@ -76,6 +76,7 @@ namespace Sungero.Projects.Shared
       return false;
     }
     
+    [Obsolete("Используйте метод GetDefaultSignatory().")]
     public override Sungero.Company.IEmployee GetDefaultSignatory(List<Docflow.Structures.SignatureSetting.Signatory> signatories)
     {
       if (Company.Employees.Current != null)

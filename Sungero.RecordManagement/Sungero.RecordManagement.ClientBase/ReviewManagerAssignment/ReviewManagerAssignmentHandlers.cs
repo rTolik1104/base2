@@ -20,6 +20,12 @@ namespace Sungero.RecordManagement
     {
       if (_obj.Task.GetStartedSchemeVersion() == LayerSchemeVersions.V1)
         e.HideAction(_obj.Info.Actions.Forward);
+      
+      // Скрывать результат выполнения "Вернуть инициатору" для задач, стартованных на ранних версиях схемы или в рамках согласования по регламенту.
+      var schemeSupportsRework = Functions.DocumentReviewTask.SchemeVersionSupportsRework(_obj.Task);
+      var reviewStartedFromApproval = Functions.DocumentReviewTask.ReviewStartedFromApproval(_obj.Task);
+      if (!schemeSupportsRework || reviewStartedFromApproval)
+        e.HideAction(_obj.Info.Actions.ForRework);
     }
   }
 

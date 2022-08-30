@@ -9,6 +9,58 @@ namespace Sungero.Docflow.Server
   public class ModuleAsyncHandlers
   {
 
+    public virtual void AddRegistrationStamp(Sungero.Docflow.Server.AsyncHandlerInvokeArgs.AddRegistrationStampInvokeArgs args)
+    {
+      int documentId = args.DocumentId;
+      int versionId = args.VersionId;
+      double rightIndent = args.RightIndent;
+      double bottomIndent = args.BottomIndent;
+      
+      Logger.DebugFormat("AddRegistrationStamp: start convert document to pdf. Document id - {0}.", documentId);
+      
+      var document = OfficialDocuments.GetAll(x => x.Id == documentId).FirstOrDefault();
+      if (document == null)
+      {
+        Logger.DebugFormat("AddRegistrationStamp: not found document with id {0}.", documentId);
+        return;
+      }
+      
+      var version = document.Versions.SingleOrDefault(v => v.Id == versionId);
+      if (version == null)
+      {
+        Logger.DebugFormat("AddRegistrationStamp: not found version. Document id - {0}, version number - {1}.", documentId, versionId);
+        return;
+      }
+      
+      if (!Locks.TryLock(version.Body))
+      {
+        Logger.DebugFormat("AddRegistrationStamp: version is locked. Document id - {0}, version number - {1}.", documentId, versionId);
+        args.Retry = true;
+        return;
+      }
+      
+      var registrationStamp = Docflow.Functions.OfficialDocument.GetRegistrationStampAsHtml(document);
+      var result = Docflow.Functions.Module.ConvertToPdfWithStamp(document, versionId, registrationStamp, false, rightIndent, bottomIndent);
+      Locks.Unlock(version.Body);
+      
+      if (result.HasErrors)
+      {
+        Logger.DebugFormat("AddRegistrationStamp: {0}", result.ErrorMessage);
+        if (result.HasLockError)
+        {
+          args.Retry = true;
+        }
+        else
+        {
+          var operation = new Enumeration(Constants.OfficialDocument.Operation.ConvertToPdf);
+          document.History.Write(operation, operation, string.Empty, version.Number);
+          document.Save();
+        }
+      }
+      
+      Logger.DebugFormat("AddRegistrationStamp: convert document {0} to pdf successfully.", documentId);
+    }
+
     public virtual void ExecuteApprovalFunction(Sungero.Docflow.Server.AsyncHandlerInvokeArgs.ExecuteApprovalFunctionInvokeArgs args)
     {
       Logger.DebugFormat("ExecuteApprovalFunction: Start for queue item id {0}. Retry iteration: {1}", args.QueueItemId, args.RetryIteration);
@@ -233,9 +285,31 @@ namespace Sungero.Docflow.Server
         args.Retry = true;
         return;
       }
+      
+      var versions = document.Versions.Where(v => !Equals(v.Body.Storage, storage) || !Equals(v.PublicBody.Storage, storage));
+      var retry = false;
+      foreach (var version in versions)
+      {
+        if (Locks.GetLockInfo(version.Body).IsLockedByOther)
+        {
+          Logger.DebugFormat("SetDocumentStorage: cannot change storage, body is locked. Document {0} (version id {1}).", documentId, version.Id);
+          retry = true;
+        }
+        if (Locks.GetLockInfo(version.PublicBody).IsLockedByOther)
+        {
+          Logger.DebugFormat("SetDocumentStorage: cannot change storage, public body is locked. Document {0} (version id {1}).", documentId, version.Id);
+          retry = true;
+        }
+      }
+      if (retry)
+      {
+        args.Retry = true;
+        return;
+      }
+      
       try
       {
-        foreach (var version in document.Versions.Where(v => !Equals(v.Body.Storage, storage) || !Equals(v.PublicBody.Storage, storage)))
+        foreach (var version in versions)
         {
           if (!Equals(version.Body.Storage, storage))
             version.Body.SetStorage(storage);

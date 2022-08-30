@@ -458,7 +458,7 @@ namespace Sungero.Docflow.Client
     /// <summary>
     /// Проверить даты диалога отчета.
     /// </summary>
-    /// <param name="args">Аргументы.</param>
+    /// <param name="args">Аргументы события нажатия на кнопку диалога.</param>
     /// <param name="dialogPeriodBegin">Параметр даты начала.</param>
     /// <param name="dialogPeriodEnd">Параметр даты конца.</param>
     [Public]
@@ -484,7 +484,7 @@ namespace Sungero.Docflow.Client
     /// <summary>
     /// Проверить даты диалога.
     /// </summary>
-    /// <param name="args">Аргументы.</param>
+    /// <param name="args">Аргументы события нажатия на кнопку диалога.</param>
     /// <param name="dialogPeriodBegin">Параметр даты начала.</param>
     /// <param name="dialogPeriodEnd">Параметр даты конца.</param>
     [Public]
@@ -495,6 +495,13 @@ namespace Sungero.Docflow.Client
       CheckDialogPeriod(args, dialogPeriodBegin, dialogPeriodEnd, Sungero.Docflow.Resources.WrongPeriod);
     }
     
+    /// <summary>
+    /// Проверить даты диалога.
+    /// </summary>
+    /// <param name="args">Аргументы события нажатия на кнопку диалога.</param>
+    /// <param name="dialogPeriodBegin">Параметр даты начала.</param>
+    /// <param name="dialogPeriodEnd">Параметр даты конца.</param>
+    /// <param name="wrongPeriodError">Текст ошибки о неверной дате.</param>
     private static void CheckDialogPeriod(CommonLibrary.InputDialogButtonClickEventArgs args,
                                           CommonLibrary.IDateDialogValue dialogPeriodBegin,
                                           CommonLibrary.IDateDialogValue dialogPeriodEnd,
@@ -871,10 +878,11 @@ namespace Sungero.Docflow.Client
                                         Company.IEmployee substituted, bool needStrongSign, string comment,
                                         Sungero.Domain.Client.ExecuteActionArgs eventArgs)
     {
-      var signatories = Functions.OfficialDocument.Remote.GetSignatories(document);
       var currentEmployee = Company.Employees.Current;
-      var canSubstitutedApprove = signatories.Any(s => Equals(s.EmployeeId, substituted.Id));
-      var canCurrentEmployeeApprove = signatories.Any(s => currentEmployee != null && Equals(s.EmployeeId, currentEmployee.Id));
+      var canSubstitutedApprove = Functions.OfficialDocument.Remote.CanSignByEmployee(document, substituted);
+      var canCurrentEmployeeApprove = currentEmployee != null 
+        ? Functions.OfficialDocument.Remote.CanSignByEmployee(document, currentEmployee) 
+        : false;
       var signatory = canSubstitutedApprove && canCurrentEmployeeApprove
         ? substituted
         : currentEmployee;
@@ -1401,6 +1409,12 @@ namespace Sungero.Docflow.Client
         ExportDocumentDialogWithSearchInWeb(documents, false);
     }
     
+    /// <summary>
+    /// Выгрузка документов в десктоп-клиенте.
+    /// </summary>
+    /// <param name="documentList">Список документов.</param>
+    /// <param name="onlySearch">Признак "Только поиск". Если установлен в True, выгрузка проводиться не будет.</param>
+    /// <returns>Кверик документов для выгрузки.</returns>
     private static IQueryable<IOfficialDocument> ExportDocumentDialogWithSearch(List<IOfficialDocument> documentList, bool onlySearch)
     {
       Docflow.Structures.Module.IExportDialogSearch filter = null;

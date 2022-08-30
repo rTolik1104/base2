@@ -9,7 +9,7 @@ namespace Sungero.Docflow.Server
 {
   partial class OutgoingDocumentBaseFunctions
   {
-          
+    
     /// <summary>
     /// Получить договор, если он был связан с исходящим документом.
     /// </summary>
@@ -94,6 +94,22 @@ namespace Sungero.Docflow.Server
         }
       }
       return result.Trim();
+    }
+    
+    /// <summary>
+    /// Проверить, связан ли документ специализированной связью.
+    /// </summary>
+    /// <returns>True - если связан, иначе - false.</returns>
+    [Remote(IsPure = true)]
+    public override bool HasSpecifiedTypeRelations()
+    {
+      var hasSpecifiedTypeRelations = false;
+      AccessRights.AllowRead(
+        () =>
+        {
+          hasSpecifiedTypeRelations = IncomingDocumentBases.GetAll().Any(x => Equals(x.InResponseTo, _obj));
+        });
+      return base.HasSpecifiedTypeRelations() || hasSpecifiedTypeRelations;
     }
   }
 }

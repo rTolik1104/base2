@@ -42,7 +42,9 @@ namespace Sungero.Docflow
         var isLeadingDocumentDisabled = Sungero.Docflow.PublicFunctions.OfficialDocument.NeedDisableLeadingDocument(_obj);
         if (isLeadingDocumentDisabled)
           e.AddError(Sungero.Docflow.OfficialDocuments.Resources.RelationPropertyDisabled);
-        e.Params.AddOrUpdate(Constants.OfficialDocument.GrantAccessRightsToProjectDocument, true);
+        
+        if (Functions.OfficialDocument.IsProjectDocument(_obj.LeadingDocument))
+          e.Params.AddOrUpdate(Constants.OfficialDocument.GrantAccessRightsToProjectDocument, true);
       }
       
       base.BeforeSave(e);

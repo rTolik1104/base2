@@ -278,7 +278,7 @@
           "DataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DropDownEditorToEnumerationBinder",
           "ParentGuid": "f3967adf-6963-4fd8-9a53-0e89cfe3d5a8",
           "PropertyGuid": "28cf7a6a-37a7-429c-820d-51a5cfda3745",
-          "RowNumber": 1,
+          "RowNumber": 2,
           "RowSpan": 1,
           "Settings": []
         },
@@ -337,6 +337,19 @@
               "Value": true
             }
           ]
+        },
+        {
+          "$type": "Sungero.Metadata.ControlMetadata, Sungero.Metadata",
+          "NameGuid": "22b0bf78-0268-4fa6-808e-c1c70609459e",
+          "Name": "CounterpartyResponseStatus",
+          "ColumnNumber": 0,
+          "ColumnSpan": 1,
+          "DataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DropDownEditorToEnumerationBinder",
+          "ParentGuid": "f3967adf-6963-4fd8-9a53-0e89cfe3d5a8",
+          "PropertyGuid": "c2932daf-9912-495f-bc75-38bc2ca9c240",
+          "RowNumber": 1,
+          "RowSpan": 1,
+          "Settings": []
         }
       ],
       "Versions": []
@@ -766,9 +779,53 @@
       "IsShowedInList": false,
       "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.StringEditorToStringBinder",
       "PreviousPropertyGuid": "033fbccd-1ad9-4dae-b458-6439a81bc0d8"
+    },
+    {
+      "$type": "Sungero.Metadata.EnumPropertyMetadata, Sungero.Metadata",
+      "NameGuid": "c2932daf-9912-495f-bc75-38bc2ca9c240",
+      "Name": "BuyerAcceptanceStatus",
+      "CanBeSearch": false,
+      "Code": "BuyerAcpStatus",
+      "DirectValues": [
+        {
+          "NameGuid": "8bde50a8-9fcd-492e-b8fd-b230f50130cb",
+          "Name": "Accepted",
+          "Code": "Accepted"
+        },
+        {
+          "NameGuid": "993fd16f-0221-4739-8fd3-7b1776499c3c",
+          "Name": "PartiallyAccepted",
+          "Code": "PartiallyAccept"
+        },
+        {
+          "NameGuid": "a6f3691a-214e-4b40-85f4-c1dd89d6c681",
+          "Name": "Rejected",
+          "Code": "Rejected"
+        }
+      ],
+      "IsEnabled": false,
+      "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DropDownEditorToEnumerationBinder",
+      "PreviousPropertyGuid": "916691d1-9338-4fbb-a636-0d3aef1ce9d0"
     }
   ],
   "PublicFunctions": [
+    {
+      "Name": "GetDocumentBusinessUnit",
+      "Parameters": [
+        {
+          "Name": "document",
+          "ParameterType": "global::Sungero.Content.IElectronicDocument",
+          "ParameterTypeFullName": "Sungero.Content.IElectronicDocument, Sungero.Content.Shared"
+        },
+        {
+          "Name": "version",
+          "ParameterType": "global::Sungero.Content.IElectronicDocumentVersions",
+          "ParameterTypeFullName": "Sungero.Content.IElectronicDocumentVersions, Sungero.Content.Shared"
+        }
+      ],
+      "ReturnType": "global::Sungero.Company.IBusinessUnit",
+      "ReturnTypeFullName": "Sungero.Company.IBusinessUnit, Sungero.Domain.Interfaces"
+    },
     {
       "Name": "GetDocumentCounterparties",
       "Parameters": [
@@ -780,6 +837,23 @@
       ],
       "ReturnType": "global::System.Collections.Generic.List<global::Sungero.Parties.ICounterparty>",
       "ReturnTypeFullName": "System.Collections.Generic.List"
+    },
+    {
+      "Name": "GetDocumentCounterparty",
+      "Parameters": [
+        {
+          "Name": "document",
+          "ParameterType": "global::Sungero.Content.IElectronicDocument",
+          "ParameterTypeFullName": "Sungero.Content.IElectronicDocument, Sungero.Content.Shared"
+        },
+        {
+          "Name": "version",
+          "ParameterType": "global::Sungero.Content.IElectronicDocumentVersions",
+          "ParameterTypeFullName": "Sungero.Content.IElectronicDocumentVersions, Sungero.Content.Shared"
+        }
+      ],
+      "ReturnType": "global::Sungero.Parties.ICounterparty",
+      "ReturnTypeFullName": "Sungero.Parties.ICounterparty, Sungero.Domain.Interfaces"
     },
     {
       "Name": "GetExDocumentInfoByExternalId",

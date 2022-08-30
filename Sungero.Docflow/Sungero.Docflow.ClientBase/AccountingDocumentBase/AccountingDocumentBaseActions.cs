@@ -175,7 +175,7 @@ namespace Sungero.Docflow.Client
           Dialogs.NotifyMessage(AccountingDocumentBases.Resources.FillBuyerInfoOutgoingDocument);
       }
       else if (_obj.BusinessUnitBox != null && Equals(_obj.BusinessUnitBox.ExchangeService.ExchangeProvider, ExchangeCore.ExchangeService.ExchangeProvider.Sbis) &&
-               Exchange.PublicFunctions.Module.Remote.IsInvoiceAmendmentRequest(_obj))
+               !Exchange.PublicFunctions.Module.Remote.CanSendSign(_obj))
       {
         Dialogs.NotifyMessage(Exchange.Resources.AnswerIsAlreadySent);
       }

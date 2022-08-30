@@ -149,6 +149,48 @@ namespace Sungero.Exchange.Server
     }
     
     /// <summary>
+    /// Получить контрагента по документу.
+    /// </summary>
+    /// <param name="document">Документ.</param>
+    /// <param name="version">Версия документа.</param>
+    /// <returns>Контрагент, от которого пришел документ.</returns>
+    [Public]
+    public static Parties.ICounterparty GetDocumentCounterparty(Content.IElectronicDocument document, Content.IElectronicDocumentVersions version)
+    {     
+      var info = GetEchangeDocumentInfo(document, version);
+      return info != null ? info.Counterparty : null;
+    }
+    
+    /// <summary>
+    /// Получить НОР для документа.
+    /// </summary>
+    /// <param name="document">Документ.</param>
+    /// <param name="version">Версия документа.</param>
+    /// <returns>Наша организация, на которую пришел документ.</returns>
+    [Public]
+    public static Company.IBusinessUnit GetDocumentBusinessUnit(Content.IElectronicDocument document, Content.IElectronicDocumentVersions version)
+    {
+      var info = GetEchangeDocumentInfo(document, version);
+      return info != null ? ExchangeCore.PublicFunctions.BoxBase.GetBusinessUnit(info.Box) : null;
+    }
+    
+    /// <summary>
+    /// Получить сведения о документе обмена.
+    /// </summary>
+    /// <param name="document">Документ.</param>
+    /// <param name="version">Версия документа.</param>
+    /// <returns>Сведения о документе обмена.</returns>
+    public static IExchangeDocumentInfo GetEchangeDocumentInfo(Content.IElectronicDocument document, Content.IElectronicDocumentVersions version)
+    {
+      if (document == null)
+        return null;
+      if (version == null)
+        return null;
+      
+      return ExchangeDocumentInfos.GetAll(x => Equals(x.Document, document) && Equals(x.VersionId, version.Id)).FirstOrDefault();
+    }
+    
+    /// <summary>
     /// Отпралять задания/уведомления ответственному.
     /// </summary>
     /// <returns>Признак отправки задания ответственному за ящик.</returns>

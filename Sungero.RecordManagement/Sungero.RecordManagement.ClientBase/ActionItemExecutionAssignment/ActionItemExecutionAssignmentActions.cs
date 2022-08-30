@@ -139,6 +139,10 @@ namespace Sungero.RecordManagement.Client
     {
       Logger.DebugFormat("ActionItemExecutionAssignment (ID={0}). Start CreateChildActionItem.", _obj.Id);
       var subTask = Functions.ActionItemExecutionTask.Remote.CreateActionItemExecutionFromExecution(_obj);
+      
+      // Синхронизировать вложения из основной задачи с учётом удалённых.
+      Functions.Module.SynchronizeAttachmentsToActionItem(_obj.Task, subTask);
+      
       subTask.Show();
       Logger.DebugFormat("ActionItemExecutionAssignment (ID={0}). End CreateChildActionItem.", _obj.Id);
     }

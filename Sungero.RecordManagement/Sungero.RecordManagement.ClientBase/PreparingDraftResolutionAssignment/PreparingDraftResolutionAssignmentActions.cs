@@ -12,16 +12,70 @@ namespace Sungero.RecordManagement.Client
 {
   partial class PreparingDraftResolutionAssignmentActions
   {
+    public virtual void Abort(Sungero.Domain.Client.ExecuteActionArgs e)
+    {
+      if (!e.Validate())
+        return;
+      
+      if (!Functions.DocumentReviewTask.HasDocumentAndCanRead(DocumentReviewTasks.As(_obj.Task)))
+      {
+        e.AddError(DocumentReviewTasks.Resources.NoRightsToDocument);
+        return;
+      }
+      
+      var dialogId = Constants.DocumentReviewTask.PreparingDraftResolutionAssignmentConfirmDialogID.Abort;
+      if (!Docflow.PublicFunctions.Module.ShowDialogGrantAccessRightsWithConfirmationDialog(_obj,
+                                                                                            _obj.OtherGroup.All.ToList(),
+                                                                                            e.Action,
+                                                                                            dialogId))
+      {
+        return;
+      }
+      
+      _obj.Task.Abort();
+      e.CloseFormAfterAction = true;
+    }
+
+    public virtual bool CanAbort(Sungero.Domain.Client.CanExecuteActionArgs e)
+    {
+      return Equals(_obj.Performer, _obj.Task.Author) && _obj.IsRework == true && _obj.Addressee == null;
+    }
+
+    public virtual void ForRework(Sungero.Workflow.Client.ExecuteResultActionArgs e)
+    {
+      // Проверить заполненность текста комментария.
+      if (string.IsNullOrWhiteSpace(_obj.ActiveText))
+      {
+        e.AddError(ReviewDraftResolutionAssignments.Resources.NeedTextToRework);
+        return;
+      }
+      
+      // Проверить наличие прав на документ.
+      if (!Functions.DocumentReviewTask.HasDocumentAndCanRead(DocumentReviewTasks.As(_obj.Task)))
+      {
+        e.AddError(DocumentReviewTasks.Resources.NoRightsToDocument);
+        e.Cancel();
+      }
+      
+      // Вывести предупреждение.
+      var dialogID = Constants.DocumentReviewTask.PreparingDraftResolutionAssignmentConfirmDialogID.ForRework;
+      if (!Docflow.PublicFunctions.Module.ShowDialogGrantAccessRightsWithConfirmationDialog(_obj, _obj.OtherGroup.All.ToList(),
+                                                                                            null, e.Action, dialogID))
+      {
+        e.Cancel();
+      }
+    }
+
+    public virtual bool CanForRework(Sungero.Workflow.Client.CanExecuteResultActionArgs e)
+    {
+      return _obj.Addressee == null && !Equals(_obj.Performer, _obj.Task.Author);
+    }
+
     public virtual void PrintResolution(Sungero.Domain.Client.ExecuteActionArgs e)
     {
       _obj.Save();
-      var report = RecordManagement.Reports.GetDraftResolutionReport();
-      var actionItems = _obj.ResolutionGroup.ActionItemExecutionTasks;
-      report.Resolution.AddRange(actionItems);
-      report.TextResolution = _obj.ActiveText;
-      report.Document = _obj.DocumentForReviewGroup.OfficialDocuments.FirstOrDefault();
-      report.Author = DocumentReviewTasks.As(_obj.Task).Addressee;
-      report.Open();
+      var actionItems = _obj.ResolutionGroup.ActionItemExecutionTasks.ToList();
+      Functions.DocumentReviewTask.OpenDraftResolutionReport(DocumentReviewTasks.As(_obj.Task), _obj.ActiveText, actionItems);
     }
 
     public virtual bool CanPrintResolution(Sungero.Domain.Client.CanExecuteActionArgs e)
@@ -114,7 +168,8 @@ namespace Sungero.RecordManagement.Client
 
     public virtual void Forward(Sungero.Workflow.Client.ExecuteResultActionArgs e)
     {
-      if (!Functions.DocumentReviewTask.HasDocumentAndCanRead(DocumentReviewTasks.As(_obj.Task)))
+      var documentReviewTask = DocumentReviewTasks.As(_obj.Task);
+      if (!Functions.DocumentReviewTask.HasDocumentAndCanRead(documentReviewTask))
       {
         e.AddError(DocumentReviewTasks.Resources.NoRightsToDocument);
         e.Cancel();
@@ -126,6 +181,12 @@ namespace Sungero.RecordManagement.Client
         e.Cancel();
       }
       
+      if (Equals(_obj.Addressee, documentReviewTask.Addressee))
+      {
+        e.AddError(DocumentReviewTasks.Resources.AddresseeAlreadyExistsFormat(_obj.Addressee.Person.ShortName));
+        e.Cancel();
+      }
+      
       // В качестве проектов резолюции нельзя отправить поручения-непроекты.
       if (_obj.ResolutionGroup.ActionItemExecutionTasks.Any(a => a.IsDraftResolution != true))
       {
@@ -133,7 +194,8 @@ namespace Sungero.RecordManagement.Client
         e.Cancel();
       }
       
-      var hasActionItems = _obj.ResolutionGroup.ActionItemExecutionTasks.Any();
+      // Вывести подтверждение удаления проекта резолюции.
+      var hasActionItems = _obj.ResolutionGroup.ActionItemExecutionTasks.Where(x => !Equals(x.AssignedBy, _obj.Addressee)).Any();
       if (hasActionItems)
       {
         var dropDialogId = Constants.DocumentReviewTask.PreparingDraftResolutionAssignmentConfirmDialogID.ForwardWithDeletingDraftResolutions;
@@ -169,7 +231,8 @@ namespace Sungero.RecordManagement.Client
 
     public virtual void SendForReview(Sungero.Workflow.Client.ExecuteResultActionArgs e)
     {
-      if (!Functions.DocumentReviewTask.HasDocumentAndCanRead(DocumentReviewTasks.As(_obj.Task)))
+      var documentReviewTask = DocumentReviewTasks.As(_obj.Task);
+      if (!Functions.DocumentReviewTask.HasDocumentAndCanRead(documentReviewTask))
       {
         e.AddError(DocumentReviewTasks.Resources.NoRightsToDocument);
         e.Cancel();
@@ -179,13 +242,27 @@ namespace Sungero.RecordManagement.Client
       if (_obj.ResolutionGroup.ActionItemExecutionTasks.Any(a => a.IsDraftResolution != true))
         e.AddError(DocumentReviewTasks.Resources.FindNotDraftResolution);
       
+      // Вывести подтверждение удаления проектов резолюции для неактуального адресата.
+      var wrongActionItems = _obj.ResolutionGroup.ActionItemExecutionTasks.Where(x => documentReviewTask.Addressees.All(a => !Equals(a.Addressee, x.AssignedBy)));
+      if (wrongActionItems.Any())
+      {
+        var dropDialogId = Constants.DocumentReviewTask.PreparingDraftResolutionAssignmentConfirmDialogID.SendForReviewWithDeletingDraftResolutions;
+        var dropIsConfirmed = Docflow.PublicFunctions.Module.ShowConfirmationDialog(e.Action.ConfirmationMessage,
+                                                                                    DocumentReviewTasks.Resources.ConfirmDeleteDraftResolutionsForWrongAddressee,
+                                                                                    null, dropDialogId);
+
+        if (!dropIsConfirmed)
+          e.Cancel();
+        _obj.NeedDeleteActionItems = true;
+      }
+      
       var giveRights = Docflow.PublicFunctions.Module.ShowDialogGrantAccessRights(_obj,
                                                                                   _obj.OtherGroup.All.ToList(),
                                                                                   null);
       if (giveRights == false)
         e.Cancel();
       
-      if (giveRights == null && !Functions.PreparingDraftResolutionAssignment.ShowConfirmationDialogSendForReview(_obj, e))
+      if (giveRights == null && _obj.NeedDeleteActionItems != true && !Functions.PreparingDraftResolutionAssignment.ShowConfirmationDialogSendForReview(_obj, e))
         e.Cancel();
     }
 
@@ -196,7 +273,8 @@ namespace Sungero.RecordManagement.Client
 
     public virtual void AddResolution(Sungero.Domain.Client.ExecuteActionArgs e)
     {
-      if (!Functions.DocumentReviewTask.HasDocumentAndCanRead(DocumentReviewTasks.As(_obj.Task)))
+      var documentReviewTask = DocumentReviewTasks.As(_obj.Task);
+      if (!Functions.DocumentReviewTask.HasDocumentAndCanRead(documentReviewTask))
       {
         e.AddError(DocumentReviewTasks.Resources.NoRightsToDocument);
         return;
@@ -209,10 +287,16 @@ namespace Sungero.RecordManagement.Client
       var assignee = task.Assignee ?? Users.Current;
       task.MaxDeadline = _obj.Deadline.HasValue ? _obj.Deadline.Value : Calendar.Today.AddWorkingDays(assignee, 2);
       task.IsDraftResolution = true;
-      var assignedBy = DocumentReviewTasks.As(_obj.Task).Addressee;
+      var assignedBy = documentReviewTask.Addressee;
       task.AssignedBy = Docflow.PublicFunctions.Module.Remote.IsUsersCanBeResolutionAuthor(document, assignedBy) ? assignedBy : null;
-      foreach (var otherGroupAttachment in _obj.OtherGroup.All)
-        task.OtherGroup.All.Add(otherGroupAttachment);
+      
+      Functions.Module.SynchronizeAttachmentsToActionItem(document,
+                                                          _obj.AddendaGroup.OfficialDocuments.Select(x => Sungero.Content.ElectronicDocuments.As(x)).ToList(),
+                                                          Functions.DocumentReviewTask.GetAddedAddenda(documentReviewTask),
+                                                          Functions.DocumentReviewTask.GetRemovedAddenda(documentReviewTask),
+                                                          _obj.OtherGroup.All.ToList(),
+                                                          task);
+      
       task.ShowModal();
       if (!task.State.IsInserted)
       {
@@ -223,7 +307,9 @@ namespace Sungero.RecordManagement.Client
 
     public virtual bool CanAddResolution(Sungero.Domain.Client.CanExecuteActionArgs e)
     {
-      return _obj.Status.Value == PreparingDraftResolutionAssignment.Status.InProcess && _obj.Addressee == null;
+      return _obj.Status.Value == PreparingDraftResolutionAssignment.Status.InProcess &&
+        _obj.Addressee == null &&
+        _obj.AccessRights.CanUpdate();
     }
 
   }

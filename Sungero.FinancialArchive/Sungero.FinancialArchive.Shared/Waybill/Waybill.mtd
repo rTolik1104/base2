@@ -5,15 +5,6 @@
   "AccessRightsMode": "Both",
   "Actions": [
     {
-      "NameGuid": "51235fd5-4441-48cc-a6f1-3e5af16d5a64",
-      "Name": "ChangeDocumentType",
-      "GenerateHandler": true,
-      "IsAncestorMetadata": true,
-      "Overridden": [
-        "GenerateHandler"
-      ]
-    },
-    {
       "NameGuid": "228f2bab-7091-4731-a6e2-3742eeaf9ff5",
       "Name": "Sign",
       "IsAncestorMetadata": true,
@@ -1065,6 +1056,52 @@
         "EntityGuid"
       ],
       "Versions": []
+    }
+  ],
+  "PublicFunctions": [
+    {
+      "Name": "ChangeDocumentType",
+      "Parameters": [
+        {
+          "Name": "waybill",
+          "ParameterType": "global::Sungero.FinancialArchive.IWaybill",
+          "ParameterTypeFullName": "Sungero.FinancialArchive.IWaybill, Sungero.Domain.Interfaces"
+        },
+        {
+          "Name": "types",
+          "ParameterType": "global::System.Collections.Generic.List<Domain.Shared.IEntityInfo>",
+          "ParameterTypeFullName": "System.Collections.Generic.List"
+        }
+      ],
+      "Placement": "Client",
+      "ReturnType": "global::Sungero.Docflow.IOfficialDocument",
+      "ReturnTypeFullName": "Sungero.Docflow.IOfficialDocument, Sungero.Domain.Interfaces"
+    },
+    {
+      "Name": "GetEmailAddressees",
+      "Parameters": [
+        {
+          "Name": "waybill",
+          "ParameterType": "global::Sungero.FinancialArchive.IWaybill",
+          "ParameterTypeFullName": "Sungero.FinancialArchive.IWaybill, Sungero.Domain.Interfaces"
+        }
+      ],
+      "Placement": "Shared",
+      "ReturnType": "global::System.Collections.Generic.List<global::Sungero.Docflow.Structures.OfficialDocument.IEmailAddressee>",
+      "ReturnTypeFullName": "System.Collections.Generic.List"
+    },
+    {
+      "Name": "IsVerificationModeSupported",
+      "Parameters": [
+        {
+          "Name": "waybill",
+          "ParameterType": "global::Sungero.FinancialArchive.IWaybill",
+          "ParameterTypeFullName": "Sungero.FinancialArchive.IWaybill, Sungero.Domain.Interfaces"
+        }
+      ],
+      "Placement": "Shared",
+      "ReturnType": "global::System.Boolean",
+      "ReturnTypeFullName": "System.Boolean"
     }
   ],
   "PublicStructures": [],

@@ -10,6 +10,14 @@ namespace Sungero.RecordManagement
   partial class AcquaintanceTaskClientHandlers
   {
 
+    public override void Showing(Sungero.Presentation.FormShowingEventArgs e)
+    {
+      // Скрывать действиe "Исключить из ознакомления" для задач, стартованных на ранних версиях схемы.
+      var schemeSupportsExcludeFromAcquaintance = Functions.AcquaintanceTask.SchemeVersionSupportsExcludeFromAcquaintance(_obj);
+      if (!schemeSupportsExcludeFromAcquaintance)
+        e.HideAction(_obj.Info.Actions.ExcludeFromAcquaintance);
+    }
+
     public override void Refresh(Sungero.Presentation.FormRefreshEventArgs e)
     {
       if (Functions.AcquaintanceTask.NeedShowSignRecommendation(_obj, _obj.IsElectronicAcquaintance.Value, _obj.DocumentGroup.OfficialDocuments.FirstOrDefault()))

@@ -400,7 +400,8 @@
     }
   ],
   "HandledEvents": [
-    "FilteringServer"
+    "FilteringServer",
+    "ConvertingFromServer"
   ],
   "IconName": "InternalDocumentBase.ico",
   "IconResourcesKeys": [],

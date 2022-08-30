@@ -297,7 +297,7 @@
             <param name="messageId">ИД сообщения.</param>
             <returns></returns>
         </member>
-        <member name="M:NpoComputer.DCX.Common.ClientBase.GetAllowedAnswers(System.String,System.String)">
+        <member name="M:NpoComputer.DCX.Common.ClientBase.GetAllowedAnswers(System.String,System.String,System.String)">
             <summary>
             Проверить возможность/необходимость отправки подписи\титула_покупателя\отказа\УОУ для документа.
             </summary>
@@ -1332,13 +1332,14 @@
             <returns>True, если на указанный документ можно отправить ИОП.</returns>
             <remarks>messageId требуется только для Диадок.</remarks>
         </member>
-        <member name="M:NpoComputer.DCX.Common.IExchangeServiceConnector.GetAllowedAnswers(System.String,System.String,System.String)">
+        <member name="M:NpoComputer.DCX.Common.IExchangeServiceConnector.GetAllowedAnswers(System.String,System.String,System.String,System.String)">
             <summary>
             Проверить возможность/необходимость отправки подписи\титула_покупателя\отказа\УОУ для документа.
             </summary>
             <param name="boxId">ИД ящика организации.</param>
             <param name="documentId">ИД документа.</param>
             <param name="messageId">ИД сообщения.</param>
+            <param name="buyerTitleId">ИД титула покупателя.</param>
             <returns>Допустимые варианты подписания \ отказа \ УОУ на документ.</returns>
         </member>
         <member name="P:NpoComputer.DCX.Common.IExchangeServiceConnector.CanGetOurSubscriberCertificates">
@@ -1520,6 +1521,26 @@
         <member name="P:NpoComputer.DCX.Common.OldFormatAttorney.IssuerPerson">
             <summary>
             Кто выдал доверенность.
+            </summary>
+        </member>
+        <member name="T:NpoComputer.DCX.Common.BuyerAcceptanceStatus">
+            <summary>
+            Статус приемки.
+            </summary>
+        </member>
+        <member name="F:NpoComputer.DCX.Common.BuyerAcceptanceStatus.Accepted">
+            <summary>
+            КодИтога = 1. Товары (работы, услуги, права) приняты без расхождений (претензий).
+            </summary>
+        </member>
+        <member name="F:NpoComputer.DCX.Common.BuyerAcceptanceStatus.PartiallyAccepted">
+            <summary>
+            КодИтога = 2. Товары (работы, услуги, права) приняты с расхождениями (претензией).
+            </summary>
+        </member>
+        <member name="F:NpoComputer.DCX.Common.BuyerAcceptanceStatus.Rejected">
+            <summary>
+            КодИтога = 3. Товары (работы, услуги, права) не приняты.
             </summary>
         </member>
         <member name="T:NpoComputer.DCX.Common.Document">
@@ -1810,6 +1831,11 @@
         <member name="P:NpoComputer.DCX.Common.IDocument.SignStatus">
             <summary>
             Статус подписания документа.
+            </summary>
+        </member>
+        <member name="P:NpoComputer.DCX.Common.IDocument.BuyerAcceptanceStatus">
+            <summary>
+            Статус приемки.
             </summary>
         </member>
         <member name="P:NpoComputer.DCX.Common.IDocument.NeedReceipt">

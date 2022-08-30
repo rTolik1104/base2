@@ -124,6 +124,7 @@ namespace Sungero.Company
     {
       _obj.NeedNotifyNewAssignments = true;
       _obj.NeedNotifyExpiredAssignments = true;
+      _obj.NeedNotifyAssignmentsSummary = true;
     }
 
     public override void BeforeDelete(Sungero.Domain.BeforeDeleteEventArgs e)

@@ -48,6 +48,8 @@ namespace Sungero.Exchange.Structures.Module
     public Docflow.IOfficialDocument Addendum { get; set; }
     
     public bool NeedRejectFirstVersion { get; set; }
+    
+    public Sungero.Core.Enumeration? BuyerAcceptanceStatus { get; set; }
   }
   
   partial class SendToCounterpartyInfo
@@ -89,6 +91,8 @@ namespace Sungero.Exchange.Structures.Module
     public bool CanSendAmendmentRequestAsAnswer { get; set; }
     
     public bool CanSendInvoiceAmendmentRequestAsAnswer { get; set; }
+    
+    public Sungero.Core.Enumeration? BuyerAcceptanceStatus { get; set; }
   }
   
   partial class DocumentCertificatesInfo

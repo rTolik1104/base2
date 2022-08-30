@@ -65,6 +65,7 @@ namespace Sungero.RecordManagement.Server
       {
         Functions.ActionItemExecutionTask.SynchronizeResultActiveText(_obj);
         Functions.ActionItemExecutionTask.CompleteParentAssignment(_obj);
+        Functions.ActionItemExecutionTask.SetCompletedByInParentAssignment(_obj);
       }
     }
     
@@ -105,7 +106,7 @@ namespace Sungero.RecordManagement.Server
         }
       }
       
-      Docflow.PublicFunctions.Module.SynchronizeAddendaAndAttachmentsGroup(_obj.AddendaGroup, _obj.DocumentsGroup.OfficialDocuments.FirstOrDefault());
+      Functions.ActionItemExecutionTask.SynchronizeAddendaAndAttachmentsGroup(_obj);
       
       // Выдача прав соисполнителям и составным, чтобы Script10Execute в цикле не зависал при блокировках документа.
       if (document != null)
@@ -179,8 +180,7 @@ namespace Sungero.RecordManagement.Server
         actionItemTask = _obj;
       e.Block.AssignedBy = actionItemTask.AssignedBy;
       
-      Docflow.PublicFunctions.Module.SynchronizeAddendaAndAttachmentsGroup(_obj.AddendaGroup,
-                                                                           _obj.DocumentsGroup.OfficialDocuments.FirstOrDefault());
+      Functions.ActionItemExecutionTask.SynchronizeAddendaAndAttachmentsGroup(_obj);
     }
     
     public virtual void StartAssignment4(Sungero.RecordManagement.IActionItemExecutionAssignment assignment, Sungero.RecordManagement.Server.ActionItemExecutionAssignmentArguments e)
@@ -325,7 +325,7 @@ namespace Sungero.RecordManagement.Server
         }
       }
       
-      Docflow.PublicFunctions.Module.SynchronizeAddendaAndAttachmentsGroup(_obj.AddendaGroup, _obj.DocumentsGroup.OfficialDocuments.FirstOrDefault());
+      Functions.ActionItemExecutionTask.SynchronizeAddendaAndAttachmentsGroup(_obj);
     }
     
     public virtual void StartAssignment6(Sungero.RecordManagement.IActionItemSupervisorAssignment assignment, Sungero.RecordManagement.Server.ActionItemSupervisorAssignmentArguments e)
@@ -412,7 +412,7 @@ namespace Sungero.RecordManagement.Server
       // Задать состояние поручения.
       _obj.ExecutionState = ExecutionState.Executed;
       
-      Docflow.PublicFunctions.Module.SynchronizeAddendaAndAttachmentsGroup(_obj.AddendaGroup, _obj.DocumentsGroup.OfficialDocuments.FirstOrDefault());
+      Functions.ActionItemExecutionTask.SynchronizeAddendaAndAttachmentsGroup(_obj);
     }
     
     public virtual void StartNotice8(Sungero.RecordManagement.IActionItemExecutionNotification notice, Sungero.RecordManagement.Server.ActionItemExecutionNotificationArguments e)
@@ -513,7 +513,8 @@ namespace Sungero.RecordManagement.Server
             document.AccessRights.Grant(assignee, DefaultAccessRightsTypes.Read);
       }
       
-      Docflow.PublicFunctions.Module.SynchronizeAddendaAndAttachmentsGroup(_obj.AddendaGroup, document);
+      Functions.ActionItemExecutionTask.SynchronizeAddendaAndAttachmentsGroup(_obj);
+      Functions.ActionItemExecutionTask.RelateAddedAddendaToPrimaryDocument(_obj);
     }
 
     public virtual void StartNotice12(Sungero.RecordManagement.IActionItemObserversNotification notice, Sungero.RecordManagement.Server.ActionItemObserversNotificationArguments e)

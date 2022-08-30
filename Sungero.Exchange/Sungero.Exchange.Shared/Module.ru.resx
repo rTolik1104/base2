@@ -421,9 +421,6 @@
   <data name="NoneCounterparty" xml:space="preserve">
     <value>Неизвестного контрагента</value>
   </data>
-  <data name="SendSetAmendmentsToSbis" xml:space="preserve">
-    <value>Через сервис обмена СБИС отказ отправляется по всем документам комплекта.</value>
-  </data>
   <data name="SendSetSignaturesToSbis" xml:space="preserve">
     <value>Для отправки ответов через сервис обмена СБИС необходимо подписать все документы комплекта.</value>
   </data>
@@ -438,5 +435,23 @@
   </data>
   <data name="AdditionalDocumentSend" xml:space="preserve">
     <value>Полученные документы добавлены контрагентом к основному комплекту:</value>
+  </data>
+  <data name="SendToCounterpartyDialog_BuyerAcceptanceStatusRejected" xml:space="preserve">
+    <value>Реквизиты покупателя заполнены с результатом "Не принято".</value>
+  </data>
+  <data name="SendToCounterpartyDialog_BuyerAcceptanceStatusAccepted" xml:space="preserve">
+    <value>Реквизиты покупателя заполнены с результатом "Принято без разногласий".</value>
+  </data>
+  <data name="SendToCounterpartyDialog_BuyerAcceptanceStatusPartiallyAccepted" xml:space="preserve">
+    <value>Реквизиты покупателя заполнены с результатом "Принято с разногласиями".</value>
+  </data>
+  <data name="SendToCounterpartyDialog_BuyerTitleIsEmpty" xml:space="preserve">
+    <value>Реквизиты покупателя не заполнены.</value>
+  </data>
+  <data name="SendToCounterpartyDialog_AddendaWithBuyerAcceptanceStatusRejected" xml:space="preserve">
+    <value>Выбраны приложения с результатом "Не принято" в реквизитах покупателя.</value>
+  </data>
+  <data name="OneOrMoreDocumentAlreadyProcessing" xml:space="preserve">
+    <value>Часть документов не требуют подписания, либо по ним уже отправлен ответ контрагенту.</value>
   </data>
 </root>

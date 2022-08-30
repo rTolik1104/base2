@@ -137,13 +137,13 @@
     <value>To cancel registration, you must be authorized to edit the register.</value>
   </data>
   <data name="CancelRegistrationDescription" xml:space="preserve">
-    <value>Clear number and date of the document and remove relation between the document and register.</value>
+    <value>After you cancel registration, the registration number, date and register will be cleared.</value>
   </data>
   <data name="CancelReservationDescription" xml:space="preserve">
-    <value>Clear number and date of the document and remove relation between the document and register.</value>
+    <value>After you cancel reservation, the registration number, date and register will be cleared.</value>
   </data>
   <data name="CancelNumberingDescription" xml:space="preserve">
-    <value>Clear number and date of the document and remove relation between the document and register.</value>
+    <value>After you cancel number assignment, the registration number, date and register will be cleared.</value>
   </data>
   <data name="CancelNumbering" xml:space="preserve">
     <value>Cancel Numbering</value>
@@ -152,7 +152,7 @@
     <value>Cancel reservation</value>
   </data>
   <data name="CancelRegistration" xml:space="preserve">
-    <value>Cancel registration</value>
+    <value>Cancel registration?</value>
   </data>
   <data name="SaveDocumentToCompleteNumbering" xml:space="preserve">
     <value>To change additional requisites of the document, fill in required data, and save the changes.</value>
@@ -349,12 +349,12 @@
     {{#if Assignment.Deadline.HasValue}}
     &lt;tr&gt;
       &lt;td&gt;Deadline:&lt;/td&gt;
-      &lt;td&gt;{{Assignment.Deadline.ToShortDateString}} {{#if Assignment.Deadline.TimeOfDay.TotalSeconds}}{{Assignment.Deadline.ToShortTimeString}}{{/if}}&lt;/td&gt;
+      &lt;td&gt;{{Sungero.Docflow.PublicFunctions.Module.GetDateDisplayValue Assignment.Deadline Assignment.Performer}}&lt;/td&gt;
     &lt;/tr&gt;
     {{/if}}
     &lt;tr&gt; 
       &lt;td&gt;Started:&lt;/td&gt;
-      &lt;td&gt;{{Assignment.Created}}&lt;/td&gt;
+      &lt;td&gt;{{Sungero.Docflow.PublicFunctions.Module.GetDateDisplayValue Assignment.Created Assignment.Performer}}&lt;/td&gt;
     &lt;/tr&gt;
   &lt;/table&gt;
   {{&gt; hr}}
@@ -1041,7 +1041,7 @@ If the assistant is not defined, employee who signs the document will be the per
     <value>Finish period date  of report cannot be less than start date.</value>
   </data>
   <data name="WrongPeriod" xml:space="preserve">
-    <value>Finish period date  cannot be less than start date.</value>
+    <value>Finish period date cannot be less than start date.</value>
   </data>
   <data name="NoAccessRightsToApprove" xml:space="preserve">
     <value>You are not authorized to perform operation "Approve"</value>
@@ -1667,5 +1667,178 @@ Create a case file list for year {0} manually.</value>
   </data>
   <data name="Ellipsis_CutText" xml:space="preserve">
     <value>{0}…</value>
+  </data>
+  <data name="SignatureBlock" xml:space="preserve">
+    <value>{0} {1} ({2}, TIN {3})</value>
+  </data>
+  <data name="DocumentSignedByCounterpartyIsExchangeServiceNote" xml:space="preserve">
+    <value>Document was signed by counterparty via {0} exchange service.</value>
+  </data>
+  <data name="StateViewVersion" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="StateViewSubstitutedUser" xml:space="preserve">
+    <value>On behalf of</value>
+  </data>
+  <data name="Ellipsis_Comment" xml:space="preserve">
+    <value>…</value>
+  </data>
+  <data name="HtmlStampTemplateForRegistrationStamp" xml:space="preserve">
+    <value>&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
+&lt;head&gt;
+&lt;style type="text/css"&gt;
+.box1 {
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border: 1px solid #d7d7d7;
+  border-color: #003f75;
+  width: 40mm;
+  height: 17mm;
+}
+.tg1{font-size:6pt;font-family:Arial, "Segoe UI", Consolas, Calibri, monospace;line-height:1;color: #003f75;white-space: pre-wrap}
+.tg2{font-size:8.25pt;font-family:Arial, "Segoe UI", Consolas, Calibri, monospace;text-align:center;line-height:1;color: #003f75;white-space: pre-wrap}
+ 
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0"&gt;
+ 
+&lt;table class="box1"&gt;
+&lt;tr&gt;
+  &lt;td colspan="2"&gt;  
+    &lt;div class="tg2" style="margin-left:3.75px;margin-right:3.75px"&gt;{BusinessUnit}&lt;/div&gt;
+  &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+  &lt;td&gt;
+    &lt;div class="tg1" style="margin-left:1.5px;margin-right:1.5px"&gt;Reg No {RegNumber}&lt;/div&gt;
+  &lt;/td&gt;  
+ &lt;td&gt;
+&lt;div class="tg1" style="margin-left:1.5px;margin-right:1.5px;text-align:right"&gt; {RegDate}&lt;/div&gt;
+ &lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</value>
+  </data>
+  <data name="RegistrationStampCoordsMustBePositive" xml:space="preserve">
+    <value>Coordinates cannot be negative.</value>
+  </data>
+  <data name="SummaryMailMainTemplate" xml:space="preserve">
+    <value>&lt;!DOCTYPE html&gt;
+ &lt;html&gt;
+  &lt;head&gt;
+   &lt;style type="text/css"&gt;
+    p, span { font-size: 12pt; font-family: 'Times New Roman', Times; color: black; margin: 0px; }
+    p { margin-top: 4px; margin-bottom: 4px; }
+    td { padding: 0; word-break: break-all; }
+    table { table-layout: fixed; width: 95%; }
+   &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+   &lt;table&gt;
+    &lt;tbody&gt;
+     &lt;tr&gt;
+      &lt;td&gt;
+       &lt;img border="0" height="25" src="cid:logo.png@01D004A6.A303C580"/&gt;
+       &lt;p&gt;Summary on assignments and tasks in process.&lt;/p&gt;
+      &lt;/td&gt;
+     &lt;/tr&gt;
+     {{{AssignmentsBlock}}}
+     {{{ActionItemsBlock}}}
+     {{{TasksBlock}}}
+     &lt;tr&gt;
+      &lt;td&gt;
+       &lt;hr size=1 noshade style='color:#D0D0D0' align=center&gt;
+        &lt;footer style="display:block"&gt;
+         &lt;p style="color:#808080;margin-top:0"&gt;
+          &lt;small&gt;This email was sent automatically. &lt;a href="mailto:{{AdministratorEmail}}?subject=Unsubscribing%20from%20Directum%20RX%20mailing&amp;body=Unsubscribe%20me%20from%20notification%20about%20assignments%20and%20tasks%20in%20process" target="_top"&gt;Contact your administrator&lt;/a&gt; to unsubscribe from Directum RX mailing.&lt;/small&gt;
+         &lt;/p&gt;
+        &lt;/footer&gt;
+       &lt;/td&gt;
+      &lt;/tr&gt;
+     &lt;/tbody&gt;
+    &lt;/table&gt;
+   &lt;/body&gt;
+  &lt;/html&gt;</value>
+  </data>
+  <data name="SummaryMailSubject" xml:space="preserve">
+    <value>{0}'s assignments and tasks on {1}</value>
+  </data>
+  <data name="SummaryMailBlockContentTemplate" xml:space="preserve">
+    <value>&lt;tr&gt;
+ &lt;td&gt;
+  {{#if Name}}
+    &lt;hr size=1 noshade style="color:#D0D0D0;" align=center&gt;
+   &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+  &lt;td&gt;
+  &lt;p&gt;{{Name}}{{#if IsNeedShowCount}} – {{Count}}{{/if}}&lt;/p&gt;
+  {{/if}}
+  {{{Content}}}
+ &lt;/td&gt;
+&lt;/tr&gt;</value>
+  </data>
+  <data name="SummaryMailGroupContentTemplate" xml:space="preserve">
+    <value>&lt;table&gt;
+ &lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td&gt;
+    &lt;p style="margin-left: {{LeftMarginSize}}px;"&gt;{{Name}} – {{Count}}&lt;/p&gt;
+    {{{Content}}}
+   &lt;/td&gt;
+  &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;br&gt;</value>
+  </data>
+  <data name="NewAssignmentsGroupName" xml:space="preserve">
+    <value>New assignments and notices</value>
+  </data>
+  <data name="OverdueAssignmentsGroupName" xml:space="preserve">
+    <value>Overdue assignments</value>
+  </data>
+  <data name="TodayAssignmentsGroupName" xml:space="preserve">
+    <value>To complete today</value>
+  </data>
+  <data name="ClosestDaysAssignmentsGroupName" xml:space="preserve">
+    <value>To complete soon</value>
+  </data>
+  <data name="ActionItemsBlockName" xml:space="preserve">
+    <value>Action items to supervise</value>
+  </data>
+  <data name="TasksBlockName" xml:space="preserve">
+    <value>Sent tasks in process</value>
+  </data>
+  <data name="OpenLinkPicture" xml:space="preserve">
+    <value>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAACQSURBVHgB3VJLDkAwEO34nIcjYMPShRBu4Ca2NjgCN3AOQqmkybShbWIjXtI0nXnvTTsdQl4CTIlB0VI5NpQxWMQQjMwW7K5/Hmced1QVsJjtYdZ51FobsN2UbusoGGDiHbC4z6PpLHjFjZ4gi3FOa/Ak5rfVGlBYAiyWe+XoDIYqqVV542/8sYHQRNU0fhcHxv47NQurgvMAAAAASUVORK5CYII=</value>
+  </data>
+  <data name="AssignmentsBlockName" xml:space="preserve">
+    <value>Inbox assignments in process</value>
+  </data>
+  <data name="SummaryMailWorkflowEntitiesListTemplate" xml:space="preserve">
+    <value>&lt;table style="margin-left: {{LeftMarginSize}}px"&gt;
+ &lt;tbody&gt;
+  {{#each WorkflowEntities }}
+  &lt;tr&gt;
+   &lt;td style="width: 10px; vertical-align: top; padding-top: 4px; padding-bottom: 4px;"&gt;
+    &lt;p&gt;
+     •
+    &lt;/p&gt;
+   &lt;/td&gt;
+   &lt;td style="padding-top: 4px; padding-bottom: 4px;"&gt;
+    &lt;p&gt;
+     &lt;a href="{{Hyperlink}}" style="color: black; text-decoration: none"&gt;{{Subject}}
+      &lt;img border="0" src="cid:openlink.png"/&gt;
+     &lt;/a&gt;
+    &lt;/p&gt;
+    &lt;p&gt;{{#if IsNotice}}{{#else}}{{#if Deadline}}Deadline: &lt;span {{#if IsOverdue}}style="color: red" {{/if}}&gt;{{DeadlineDisplayValue}}&lt;/span&gt;{{#else}}Deadline: no deadline.{{/if}}{{/if}}{{#if IsTasks}}{{#else}}{{#if IsActionItems}}{{#if IsCompoundActionItem}}{{#else}} Assignee: {{/if}}{{#else}} From: {{/if}}{{AuthorName}}{{/if}}&lt;/p&gt;
+   &lt;/td&gt;
+  &lt;/tr&gt;
+  {{/each}}
+ &lt;/tbody&gt;
+&lt;/table&gt;</value>
   </data>
 </root>

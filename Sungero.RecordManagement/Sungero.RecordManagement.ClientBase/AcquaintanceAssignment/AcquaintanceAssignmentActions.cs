@@ -35,11 +35,9 @@ namespace Sungero.RecordManagement.Client
       var isCurrentUserPerformer = Equals(_obj.Performer, Users.Current);
       if (!isCurrentUserPerformer)
       {
-        // Задание может выполнить только замещающий, и только за виртуальных или уволенных сотрудников.
-        var isCurrentUserSubstitute = Functions.AcquaintanceAssignment.Remote.IsSubstituteOf(_obj, Users.Current, _obj.Performer);
-        var isPerformerActive = _obj.Performer.Status == CoreEntities.DatabookEntry.Status.Active;
-        var isPerformerAutomated = _obj.Performer.Login != null;
-        if (!isCurrentUserSubstitute || isCurrentUserSubstitute && isPerformerActive && isPerformerAutomated)
+        // Задание может выполнить только замещающий, и только за виртуальных или уволенных сотрудников,
+        // либо за действующего сотрудника, если это разрешено соответствующей настройкой.
+        if (!Functions.AcquaintanceAssignment.CanUserCompleteAcquaintanceBySubstitute(_obj))
         {
           e.AddError(Sungero.RecordManagement.AcquaintanceAssignments.Resources.EmployeeMustPersonallyConfirmAcquaintance);
           return;

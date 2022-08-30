@@ -26,6 +26,15 @@ namespace Sungero.RecordManagement.Client
                                                                                  _obj.Id,
                                                                                  _obj.ResolutionText,
                                                                                  assignedBy);
+      
+      var documentReviewTask = DocumentReviewTasks.As(_obj.Task);
+      Functions.Module.SynchronizeAttachmentsToActionItem(document,
+                                                          _obj.AddendaGroup.OfficialDocuments.Select(x => Sungero.Content.ElectronicDocuments.As(x)).ToList(),
+                                                          Functions.DocumentReviewTask.GetAddedAddenda(documentReviewTask),
+                                                          Functions.DocumentReviewTask.GetRemovedAddenda(documentReviewTask),
+                                                          _obj.OtherGroup.All.ToList(),
+                                                          task);
+      
       task.ShowModal();
     }
 

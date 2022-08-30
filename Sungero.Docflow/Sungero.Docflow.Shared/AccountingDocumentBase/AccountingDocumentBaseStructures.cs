@@ -12,10 +12,10 @@ namespace Sungero.Docflow.Structures.AccountingDocumentBase
     public DateTime? AcceptanceDate { get; set; }
     
     /// <summary>
-    /// Результат подписания - с разногласиями или без.
+    /// Результат приемки.
     /// </summary>
-    public bool SignResult { get; set; }
-
+    public Sungero.Core.Enumeration BuyerAcceptanceStatus { get; set; }
+    
     /// <summary>
     /// Акт разногласий.
     /// </summary>

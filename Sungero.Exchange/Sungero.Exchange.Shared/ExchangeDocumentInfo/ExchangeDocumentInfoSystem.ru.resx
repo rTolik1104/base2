@@ -100,6 +100,9 @@
   <data name="Enum_MessageType_Outgoing" xml:space="preserve">
     <value>Исходящее</value>
   </data>
+  <data name="ControlGroup_9057168b2b31462a95e13afb0588ad0e" xml:space="preserve">
+    <value>Информация о документе обмена</value>
+  </data>
   <data name="Property_MessageDate" xml:space="preserve">
     <value>Дата отправки</value>
   </data>
@@ -193,10 +196,19 @@
   <data name="ControlGroup_d4cdd07b229f466e91fc4395af73af32" xml:space="preserve">
     <value>Служебные документы</value>
   </data>
-  <data name="ControlGroup_9057168b2b31462a95e13afb0588ad0e" xml:space="preserve">
-    <value>Информация о документе обмена</value>
-  </data>
   <data name="ControlGroup_f3967adf69634fd89a530e89cfe3d5a8" xml:space="preserve">
     <value>Состояние документооборота</value>
+  </data>
+  <data name="Property_BuyerAcceptanceStatus" xml:space="preserve">
+    <value>Статус приемки</value>
+  </data>
+  <data name="Enum_BuyerAcceptanceStatus_Accepted" xml:space="preserve">
+    <value>Принято без разногласий</value>
+  </data>
+  <data name="Enum_BuyerAcceptanceStatus_PartiallyAccepted" xml:space="preserve">
+    <value>Принято с разногласиями</value>
+  </data>
+  <data name="Enum_BuyerAcceptanceStatus_Rejected" xml:space="preserve">
+    <value>Не принято</value>
   </data>
 </root>

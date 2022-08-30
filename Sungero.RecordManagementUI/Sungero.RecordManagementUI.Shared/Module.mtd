@@ -186,6 +186,7 @@
         "Name": "Documents",
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconDocuments_beed810688fe4f72b6eb9f65ebbae52a.png",
+        "TabId": "3e1b9ada-9727-4ab7-803c-4dd1150feec6",
         "Versions": []
       },
       {
@@ -194,6 +195,7 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconReports_e3223c069e664c9b81128a0b0a53bae3.png",
         "PreviousItemGuid": "beed8106-88fe-4f72-b6eb-9f65ebbae52a",
+        "TabId": "3e1b9ada-9727-4ab7-803c-4dd1150feec6",
         "Versions": []
       },
       {
@@ -202,6 +204,7 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconSearch_f7b55d5cef4f4f86b78a7f8dd81cbe51.png",
         "PreviousItemGuid": "e3223c06-9e66-4c9b-8112-8a0b0a53bae3",
+        "TabId": "3e1b9ada-9727-4ab7-803c-4dd1150feec6",
         "Versions": []
       },
       {
@@ -210,6 +213,7 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconSettings_a872b5274fa8445c8f8b5f70cd2d6ef6.png",
         "PreviousItemGuid": "f7b55d5c-ef4f-4f86-b78a-7f8dd81cbe51",
+        "TabId": "3e1b9ada-9727-4ab7-803c-4dd1150feec6",
         "Versions": []
       },
       {
@@ -218,6 +222,7 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconControl_a0b082c5741f4b8e8d0ca01e922d8782.png",
         "PreviousItemGuid": "a872b527-4fa8-445c-8f8b-5f70cd2d6ef6",
+        "TabId": "3e1b9ada-9727-4ab7-803c-4dd1150feec6",
         "Versions": []
       }
     ],
@@ -227,6 +232,12 @@
       "IconName": "",
       "Versions": []
     },
+    "Tabs": [
+      {
+        "NameGuid": "3e1b9ada-9727-4ab7-803c-4dd1150feec6",
+        "Name": "Tab"
+      }
+    ],
     "Versions": []
   },
   "Dependencies": [
@@ -481,12 +492,12 @@
       "Versions": []
     }
   ],
-  "Version": "4.3.25.0",
+  "Version": "4.4.29.0",
   "Widgets": [],
   "Versions": [
     {
       "Type": "ModuleMetadata",
-      "Number": 6
+      "Number": 8
     },
     {
       "Type": "DomainApi",

@@ -393,14 +393,10 @@ namespace Sungero.Exchange.Client
         var isWaybill = FinancialArchive.Waybills.Is(document);
         var isContractStatement = FinancialArchive.ContractStatements.Is(document);
         var isUPD = FinancialArchive.UniversalTransferDocuments.Is(document);
-        var isDiadoc = accDocument.BusinessUnitBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Diadoc;
         var isSbis = accDocument.BusinessUnitBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis;
-        var isDiadocUPD = isUPD && isDiadoc;
-        var isSbisUPD = isUPD && isSbis;
         var isSbisSF = isSF && isSbis;
-        var isDiadocContractStatement = isContractStatement && isDiadoc;
         needSign.Value = isWaybill || isUPD || isContractStatement || isSbisSF;
-        needSign.IsEnabled = !(isWaybill || isSF || isDiadocUPD || isDiadocContractStatement || isSbisSF || isSbisUPD);
+        needSign.IsEnabled = !(isWaybill || isSF || isUPD || isContractStatement || isSbisSF);
       }
       else
         needSign.Value = Docflow.ContractualDocumentBases.Is(document);
@@ -683,9 +679,7 @@ namespace Sungero.Exchange.Client
       var formParams = ((Domain.Shared.IExtendedEntity)document).Params;
       var signAndSend = formParams.ContainsKey(Exchange.PublicConstants.Module.DefaultSignResult) &&
         (bool)formParams[Exchange.PublicConstants.Module.DefaultSignResult];
-      var defaultSignResult = documentInfo.IsSignedByUs || signAndSend == true ?
-        allowedResults.FirstOrDefault() : allowedResults.LastOrDefault();
-      var signResult = dialog.AddSelect(Resources.SendCounterpartyResult, true, defaultSignResult)
+      var signResult = dialog.AddSelect(Resources.SendCounterpartyResult, true, allowedResults.FirstOrDefault())
         .From(allowedResults.ToArray());
       
       var counterparty = dialog.AddSelect(Resources.SendCounterpartyReceiver, true, documentInfo.DefaultCounterparty);
@@ -709,7 +703,7 @@ namespace Sungero.Exchange.Client
       selectedAddenda.IsEnabled = documentInfo.HasAddendaToSend;
       
       var comment = dialog.AddMultilineString(Resources.SendCounterpartyComment, false);
-      comment.IsEnabled = defaultSignResult != positiveResult;
+      comment.IsEnabled = false;
       
       var sendButton = dialog.Buttons.AddCustom(Resources.SendCounterpartySendButton);
       dialog.Buttons.Default = sendButton;
@@ -727,28 +721,7 @@ namespace Sungero.Exchange.Client
       var isSbis = exchangeDocumentInfo.RootBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis;
       comment.IsRequired = isSbis && comment.IsEnabled;
       
-      dialog.SetOnRefresh(e => 
-                           {
-                             if (isSbis)
-                             {
-                               if (signResult.Value != positiveResult)
-                               {
-                                 var packageDocumentsExchangeInfos = Functions.Module.Remote.GetPackageDocumentsExchangeInfos(exchangeDocumentInfo.ServiceMessageId);
-                                 if (packageDocumentsExchangeInfos.Count() > 1)
-                                 {
-                                   e.AddWarning(Sungero.Exchange.Resources.SendSetAmendmentsToSbis);
-                                 }
-                               }
-                               else
-                               {
-                                 var packageDocumentsExchangeInfos = Functions.Module.Remote.GetPackageDocumentsExchangeInfos(exchangeDocumentInfo.ServiceMessageId);
-                                 if (packageDocumentsExchangeInfos.Count() > 1)
-                                 {
-                                   e.AddWarning(Sungero.Exchange.Resources.SendSetSignaturesToSbis);
-                                 }
-                               }
-                             }
-                           });
+      var accountingDocument = Docflow.AccountingDocumentBases.As(document);
       
       signResult.SetOnValueChanged(x =>
                                    {
@@ -773,6 +746,26 @@ namespace Sungero.Exchange.Client
                                        }
                                      }
                                    });
+      
+      dialog.SetOnRefresh(x =>
+                          {
+                            if (documentInfo.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Accepted)
+                              x.AddInformation(Sungero.Exchange.Resources.SendToCounterpartyDialog_BuyerAcceptanceStatusAccepted);
+                            else if (documentInfo.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.PartiallyAccepted)
+                              x.AddInformation(Sungero.Exchange.Resources.SendToCounterpartyDialog_BuyerAcceptanceStatusPartiallyAccepted);
+                            else if (documentInfo.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Rejected)
+                              x.AddInformation(Sungero.Exchange.Resources.SendToCounterpartyDialog_BuyerAcceptanceStatusRejected);
+                            else if (accountingDocument != null && accountingDocument.IsFormalized == true &&
+                                     accountingDocument.ExchangeState == Docflow.OfficialDocument.ExchangeState.SignRequired && accountingDocument.BuyerTitleId == null &&
+                                     !(isSbis && accountingDocument.FormalizedFunction == Docflow.AccountingDocumentBase.FormalizedFunction.Schf))
+                              x.AddInformation(Sungero.Exchange.Resources.SendToCounterpartyDialog_BuyerTitleIsEmpty);
+                            
+                            if (selectedAddenda.Value != null && selectedAddenda.Value.Any() &&
+                                documentInfo.Addenda.Where(a => a.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Rejected)
+                                .Any(ad => selectedAddenda.Value.Contains(ad.Addendum)))
+                              x.AddWarning(Sungero.Exchange.Resources.SendToCounterpartyDialog_AddendaWithBuyerAcceptanceStatusRejected);
+
+                          });
       
       dialog.SetOnButtonClick(x =>
                               {
@@ -880,18 +873,8 @@ namespace Sungero.Exchange.Client
                                     {
                                       var certificate = signatureOwner.Value == null ? null :
                                         documentInfo.Certificates.Certificates.Single(c => Equals(c.Owner, signatureOwner.Value));
-
-                                      // SBIS: проверить, что все документы комплекта подписаны.
-                                      var documentsFromPackage = new List<Docflow.IOfficialDocument>();
-                                      if (isSbis && certificate != null)
-                                      {
-                                        documentsFromPackage = ProcessSbisDocumentsPackage(exchangeDocumentInfo, x, certificate);
-                                        if (!documentsFromPackage.Any())
-                                          return;
-                                      }                                      
                                       
                                       var documentsToSend = new List<Docflow.IOfficialDocument>() { document };
-                                      documentsToSend.AddRange(documentsFromPackage.Where(d => d.Id != document.Id));
                                       documentsToSend.AddRange(selectedAddenda.Value);
                                       Functions.Module.Remote.SendAnswers(documentsToSend, counterparty.Value, box.Value, certificate, false);
                                       if (Equals(certificate.Owner, Company.Employees.Current))
@@ -923,17 +906,7 @@ namespace Sungero.Exchange.Client
                                     
                                     if (currentUserSelectedCertificate != null)
                                     {
-                                      var documentsFromPackage = new List<Docflow.IOfficialDocument>();
-                                      // SBIS: Отказать можно только по всему комплекту документов.
-                                      if (isSbis)
-                                      {
-                                        documentsFromPackage = ProcessSbisDocumentsPackage(exchangeDocumentInfo, x);
-                                        if (!documentsFromPackage.Any())
-                                          return;
-                                      }
-                                      
                                       var documents = selectedAddenda.Value.ToList();
-                                      documents.AddRange(documentsFromPackage.Where(d => d.Id != document.Id));
                                       documents.Add(document);
                                       
                                       var error = SendAmendmentRequest(documents, counterparty.Value, comment.Value, false, box.Value, currentUserSelectedCertificate, signResult.Value == invoiceAmendmentResult);
@@ -966,6 +939,7 @@ namespace Sungero.Exchange.Client
     /// <param name="x">Аргументы события нажатия на кнопку диалога.</param>
     /// <param name="certificate">Сертификат.</param>
     /// <returns>Список документов комплекта.</returns>
+    [Obsolete("Теперь функция не актуальна, т.к. реализована поддержка частичного подписания.")]
     private static List<Docflow.IOfficialDocument> ProcessSbisDocumentsPackage(IExchangeDocumentInfo exchangeDocumentInfo, CommonLibrary.InputDialogButtonClickEventArgs x,
                                                                                ICertificate certificate = null)
     {
@@ -978,7 +952,7 @@ namespace Sungero.Exchange.Client
         {
           x.AddError(Sungero.Exchange.Resources.NotFoundOrNoRightsToDocument);
           return documentsFromPackage;
-        }        
+        }
         
         foreach (Exchange.IExchangeDocumentInfo exchangeInfo in packageDocumentsExchangeInfos)
         {

@@ -5,6 +5,16 @@
   "AccessRightsMode": "Both",
   "Actions": [
     {
+      "NameGuid": "05fbe763-f698-4c36-a486-e2e53f0f0e7a",
+      "Name": "ConvertToPdf",
+      "GenerateHandler": true,
+      "IsAncestorMetadata": true,
+      "Overridden": [
+        "GenerateHandler"
+      ],
+      "Versions": []
+    },
+    {
       "NameGuid": "56d379b0-e314-4d8f-950d-70998bdfb7df",
       "Name": "DocumentRegister",
       "ActionArea": "Collection",
@@ -58,6 +68,14 @@
       "GenerateHandler": true,
       "LargeIconName": null,
       "SmallIconName": null
+    },
+    {
+      "NameGuid": "cc2aae99-1c13-4709-bd99-ac50b529016f",
+      "Name": "AddRegistrationStamp",
+      "ActionArea": "Card",
+      "GenerateHandler": true,
+      "LargeIconName": "Action_AddRegistrationMark_large_cc2aae991c134709bd99ac50b529016f.png",
+      "SmallIconName": "Action_AddRegistrationMark_small_cc2aae991c134709bd99ac50b529016f.png"
     }
   ],
   "BaseGuid": "58cca102-1e97-4f07-b6ac-fd866a8b7cb1",
@@ -913,7 +931,18 @@
   ],
   "PublicStructures": [],
   "ResourcesKeys": [
-    "MarkDocumentAsObsolete"
+    "MarkDocumentAsObsolete",
+    "CancelNumberingDescription",
+    "CancelRegistrationDescription",
+    "AddRegistrationStampDialogTitle",
+    "AddRegistrationStampDialogRightIndent",
+    "AddRegistrationStampDialogBottomIndent",
+    "AddRegistrationStampDialogPosition",
+    "AddRegistrationStampDialogBottomRightPosition",
+    "AddRegistrationStampDialogBottomCenterPosition",
+    "AddRegistrationStampDialogCustomPosition",
+    "AddRegistrationStampDialogCreateButton",
+    "AddRegistrationStampCompleteNotification"
   ],
   "RibbonCardMetadata": {
     "NameGuid": "c216f61c-d9da-4882-94b0-a697e72961a5",
@@ -1077,6 +1106,27 @@
         "ParentGuid": "490efb36-f0d4-4121-b12f-4ea60cccb024",
         "SmallIconName": "Ribbon_ManyAddresseesToggleButton_small_43d2e0d3b83c4ba39f36b0595f5c23e3.png",
         "StatePropertyGuid": "76611cff-b8f7-40c0-b9bf-346f53d5b948"
+      },
+      {
+        "$type": "Sungero.Metadata.RibbonActionButtonMetadata, Sungero.Metadata",
+        "NameGuid": "6939d15a-8d78-40ad-9497-b73f3e54fdd2",
+        "Name": "ShowRegistrationButton",
+        "ActionGuid": "e62f1e4e-2d48-4e7d-ad93-fcffe0a0fed8",
+        "Index": 5,
+        "IsAncestorMetadata": true,
+        "Overridden": [
+          "Index"
+        ],
+        "ParentGuid": "7aa0ac24-8039-4d94-9542-84c3d878412e",
+        "Versions": []
+      },
+      {
+        "$type": "Sungero.Metadata.RibbonActionButtonMetadata, Sungero.Metadata",
+        "NameGuid": "bd9c02e1-be17-45a5-b66b-8cd50937dbd4",
+        "Name": "AddRegistrationMark",
+        "ActionGuid": "cc2aae99-1c13-4709-bd99-ac50b529016f",
+        "Index": 4,
+        "ParentGuid": "7aa0ac24-8039-4d94-9542-84c3d878412e"
       }
     ],
     "Groups": [

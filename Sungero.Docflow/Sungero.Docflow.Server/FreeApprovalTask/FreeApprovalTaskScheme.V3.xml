@@ -215,14 +215,14 @@
         <Bounds>
           <Location>
             <X>207.66299999997443</X>
-            <Y>647</Y>
+            <Y>679</Y>
           </Location>
           <Size>
             <Width>48</Width>
             <Height>48</Height>
           </Size>
           <X>207.66299999997443</X>
-          <Y>647</Y>
+          <Y>679</Y>
           <Width>48</Width>
           <Height>48</Height>
         </Bounds>
@@ -462,7 +462,7 @@
         <EdgeId>10</EdgeId>
         <EndPoint>
           <X>231.66299999997443</X>
-          <Y>647</Y>
+          <Y>679</Y>
         </EndPoint>
         <OriginAnchor>10</OriginAnchor>
         <Points>
@@ -472,23 +472,15 @@
           </Point>
           <Point>
             <X>34.337000000025569</X>
-            <Y>613.29527559055123</Y>
-          </Point>
-          <Point>
-            <X>183.16850000001278</X>
-            <Y>613.29527559055123</Y>
-          </Point>
-          <Point>
-            <X>183.16850000001278</X>
-            <Y>575.5</Y>
+            <Y>594.39763779527561</Y>
           </Point>
           <Point>
             <X>231.66299999997443</X>
-            <Y>575.5</Y>
+            <Y>594.39763779527561</Y>
           </Point>
           <Point>
             <X>231.66299999997443</X>
-            <Y>647</Y>
+            <Y>679</Y>
           </Point>
         </Points>
         <StartPoint>
@@ -501,7 +493,7 @@
         <EdgeId>11</EdgeId>
         <EndPoint>
           <X>231.66299999997443</X>
-          <Y>647</Y>
+          <Y>679</Y>
         </EndPoint>
         <OriginAnchor>10</OriginAnchor>
         <Points>
@@ -511,15 +503,15 @@
           </Point>
           <Point>
             <X>427.66299999997443</X>
-            <Y>611.25</Y>
+            <Y>594.39763779527561</Y>
           </Point>
           <Point>
             <X>231.66299999997443</X>
-            <Y>611.25</Y>
+            <Y>594.39763779527561</Y>
           </Point>
           <Point>
             <X>231.66299999997443</X>
-            <Y>647</Y>
+            <Y>679</Y>
           </Point>
         </Points>
         <StartPoint>

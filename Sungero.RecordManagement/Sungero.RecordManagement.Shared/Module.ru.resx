@@ -220,8 +220,7 @@
     <value>Приказ</value>
   </data>
   <data name="ConfirmDeleteDraftResolutionAssignment" xml:space="preserve">
-    <value>Поручения из проекта резолюции будут удалены.
-</value>
+    <value>Поручения из проекта резолюции будут удалены.</value>
   </data>
   <data name="Delete" xml:space="preserve">
     <value>Удалить</value>

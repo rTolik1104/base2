@@ -2513,13 +2513,8 @@ namespace Sungero.Docflow.Server
     [Remote(PackResultEntityEagerly = true, IsPure = true)]
     public virtual Structures.Module.DefinedApprovalStages GetStages(IOfficialDocument document, IApprovalTask task)
     {
-      Logger.DebugFormat("Start GetStages");
-      
       var baseStages = Functions.ApprovalRuleBase.GetBaseStages(_obj, document, task);
-      var result = Functions.ApprovalRuleBase.CastToDefinedApprovalStages(baseStages);
-      
-      Logger.DebugFormat("Done GetStages");
-      return result;
+      return Functions.ApprovalRuleBase.CastToDefinedApprovalStages(baseStages);
     }
     
     /// <summary>
@@ -2531,8 +2526,6 @@ namespace Sungero.Docflow.Server
     [Remote(PackResultEntityEagerly = true, IsPure = true)]
     public virtual Structures.Module.DefinedApprovalBaseStages GetBaseStages(IOfficialDocument document, IApprovalTask task)
     {
-      Logger.DebugFormat("Start GetBaseStages");
-      
       var stages = new List<Structures.Module.DefinedApprovalBaseStageLite>() { };
       bool canDefineConditions = false;
       
@@ -2576,7 +2569,7 @@ namespace Sungero.Docflow.Server
         var stage = _obj.Stages.Single(s => s.Number == currentStageNumber);
         stages.Add(Structures.Module.DefinedApprovalBaseStageLite.Create(stage.StageBase, stage.Number, stage.StageType));
       }
-      Logger.DebugFormat("Done GetBaseStages");
+      
       return Structures.Module.DefinedApprovalBaseStages.Create(stages, canDefineConditions, error);
     }
     

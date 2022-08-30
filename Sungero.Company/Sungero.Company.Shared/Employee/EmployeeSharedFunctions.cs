@@ -101,7 +101,7 @@ namespace Sungero.Company.Shared
     [Public]
     public void SetRequiredProperties()
     {
-      var isEmailRequired = _obj.NeedNotifyExpiredAssignments == true || _obj.NeedNotifyNewAssignments == true;
+      var isEmailRequired = _obj.NeedNotifyExpiredAssignments == true || _obj.NeedNotifyNewAssignments == true || _obj.NeedNotifyAssignmentsSummary == true;
       
       _obj.State.Properties.Email.IsRequired = isEmailRequired;
     }

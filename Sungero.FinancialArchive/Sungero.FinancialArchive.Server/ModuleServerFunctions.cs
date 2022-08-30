@@ -280,6 +280,11 @@ namespace Sungero.FinancialArchive.Server
       return result.ToList();
     }
     
+    /// <summary>
+    /// Получить список номеров, соответствующих заданному рег. номеру документа.
+    /// </summary>
+    /// <param name="number">Рег. номер.</param>
+    /// <returns>Список номеров, соответствующих заданному.</returns>
     private List<string> GetRelevantNumbers(string number)
     {
       var relevantNumbers = new List<string>();
@@ -306,6 +311,7 @@ namespace Sungero.FinancialArchive.Server
       }
       return relevantNumbers;
     }
+    
     #endregion
     
     #region Импорт формализованных документов
@@ -528,7 +534,12 @@ namespace Sungero.FinancialArchive.Server
       
       using (var body = document.Versions.Single(v => v.Id == document.SellerTitleId).Body.Read())
       {
-        return FormalizeDocumentsParser.SellerSignatoryInfo.HasSellerSignatoryInfo(body);
+        using (var memory = new System.IO.MemoryStream())
+        {
+          body.CopyTo(memory);
+          memory.Position = 0;
+          return FormalizeDocumentsParser.SellerSignatoryInfo.HasSellerSignatoryInfo(memory);
+        }
       }
     }
     
@@ -553,7 +564,12 @@ namespace Sungero.FinancialArchive.Server
       }
     }
     
-    private static Enumeration GetExchangeService(FormalizeDocumentsParser.IFormalizedDocument title)
+    /// <summary>
+    /// Получить сервис обмена.
+    /// </summary>
+    /// <param name="title">Титул продавца.</param>
+    /// <returns>Сервис обмена.</returns>
+    private static Enumeration? GetExchangeService(FormalizeDocumentsParser.IFormalizedDocument title)
     {
       switch (title.FromService)
       {
@@ -562,10 +578,17 @@ namespace Sungero.FinancialArchive.Server
         case FormalizeDocumentsParser.SupportedService.Sbis:
           return ExchangeCore.ExchangeService.ExchangeProvider.Sbis;
         default:
-          return ExchangeCore.ExchangeService.ExchangeProvider.Synerdocs;
+          Logger.DebugFormat("GetExchangeService. Unsupportable exchange service {0}", title.FromService.ToString());
+          return null;
       }
     }
     
+    /// <summary>
+    /// Заполнить в документе НОР и контрагента.
+    /// </summary>
+    /// <param name="document">Документ.</param>
+    /// <param name="sellerTitle">Титул продавца.</param>
+    /// <param name="requireFtsId">Соотносить НОР и контрагента только по ФНС ИД.</param>
     private static void FillBusinessUnitAndCounterparty(Docflow.IAccountingDocumentBase document,
                                                         FormalizeDocumentsParser.ISellerTitle sellerTitle,
                                                         bool requireFtsId)
@@ -621,6 +644,11 @@ namespace Sungero.FinancialArchive.Server
       }
     }
     
+    /// <summary>
+    /// Получить абонентский ящик участника ЭДО.
+    /// </summary>
+    /// <param name="participant">Участник ЭДО.</param>
+    /// <returns>Абонентский ящик.</returns>
     private static ExchangeCore.IBusinessUnitBox GetBox(FormalizeDocumentsParser.IExchangeParticipant participant)
     {
       var boxes = ExchangeCore.BusinessUnitBoxes.GetAll()
@@ -635,6 +663,11 @@ namespace Sungero.FinancialArchive.Server
       return null;
     }
     
+    /// <summary>
+    /// Определить НОР по информации об участнике ЭДО.
+    /// </summary>
+    /// <param name="participant">Участник ЭДО.</param>
+    /// <returns>Наша организация.</returns>
     private static Company.IBusinessUnit GetBusinessUnit(FormalizeDocumentsParser.IExchangeParticipant participant)
     {
       var units = Company.BusinessUnits.GetAll()
@@ -649,6 +682,13 @@ namespace Sungero.FinancialArchive.Server
       return null;
     }
     
+    /// <summary>
+    /// Определить контрагента по информации об участнике ЭДО.
+    /// </summary>
+    /// <param name="participant">Участник ЭДО.</param>
+    /// <param name="box">Абонентский ящик.</param>
+    /// <param name="canExchange">Участвует ли в электронном обмене.</param>
+    /// <returns>Контрагент.</returns>
     private static Parties.ICounterparty GetCounterparty(FormalizeDocumentsParser.IExchangeParticipant participant,
                                                          ExchangeCore.IBusinessUnitBox box, bool canExchange)
     {
@@ -675,6 +715,12 @@ namespace Sungero.FinancialArchive.Server
       return null;
     }
     
+    /// <summary>
+    /// Определить контрагента по ФНС ИД и абонентскому ящику.
+    /// </summary>
+    /// <param name="ftsId">ФНС ИД.</param>
+    /// <param name="box">Абонентский ящик.</param>
+    /// <returns>Контрагент.</returns>
     private static Parties.ICounterparty GetCounterparty(string ftsId, ExchangeCore.IBusinessUnitBox box)
     {
       return Parties.Counterparties.GetAll()
@@ -734,8 +780,11 @@ namespace Sungero.FinancialArchive.Server
 
       if (rootBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Diadoc)
         sellerTitleInfo.Operator = FormalizeDocumentsParser.SupportedEdoOperators.Diadoc;
+      else if (rootBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis)
+        sellerTitleInfo.Operator = FormalizeDocumentsParser.SupportedEdoOperators.Sbis;
       else
-        sellerTitleInfo.Operator = FormalizeDocumentsParser.SupportedEdoOperators.Synerdocs;
+        Logger.DebugFormat("AddOrReplaceSellerTitleInfo. Unsupportable exchange service {0}", rootBox.ExchangeService.ExchangeProvider);
+      
       sellerTitleInfo.Receiver = counterpartyExchange.FtsId;
       sellerTitleInfo.Sender = rootBox.FtsId;
       return sellerTitleInfo.AddOrReplaceToXml(stream);
@@ -745,7 +794,7 @@ namespace Sungero.FinancialArchive.Server
     /// Сгенерировать титул продавца.
     /// </summary>
     /// <param name="statement">Документ, для которого генерируется титул.</param>
-    /// <param name="sellerTitle">Информация о титуле продавца.</param>    
+    /// <param name="sellerTitle">Информация о титуле продавца.</param>
     [Public, Remote]
     public static void GenerateSellerTitle(Docflow.IAccountingDocumentBase statement, Docflow.Structures.AccountingDocumentBase.ISellerTitle sellerTitle)
     {
@@ -790,21 +839,26 @@ namespace Sungero.FinancialArchive.Server
       
       using (var body = statement.Versions.Single(v => v.Id == statement.SellerTitleId).Body.Read())
       {
-        using (var patchedXml = sellerSignatoryInfo.AddOrReplaceToXml(body))
+        using (var memory = new System.IO.MemoryStream())
         {
-          if (!HasUnsignedSellerTitle(statement))
+          body.CopyTo(memory);
+          memory.Position = 0;
+          using (var patchedXml = sellerSignatoryInfo.AddOrReplaceToXml(memory))
           {
-            // При создании версии чистится статус эл. обмена, восстанавливаем его.
-            var exchangeState = statement.ExchangeState;
-            statement.CreateVersion();
-            statement.ExchangeState = exchangeState;
+            if (!HasUnsignedSellerTitle(statement))
+            {
+              // При создании версии чистится статус эл. обмена, восстанавливаем его.
+              var exchangeState = statement.ExchangeState;
+              statement.CreateVersion();
+              statement.ExchangeState = exchangeState;
+            }
+            
+            var version = statement.LastVersion;
+            statement.SellerTitleId = version.Id;
+            version.Body.Write(patchedXml);
+            statement.IsFormalizedSignatoryEmpty = false;
+            statement.Save();
           }
-          
-          var version = statement.LastVersion;
-          statement.SellerTitleId = version.Id;
-          version.Body.Write(patchedXml);
-          statement.IsFormalizedSignatoryEmpty = false;
-          statement.Save();
         }
       }
     }
@@ -813,7 +867,7 @@ namespace Sungero.FinancialArchive.Server
     /// Определить, есть ли у документа неподписанный титул продавца.
     /// </summary>
     /// <param name="statement">Документ.</param>
-    /// <returns>True, если есть неподписанный титул продавца, иначе - false.</returns>    
+    /// <returns>True, если есть неподписанный титул продавца, иначе - false.</returns>
     [Public, Remote]
     public static bool HasUnsignedSellerTitle(Docflow.IAccountingDocumentBase statement)
     {

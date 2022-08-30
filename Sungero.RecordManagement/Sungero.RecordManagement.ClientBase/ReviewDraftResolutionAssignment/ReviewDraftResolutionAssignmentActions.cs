@@ -23,6 +23,12 @@ namespace Sungero.RecordManagement.Client
         e.Cancel();
       }
       
+      if (Equals(_obj.Addressee, _obj.Performer))
+      {
+        e.AddError(DocumentReviewTasks.Resources.AddresseeAlreadyExistsFormat(_obj.Addressee.Person.ShortName));
+        e.Cancel();
+      }
+      
       // Подтверждение удаления проекта резолюции.
       var hasActionItems = _obj.ResolutionGroup.ActionItemExecutionTasks.Any();
       var dropDialogId = Constants.DocumentReviewTask.ReviewDraftResolutionAssignmentConfirmDialogID.ForwardWithDrop;
@@ -73,6 +79,7 @@ namespace Sungero.RecordManagement.Client
         e.AddError(DocumentReviewTasks.Resources.FindNotDraftResolution);
         e.Cancel();
       }
+      
       // Проверить заполненность текста резолюции.
       if (string.IsNullOrWhiteSpace(_obj.ActiveText))
       {

@@ -12,8 +12,8 @@ namespace Sungero.Contracts
 
     public override void ConvertingFrom(Sungero.Domain.ConvertingFromEventArgs e)
     {
-      base.ConvertingFrom(e);
-      
+      base.ConvertingFrom(e);  
+
       if (Sungero.Docflow.AccountingDocumentBases.Is(_source))
       {
         e.Map(_info.Properties.Number, Sungero.Docflow.AccountingDocumentBases.Info.Properties.RegistrationNumber);
@@ -30,6 +30,9 @@ namespace Sungero.Contracts
         e.Without(Sungero.Docflow.AccountingDocumentBases.Info.Properties.Contact);
         e.Without(Sungero.Docflow.AccountingDocumentBases.Info.Properties.ResponsibleEmployee);
       }
+      
+      // Исключаем проброс LeadingDocument, так как в счете должно заполняться поле Contract.
+      e.Without(Sungero.Docflow.OfficialDocuments.Info.Properties.LeadingDocument);
     }
   }
 

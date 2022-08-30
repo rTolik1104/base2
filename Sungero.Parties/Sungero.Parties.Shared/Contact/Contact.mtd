@@ -402,25 +402,21 @@
         {
           "Name": "name",
           "ParameterType": "global::System.String",
-          "ParameterTypeFullName": "System.String",
-          "Versions": []
+          "ParameterTypeFullName": "System.String"
         },
         {
           "Name": "personShortName",
           "ParameterType": "global::System.String",
-          "ParameterTypeFullName": "System.String",
-          "Versions": []
+          "ParameterTypeFullName": "System.String"
         },
         {
           "Name": "counterparty",
           "ParameterType": "global::Sungero.Parties.ICounterparty",
-          "ParameterTypeFullName": "Sungero.Parties.ICounterparty, Sungero.Domain.Interfaces",
-          "Versions": []
+          "ParameterTypeFullName": "Sungero.Parties.ICounterparty, Sungero.Domain.Interfaces"
         }
       ],
       "ReturnType": "global::System.Linq.IQueryable<global::Sungero.Parties.IContact>",
-      "ReturnTypeFullName": "System.Linq.IQueryable",
-      "Versions": []
+      "ReturnTypeFullName": "System.Linq.IQueryable"
     }
   ],
   "PublicStructures": [],

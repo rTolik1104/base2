@@ -81,7 +81,7 @@ namespace Sungero.FinancialArchiveUI.Server
 
     public virtual IQueryable<Sungero.Docflow.IAccountingDocumentBase> DocumentsWithoutScanDataQuery(IQueryable<Sungero.Docflow.IAccountingDocumentBase> query)
     {
-      // Получить все финансовые документы без сканкопий.
+      // Получить все финансовые документы без скан-копий.
       var scanExtensions = new List<string>() { "pdf", "jpg", "tiff", "png", "tif", "bmp", "jpeg" };
 
       query = query.Where(x => !Contracts.IncomingInvoices.Is(x) && !Contracts.OutgoingInvoices.Is(x))

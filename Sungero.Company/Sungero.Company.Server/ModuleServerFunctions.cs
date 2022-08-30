@@ -667,8 +667,8 @@ namespace Sungero.Company.Server
     /// <summary>
     /// Получить головные Наши организации/подразделения для сотрудника.
     /// </summary>
-    /// <param name="currentEmployeeId">Ид сотрудника.</param>
-    /// <returns>Список Ид реципиентов.</returns>
+    /// <param name="currentEmployeeId">ИД сотрудника.</param>
+    /// <returns>Список ИД реципиентов.</returns>
     [Public]
     public virtual List<int> GetHeadRecipientsByEmployee(int currentEmployeeId)
     {
@@ -677,11 +677,11 @@ namespace Sungero.Company.Server
     }
     
     /// <summary>
-    /// Получить список Ид реципиентов Нашей организации/подразделения.
+    /// Получить список ИД реципиентов Нашей организации/подразделения.
     /// </summary>
-    /// <param name="currentRecipientId">Ид реципиента.</param>
+    /// <param name="currentRecipientId">ИД реципиента.</param>
     /// <param name="recipientTypeGuid">GUID типа сущности.</param>
-    /// <returns>Раскрытый список Ид реципиентов.</returns>
+    /// <returns>Раскрытый список ИД реципиентов.</returns>
     [Public]
     public virtual List<int> GetAllVisisbleRecipientsIds(int currentRecipientId, string recipientTypeGuid)
     {
@@ -714,6 +714,12 @@ namespace Sungero.Company.Server
       return query.Where(x => (Employees.Is(x) || Groups.Is(x)) && !systemRecipientsSid.Contains(x.Sid.Value));
     }
     
+    /// <summary>
+    /// Получить список ИД реципиентов через хранимую процедуру.
+    /// </summary>
+    /// <param name="procedureName">Имя хранимой процедуры.</param>
+    /// <param name="parameters">Параметры хранимой процедуры.</param>
+    /// <returns>Список ИД реципиентов.</returns>
     private List<int> GetRecipientIdsFromStoredProcedure(string procedureName, string parameters)
     {
       var recipientIds = new List<int>();

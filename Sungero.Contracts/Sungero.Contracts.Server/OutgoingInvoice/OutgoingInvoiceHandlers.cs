@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sungero.Contracts.OutgoingInvoice;
@@ -7,7 +7,6 @@ using Sungero.CoreEntities;
 
 namespace Sungero.Contracts
 {
-
   partial class OutgoingInvoiceFilteringServerHandler<T>
   {
     /// <summary>

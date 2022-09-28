@@ -80,25 +80,6 @@
           "RowNumber": 1,
           "RowSpan": 1,
           "Settings": []
-        },
-        {
-          "$type": "Sungero.Metadata.ControlGroupMetadata, Sungero.Metadata",
-          "NameGuid": "431e8185-a398-4e5b-a0de-fbb3925d9139",
-          "Name": "Acquaintance",
-          "GroupType": "WithTitleNoBorder"
-        },
-        {
-          "$type": "Sungero.Metadata.ControlMetadata, Sungero.Metadata",
-          "NameGuid": "5193cfc4-6775-41a3-9327-458a1727ca50",
-          "Name": "AllowAcquaintanceWithSubstitution",
-          "ColumnNumber": 0,
-          "ColumnSpan": 1,
-          "DataBinderTypeName": "Sungero.Presentation.CommonDataBinders.BooleanEditorToBooleanBinder",
-          "ParentGuid": "431e8185-a398-4e5b-a0de-fbb3925d9139",
-          "PropertyGuid": "db82345b-d30f-474b-9c4d-bf87f6108cea",
-          "RowNumber": 0,
-          "RowSpan": 1,
-          "Settings": []
         }
       ]
     }
@@ -164,14 +145,6 @@
       "IsShowedInList": false,
       "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.NumericEditorToIntAndDoubleBinder",
       "PreviousPropertyGuid": "a3267256-59c1-44eb-8d47-b2458d132757"
-    },
-    {
-      "$type": "Sungero.Metadata.BooleanPropertyMetadata, Sungero.Metadata",
-      "NameGuid": "db82345b-d30f-474b-9c4d-bf87f6108cea",
-      "Name": "AllowAcquaintanceBySubstitute",
-      "Code": "AllowAcqBySub",
-      "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.BooleanEditorToBooleanBinder",
-      "PreviousPropertyGuid": "62449f18-0519-4ef6-b58c-f188134c3810"
     }
   ],
   "PublicConstants": [

@@ -24,7 +24,6 @@
       "BackgroundPosition": "Stretch",
       "Versions": []
     },
-    "Tabs": [],
     "Versions": []
   },
   "Dependencies": [
@@ -54,12 +53,12 @@
   "SharedAssemblyName": "Sungero.ExchangeCoreDiadoc.Shared",
   "SharedNamespace": "Sungero.ExchangeCoreDiadoc.Shared",
   "SpecialFolders": [],
-  "Version": "4.4.29.0",
+  "Version": "4.3.25.0",
   "Widgets": [],
   "Versions": [
     {
       "Type": "ModuleMetadata",
-      "Number": 8
+      "Number": 6
     },
     {
       "Type": "DomainApi",

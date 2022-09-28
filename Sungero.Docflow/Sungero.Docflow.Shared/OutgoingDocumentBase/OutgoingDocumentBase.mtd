@@ -580,8 +580,7 @@
     "CreatedServer",
     "BeforeSaveServer",
     "RefreshClient",
-    "CreatingFromServer",
-    "ConvertingFromServer"
+    "CreatingFromServer"
   ],
   "IconName": "OutgoingDocumentBase.ico",
   "IconResourcesKeys": [],

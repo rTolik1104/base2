@@ -20,7 +20,7 @@ namespace Sungero.Docflow
       
       _obj.State.Properties.DeliveryMethodDescription.IsVisible = !string.IsNullOrEmpty(_obj.DeliveryMethodDescription);
       
-      var reworkParameters = Functions.ApprovalTask.GetAssignmentReworkParameters(ApprovalTasks.As(_obj.Task), _obj.StageNumber.Value);
+      var reworkParameters = Functions.ApprovalTask.Remote.GetReworkParameters(ApprovalTasks.As(_obj.Task), _obj.StageNumber.Value);
       _obj.State.Properties.ReworkPerformer.IsEnabled = reworkParameters.AllowChangeReworkPerformer;
       _obj.State.Properties.ReworkPerformer.IsVisible = reworkParameters.AllowViewReworkPerformer;      
     }

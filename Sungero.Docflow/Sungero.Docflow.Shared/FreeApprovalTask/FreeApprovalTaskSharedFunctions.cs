@@ -235,21 +235,64 @@ namespace Sungero.Docflow.Shared
     }
     
     /// <summary>
-    /// Получить список документов, добавленных в группу "Приложения" в заданиях.
+    /// Получить список документов добавленных в группу "Приложения" в заданиях.
     /// </summary>
     /// <returns>Список документов.</returns>
     public virtual List<IElectronicDocument> GetAddedAddendaFromAssignments()
     {
-      return Docflow.Functions.Module.GetAddedAddendaFromAssignments(_obj, Constants.FreeApprovalTask.AddendaGroupGuid);
+      var addedAddenda = new List<IElectronicDocument>();
+      
+      var addendaHistory = Functions.FreeApprovalTask.Remote.GetAttachmentHistoryEntriesByGroupId(_obj, Constants.FreeApprovalTask.AddendaGroupGuid);
+      var addedAttachmentIds = addendaHistory.Added
+        .Select(x => x.DocumentId)
+        .Distinct()
+        .ToList();
+      
+      foreach (var id in addedAttachmentIds)
+      {
+        var lastAddedDate = Functions.Module.GetMaxHistoryOperationDateById(addendaHistory.Added, id);
+        var lastRemovedDate = Functions.Module.GetMaxHistoryOperationDateById(addendaHistory.Removed, id);
+
+        if (lastAddedDate.HasValue && (!lastRemovedDate.HasValue || lastAddedDate.Value > lastRemovedDate.Value))
+        {
+          var attachment = Functions.Module.Remote.GetElectronicDocumentById(id);
+          if (attachment == null)
+            continue;
+          addedAddenda.Add(attachment);
+        }
+      }
+      
+      return addedAddenda;
     }
     
     /// <summary>
-    /// Получить список документов, удаленных из группы "Приложения" в заданиях.
+    /// Получить список документов удаленных из группы "Приложения" в заданиях.
     /// </summary>
     /// <returns>Список документов.</returns>
     public virtual List<IElectronicDocument> GetRemovedAddendaFromAssignments()
     {
-      return Docflow.Functions.Module.GetRemovedAddendaFromAssignments(_obj, Constants.FreeApprovalTask.AddendaGroupGuid);
+      var removedAddenda = new List<IElectronicDocument>();
+      
+      var addendaHistory = Functions.FreeApprovalTask.Remote.GetAttachmentHistoryEntriesByGroupId(_obj, Constants.FreeApprovalTask.AddendaGroupGuid);
+      var removedFromHistoryIds = addendaHistory.Removed
+        .Select(x => x.DocumentId)
+        .Distinct()
+        .ToList();
+      foreach (var id in removedFromHistoryIds)
+      {
+        var lastAddedDate = Functions.Module.GetMaxHistoryOperationDateById(addendaHistory.Added, id);
+        var lastRemovedDate = Functions.Module.GetMaxHistoryOperationDateById(addendaHistory.Removed, id);
+        
+        if (lastRemovedDate.HasValue && (!lastAddedDate.HasValue || lastRemovedDate.Value > lastAddedDate.Value))
+        {
+          var attachment = Functions.Module.Remote.GetElectronicDocumentById(id);
+          if (attachment == null)
+            continue;
+          removedAddenda.Add(attachment);
+        }
+      }
+      
+      return removedAddenda;
     }
     
     #endregion

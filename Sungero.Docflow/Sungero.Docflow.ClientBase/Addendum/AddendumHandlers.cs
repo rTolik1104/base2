@@ -9,6 +9,7 @@ namespace Sungero.Docflow
 {
   partial class AddendumClientHandlers
   {
+
     public override void Refresh(Sungero.Presentation.FormRefreshEventArgs e)
     {
       base.Refresh(e);

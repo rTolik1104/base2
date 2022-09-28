@@ -28,7 +28,6 @@
       "ActionArea": "CardAndCollection",
       "GenerateHandler": true,
       "IsMultiSelectAction": true,
-      "IsVisibleInDesktopClient": false,
       "LargeIconName": "Action_ExportFinancialDocument_large_3641a9970fe343bb8be9265b73b1b5ad.png",
       "SmallIconName": "Action_ExportFinancialDocument_small_3641a9970fe343bb8be9265b73b1b5ad.png",
       "Versions": []
@@ -864,19 +863,6 @@
     }
   ],
   "PublicFunctions": [
-    {
-      "Name": "GetEmailAddressees",
-      "Parameters": [
-        {
-          "Name": "contractualDocument",
-          "ParameterType": "global::Sungero.Contracts.IContractualDocument",
-          "ParameterTypeFullName": "Sungero.Contracts.IContractualDocument, Sungero.Domain.Interfaces"
-        }
-      ],
-      "Placement": "Shared",
-      "ReturnType": "global::System.Collections.Generic.List<global::Sungero.Docflow.Structures.OfficialDocument.IEmailAddressee>",
-      "ReturnTypeFullName": "System.Collections.Generic.List"
-    },
     {
       "Name": "GetRegistrationNumberIgnoreAccessRights",
       "IsRemote": true,

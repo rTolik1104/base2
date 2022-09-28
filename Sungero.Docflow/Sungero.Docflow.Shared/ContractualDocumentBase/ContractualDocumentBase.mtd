@@ -41,6 +41,7 @@
       "Conditions": [
         {
           "NameGuid": "b18dc633-c211-4b81-ab28-a7d1dbd89f81",
+          "IsAncestorMetadata": true,
           "LeftSideGuid": "ec082683-e3d8-4cf2-8cfa-1461ee0e6fc0",
           "RightSide": "Obsolete"
         }
@@ -516,8 +517,7 @@
   ],
   "HandledEvents": [
     "WriteHistoryServer",
-    "ClosingClient",
-    "ConvertingFromServer"
+    "ClosingClient"
   ],
   "IconResourcesKeys": [],
   "IsAbstract": true,
@@ -823,21 +823,6 @@
         "EntityGuid"
       ],
       "Versions": []
-    }
-  ],
-  "PublicFunctions": [
-    {
-      "Name": "HasEmptyRequiredProperties",
-      "Parameters": [
-        {
-          "Name": "contractualDocumentBase",
-          "ParameterType": "global::Sungero.Docflow.IContractualDocumentBase",
-          "ParameterTypeFullName": "Sungero.Docflow.IContractualDocumentBase, Sungero.Domain.Interfaces"
-        }
-      ],
-      "Placement": "Shared",
-      "ReturnType": "global::System.Boolean",
-      "ReturnTypeFullName": "System.Boolean"
     }
   ],
   "PublicStructures": [],

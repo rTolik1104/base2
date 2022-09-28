@@ -25,8 +25,7 @@ namespace Sungero.Docflow
     public virtual IQueryable<T> ApprovalRoleForComparisonFiltering(IQueryable<T> query, Sungero.Domain.PropertyFilteringEventArgs e)
     {
       var multipleMembersRoles = Docflow.Functions.Module.GetMultipleMembersRoles();
-      return query.Where(r => !multipleMembersRoles.Contains(r.Type) && !Equals(r, _obj.ApprovalRole))
-        .Where(r => r.Type != Docflow.ApprovalRoleBase.Type.PrintResp);
+      return query.Where(r => !multipleMembersRoles.Contains(r.Type) && !Equals(r, _obj.ApprovalRole));
     }
   }
 
@@ -40,8 +39,7 @@ namespace Sungero.Docflow
       if (_obj.ConditionType == Docflow.ConditionBase.ConditionType.EmployeeInRole)
         return query.Where(r => multipleMembersRoles.Contains(r.Type) && r.Type != Docflow.ApprovalRoleBase.Type.Approvers);
 
-      return query.Where(r => !multipleMembersRoles.Contains(r.Type) && !Equals(r, _obj.ApprovalRoleForComparison))
-        .Where(r => r.Type != Docflow.ApprovalRoleBase.Type.PrintResp);
+      return query.Where(r => !multipleMembersRoles.Contains(r.Type) && !Equals(r, _obj.ApprovalRoleForComparison));
     }
   }
 

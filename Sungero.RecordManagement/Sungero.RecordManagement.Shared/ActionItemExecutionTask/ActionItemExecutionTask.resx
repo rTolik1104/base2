@@ -529,6 +529,6 @@ If you add or change a supervisor, the selected employee will receive an assignm
     <value>Change deadline</value>
   </data>
   <data name="ChangeCompoundActionItemHistory" xml:space="preserve">
-    <value>Execution deadlines were changed. For more information, see notices and history of the action item parts.</value>
+    <value>Execution deadlines were changed. For more information, see notices and history of the action item parts. </value>
   </data>
 </root>

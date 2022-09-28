@@ -12,7 +12,7 @@ namespace Sungero.Docflow
 
     public override void Showing(Sungero.Presentation.FormShowingEventArgs e)
     {
-      var reworkParameters = Functions.ApprovalTask.GetAssignmentReworkParameters(ApprovalTasks.As(_obj.Task), _obj.StageNumber.Value);
+      var reworkParameters = Functions.ApprovalTask.Remote.GetReworkParameters(ApprovalTasks.As(_obj.Task), _obj.StageNumber.Value);
       var schemeVersionSupportsRework = Functions.ApprovalTask.SchemeVersionSupportsRework(ApprovalTasks.As(_obj.Task));
       if ((!schemeVersionSupportsRework) || (schemeVersionSupportsRework && !reworkParameters.AllowSendToRework))
         e.HideAction(_obj.Info.Actions.ForRevision);
@@ -24,7 +24,7 @@ namespace Sungero.Docflow
         e.AddError(ApprovalTasks.Resources.NoRightsToDocument);
 
       _obj.State.Properties.DeliveryMethodDescription.IsVisible = !string.IsNullOrEmpty(_obj.DeliveryMethodDescription);
-      var reworkParameters = Functions.ApprovalTask.GetAssignmentReworkParameters(ApprovalTasks.As(_obj.Task), _obj.StageNumber.Value);           
+      var reworkParameters = Functions.ApprovalTask.Remote.GetReworkParameters(ApprovalTasks.As(_obj.Task), _obj.StageNumber.Value);           
       var schemeVersionSupportsRework = Functions.ApprovalTask.SchemeVersionSupportsRework(ApprovalTasks.As(_obj.Task));
       _obj.State.Properties.ReworkPerformer.IsEnabled = reworkParameters.AllowChangeReworkPerformer && schemeVersionSupportsRework;
       _obj.State.Properties.ReworkPerformer.IsVisible = reworkParameters.AllowViewReworkPerformer && schemeVersionSupportsRework;

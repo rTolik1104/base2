@@ -9,36 +9,6 @@ namespace Sungero.RecordManagement.Client
 {
   partial class ReviewManagerAssignmentActions
   {
-    public virtual void ForRework(Sungero.Workflow.Client.ExecuteResultActionArgs e)
-    {
-      // Проверить заполненность текста комментария.
-      if (string.IsNullOrWhiteSpace(_obj.ActiveText))
-      {
-        e.AddError(ReviewDraftResolutionAssignments.Resources.NeedTextToRework);
-        return;
-      }
-      
-      // Проверить наличие прав на документ.
-      if (!Functions.DocumentReviewTask.HasDocumentAndCanRead(DocumentReviewTasks.As(_obj.Task)))
-      {
-        e.AddError(DocumentReviewTasks.Resources.NoRightsToDocument);
-        e.Cancel();
-      }
-      
-      // Вывести предупреждение.
-      var dialogID = Constants.DocumentReviewTask.ReviewManagerAssignmentConfirmDialogID.ForRework;
-      if (!Docflow.PublicFunctions.Module.ShowDialogGrantAccessRightsWithConfirmationDialog(_obj, _obj.OtherGroup.All.ToList(),
-                                                                                            null, e.Action, dialogID))
-      {
-        e.Cancel();
-      }
-    }
-
-    public virtual bool CanForRework(Sungero.Workflow.Client.CanExecuteResultActionArgs e)
-    {
-      return _obj.Addressee == null;
-    }
-
     public virtual void Forward(Sungero.Workflow.Client.ExecuteResultActionArgs e)
     {
       if (!Functions.DocumentReviewTask.HasDocumentAndCanRead(DocumentReviewTasks.As(_obj.Task)))
@@ -50,12 +20,6 @@ namespace Sungero.RecordManagement.Client
       if (_obj.Addressee == null)
       {
         e.AddError(DocumentReviewTasks.Resources.CantRedirectWithoutAddressee);
-        e.Cancel();
-      }
-      
-      if (Equals(_obj.Addressee, _obj.Performer))
-      {
-        e.AddError(DocumentReviewTasks.Resources.AddresseeAlreadyExistsFormat(_obj.Addressee.Person.ShortName));
         e.Cancel();
       }
       
@@ -86,26 +50,15 @@ namespace Sungero.RecordManagement.Client
       
       _obj.Save();
       
-      var documentReviewTask = DocumentReviewTasks.As(_obj.Task);
-      var task = Functions.DocumentReviewTask.CreateActionItemExecution(_obj, documentReviewTask, _obj.ActiveText);
+      var documentReview = DocumentReviewTasks.As(_obj.Task);
+      var task = Functions.DocumentReviewTask.CreateActionItemExecution(_obj, documentReview, _obj.ActiveText);
       
-      if (documentReviewTask.Addressee.Status == Sungero.CoreEntities.DatabookEntry.Status.Closed)
-      {
+      if (documentReview.Addressee.Status == Sungero.CoreEntities.DatabookEntry.Status.Closed)
         task.AssignedBy = null;
-      }
       else
-      {
-        task.AssignedBy = Docflow.PublicFunctions.Module.Remote.IsUsersCanBeResolutionAuthor(task.DocumentsGroup.OfficialDocuments.SingleOrDefault(), documentReviewTask.Addressee) ?
-          documentReviewTask.Addressee :
+        task.AssignedBy = Docflow.PublicFunctions.Module.Remote.IsUsersCanBeResolutionAuthor(task.DocumentsGroup.OfficialDocuments.SingleOrDefault(), documentReview.Addressee) ?
+          documentReview.Addressee :
           null;
-      }
-      
-      Functions.Module.SynchronizeAttachmentsToActionItem(_obj.DocumentForReviewGroup.OfficialDocuments.FirstOrDefault(),
-                                                          _obj.AddendaGroup.OfficialDocuments.Select(x => Sungero.Content.ElectronicDocuments.As(x)).ToList(),
-                                                          Functions.DocumentReviewTask.GetAddedAddenda(documentReviewTask),
-                                                          Functions.DocumentReviewTask.GetRemovedAddenda(documentReviewTask),
-                                                          _obj.OtherGroup.All.ToList(),
-                                                          task);
       
       task.ShowModal();
     }

@@ -62,11 +62,7 @@ namespace Sungero.Docflow
     {
       e.DisableUiFiltering = true;
       var document = _obj.DocumentGroup.OfficialDocuments.FirstOrDefault();
-
-      if (Functions.OfficialDocument.SignatorySettingWithAllUsersExist(document))
-        return query;
-      
-      var signatories = Functions.OfficialDocument.GetSignatoriesIds(document);
+      var signatories = Functions.OfficialDocument.GetSignatories(document).Select(s => s.EmployeeId).Distinct().ToList();
       
       return query.Where(s => signatories.Contains(s.Id));
     }
@@ -212,7 +208,6 @@ namespace Sungero.Docflow
         return;
       
       var refreshParameters = Functions.ApprovalTask.GetFullStagesInfoForRefresh(_obj);
-      Functions.ApprovalTask.SetRefreshParams(_obj, (Domain.Shared.IExtendedEntity)_obj, refreshParameters);
       // Могли измениться условия, влияющие на обязательность полей.
       Functions.ApprovalTask.SetRequiredProperties(_obj, refreshParameters);
       

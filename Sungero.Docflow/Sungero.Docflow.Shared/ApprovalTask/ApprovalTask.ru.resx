@@ -475,16 +475,4 @@
   <data name="CantUpdateTask" xml:space="preserve">
     <value>Задача была изменена. Закройте окно подтверждения и прекратите задачу повторно.</value>
   </data>
-  <data name="CommentNeeded" xml:space="preserve">
-    <value>Для согласования с замечаниями необходимо написать комментарий.</value>
-  </data>
-  <data name="EndorsedWithSuggestions" xml:space="preserve">
-    <value>Согласовано с замечаниями.</value>
-  </data>
-  <data name="ApprovalFormEndorsedWithSuggestions" xml:space="preserve">
-    <value>Согласовано с замечаниями</value>
-  </data>
-  <data name="StateViewEndorsedWithSuggestions" xml:space="preserve">
-    <value>Согласовано с замечаниями</value>
-  </data>
 </root>

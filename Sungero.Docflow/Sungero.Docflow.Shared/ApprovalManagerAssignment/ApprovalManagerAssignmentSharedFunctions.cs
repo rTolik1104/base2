@@ -5,7 +5,6 @@ using Sungero.Company;
 using Sungero.Core;
 using Sungero.CoreEntities;
 using Sungero.Docflow.ApprovalManagerAssignment;
-using Sungero.Domain.Shared;
 
 namespace Sungero.Docflow.Shared
 {
@@ -32,15 +31,7 @@ namespace Sungero.Docflow.Shared
         
         if (deliveryMethodIsExchange && document != null)
         {
-          var formParams = ((IExtendedEntity)_obj).Params;
-          bool isIncomingDocument = false;
-          if (formParams.ContainsKey(Constants.ApprovalManagerAssignment.IsIncomingDocument))
-            isIncomingDocument = (bool)formParams[Constants.ApprovalManagerAssignment.IsIncomingDocument];
-          else
-          {
-            isIncomingDocument = Docflow.PublicFunctions.OfficialDocument.Remote.CanSendAnswer(document);
-            formParams[Constants.ApprovalManagerAssignment.IsIncomingDocument] = isIncomingDocument;
-          }
+          var isIncomingDocument = Docflow.PublicFunctions.OfficialDocument.Remote.CanSendAnswer(document);
           var isFormalizedDocument = Docflow.AccountingDocumentBases.Is(document) && Docflow.AccountingDocumentBases.As(document).IsFormalized == true;
           _obj.State.Properties.DeliveryMethod.IsEnabled = !isIncomingDocument;
           _obj.State.Properties.ExchangeService.IsEnabled = !(isIncomingDocument || isFormalizedDocument);

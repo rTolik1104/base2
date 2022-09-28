@@ -574,19 +574,6 @@
           "RowNumber": 1,
           "RowSpan": 1,
           "Settings": []
-        },
-        {
-          "$type": "Sungero.Metadata.ControlMetadata, Sungero.Metadata",
-          "NameGuid": "44d74841-3529-47a9-8e96-a7b3c267ea05",
-          "Name": "AllowApproveWithSuggestions",
-          "ColumnNumber": 0,
-          "ColumnSpan": 1,
-          "DataBinderTypeName": "Sungero.Presentation.CommonDataBinders.BooleanEditorToBooleanBinder",
-          "ParentGuid": "ee6445fd-4d53-4c43-a1bd-e7edf2d737b8",
-          "PropertyGuid": "84170c9e-b47c-48e4-a39c-8f7c0c90a492",
-          "RowNumber": 3,
-          "RowSpan": 1,
-          "Settings": []
         }
       ],
       "Overridden": [
@@ -1077,15 +1064,6 @@
       "IsShowedInList": false,
       "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.BooleanEditorToBooleanBinder",
       "PreviousPropertyGuid": "e9f60bdb-9ea3-471b-b2c2-f09e0f6c32eb"
-    },
-    {
-      "$type": "Sungero.Metadata.BooleanPropertyMetadata, Sungero.Metadata",
-      "NameGuid": "84170c9e-b47c-48e4-a39c-8f7c0c90a492",
-      "Name": "AllowApproveWithSuggestions",
-      "CanBeSearch": false,
-      "Code": "AllowApprWSugg",
-      "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.BooleanEditorToBooleanBinder",
-      "PreviousPropertyGuid": "e6338f48-a30d-4fa4-ae5b-de8e17c808d5"
     }
   ],
   "PublicFunctions": [

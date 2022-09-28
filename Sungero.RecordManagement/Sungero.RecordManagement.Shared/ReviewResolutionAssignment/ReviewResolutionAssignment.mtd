@@ -52,9 +52,7 @@
       "Overridden": [
         "PreviousGroupId",
         "Title",
-        "Description",
-        "IsEnabled",
-        "CanDeleteTaskFamilyAttachments"
+        "Description"
       ],
       "PreviousGroupId": "88ec82fb-d8a8-4a36-a0d8-5c0bf42ff820",
       "Versions": []
@@ -69,8 +67,7 @@
       "Overridden": [
         "PreviousGroupId",
         "Title",
-        "Description",
-        "CanDeleteTaskFamilyAttachments"
+        "Description"
       ],
       "PreviousGroupId": "5320f83f-1364-4035-a7ab-44e457b9b388",
       "Versions": []

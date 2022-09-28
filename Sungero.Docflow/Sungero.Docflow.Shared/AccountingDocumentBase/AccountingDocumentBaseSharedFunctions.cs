@@ -278,21 +278,6 @@ namespace Sungero.Docflow.Shared
       
       var rateValue = Math.Round((double)vatRate.Rate.Value / 100, 2);
       return Math.Round(totalAmount * rateValue / (1 + rateValue), 2);
-    }
-    
-    /// <summary>
-    /// Заполнить свойство "Ведущий документ" в зависимости от типа документа.
-    /// </summary>
-    /// <param name="leadingDocument">Ведущий документ.</param>
-    /// <remarks>Используется при смене типа.</remarks>
-    [Public]
-    public override void FillLeadingDocument(IOfficialDocument leadingDocument)
-    {
-      var contractualDocument = ContractualDocumentBases.As(leadingDocument);
-      if (contractualDocument != null && (_obj.Counterparty == null || Equals(_obj.Counterparty, contractualDocument.Counterparty)))
-        _obj.LeadingDocument = contractualDocument;
-      else
-        _obj.LeadingDocument = null;
-    }
+    }    
   }
 }

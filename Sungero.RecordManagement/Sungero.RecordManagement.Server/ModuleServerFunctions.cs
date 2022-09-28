@@ -23,6 +23,7 @@ namespace Sungero.RecordManagement.Server
 
   public class ModuleFunctions
   {
+    
     #region Виджеты
     
     #region Виджет "Поручения"
@@ -35,22 +36,6 @@ namespace Sungero.RecordManagement.Server
     /// <returns>Список поручений.</returns>
     public IQueryable<Sungero.RecordManagement.IActionItemExecutionTask> GetActionItemsToWidgets(bool onlyOverdue, bool substitution)
     {
-      var users = substitution ? Substitutions.ActiveSubstitutedUsersWithoutSystem.ToList() : new List<IUser>();
-      users.Add(Users.Current);
-      var usersIds = users.Select(u => u.Id).ToList();
-
-      return this.GetActionItemsUnderControl(usersIds, onlyOverdue);
-    }
-    
-    /// <summary>
-    /// Выбрать поручения, которые нужно проконтролировать.
-    /// </summary>
-    /// <param name="usersIds">Список Ид сотрудников.</param>
-    /// <param name="onlyOverdue">Только просроченные.</param>
-    /// <returns>Список поручений.</returns>
-    [Public]
-    public virtual IQueryable<IActionItemExecutionTask> GetActionItemsUnderControl(List<int> usersIds, bool onlyOverdue)
-    {
       var tasks = ActionItemExecutionTasks.GetAll()
         .Where(t => t.Status == Workflow.AssignmentBase.Status.InProcess);
 
@@ -59,7 +44,10 @@ namespace Sungero.RecordManagement.Server
                             (!t.Deadline.Value.HasTime() && t.Deadline.Value < Calendar.UserToday ||
                              t.Deadline.Value.HasTime() && t.Deadline.Value < Calendar.Now));
 
-      return tasks.Where(a => a.Supervisor != null && usersIds.Contains(a.Supervisor.Id));
+      var users = substitution ? Substitutions.ActiveSubstitutedUsersWithoutSystem.ToList() : new List<IUser>();
+      users.Add(Users.Current);
+
+      return tasks.Where(a => users.Contains(a.Supervisor));
     }
 
     #endregion
@@ -509,24 +497,15 @@ namespace Sungero.RecordManagement.Server
       Logger.DebugFormat("Start CreateActionItemExecution, CreateAsSubtask = {0}, Parent assignment (ID={1}).", parentAssignment != null, parentAssignmentId);
       
       var task = parentAssignment == null ? ActionItemExecutionTasks.Create() : ActionItemExecutionTasks.CreateAsSubtask(parentAssignment);
-      var taskId = task != null ? task.Id : -1;
       
-      if (parentAssignment != null)
-      {
-        Logger.DebugFormat("Start SynchronizeAttachmentsToActionItem from parent task (ID={0}).", parentAssignment.Task.Id);
-        Functions.Module.SynchronizeAttachmentsToActionItem(parentAssignment.Task, task);
-      }
-      else
-      {
-        Logger.DebugFormat("Start SynchronizeAttachmentsToActionItem from document (ID={0}).", document.Id);
-        Functions.Module.SynchronizeAttachmentsToActionItem(document,
-                                                            new List<IElectronicDocument>(),
-                                                            new List<int>(),
-                                                            new List<int>(),
-                                                            new List<IEntity>(),
-                                                            task);
-      }
-      Logger.Debug("End SynchronizeAttachmentsToActionItem.");
+      var taskId = task != null ? task.Id : -1;
+      var docId = document != null ? document.Id : -1;
+      Logger.DebugFormat("ActionItemExecutionTask (ID={0}). Add document (ID={1}) to DocumentsGroup.OfficialDocuments.", taskId, docId);
+      task.DocumentsGroup.OfficialDocuments.Add(document);
+      
+      Logger.DebugFormat("ActionItemExecutionTask (ID={0}). Set task Subject.", taskId);
+      task.Subject = Functions.ActionItemExecutionTask.GetActionItemExecutionSubject(task, ActionItemExecutionTasks.Resources.TaskSubject);
+      Logger.DebugFormat("ActionItemExecutionTask (ID={0}). Task Subject = {1}.", taskId, task.Subject);
       
       // Выдать права на изменение группе регистрации. Группа регистрации будет взята из журнала документа.
       var documentRegister = document.DocumentRegister;
@@ -536,9 +515,20 @@ namespace Sungero.RecordManagement.Server
         task.AccessRights.Grant(documentRegister.RegistrationGroup, DefaultAccessRightsTypes.Change);
       }
 
-      Logger.DebugFormat("ActionItemExecutionTask (ID={0}). Set task Subject.", taskId);
-      task.Subject = Functions.ActionItemExecutionTask.GetActionItemExecutionSubject(task, ActionItemExecutionTasks.Resources.TaskSubject);
-      Logger.DebugFormat("ActionItemExecutionTask (ID={0}). Task Subject = {1}.", taskId, task.Subject);
+      Logger.DebugFormat("ActionItemExecutionTask (ID={0}). Synchronize OtherGroup attachments.", taskId);
+      if (parentAssignment == null)
+        return task;
+      
+      var addenda = task.AddendaGroup.All;
+      var resolutions = new List<IEntity>();
+      if (DocumentReviewTasks.Is(parentAssignment.Task.MainTask))
+        resolutions = DocumentReviewTasks.As(parentAssignment.Task.MainTask).ResolutionGroup.All.ToList();
+      var otherAttachments = parentAssignment.Attachments.AsEnumerable();
+      if (parentAssignment.Task != null)
+        otherAttachments = otherAttachments.Concat(parentAssignment.Task.Attachments).Distinct();
+      otherAttachments = otherAttachments.Where(x => !Equals(x, document) && !addenda.Contains(x) && !resolutions.Contains(x));
+      foreach (var attachment in otherAttachments)
+        task.OtherGroup.All.Add(attachment);
       
       Logger.DebugFormat("ActionItemExecutionTask (ID={0}). End CreateActionItemExecution.", taskId);
       return task;
@@ -606,7 +596,7 @@ namespace Sungero.RecordManagement.Server
     public static IAcquaintanceTask CreateAcquaintanceTaskAsSubTask(IOfficialDocument document, IAssignment parentAssignment)
     {
       var newAcqTask = AcquaintanceTasks.CreateAsSubtask(parentAssignment);
-      RecordManagement.PublicFunctions.Module.SynchronizeAttachmentsToAcquaintance(parentAssignment.Task, newAcqTask);
+      newAcqTask.DocumentGroup.OfficialDocuments.Add(document);
       return newAcqTask;
     }
 
@@ -1647,7 +1637,6 @@ namespace Sungero.RecordManagement.Server
       var recordManagementSettings = RecordManagementSettings.Create();
       recordManagementSettings.Name = RecordManagementSettings.Info.LocalizedName;
       recordManagementSettings.AllowActionItemsWithIndefiniteDeadline = false;
-      recordManagementSettings.AllowAcquaintanceBySubstitute = false;
       recordManagementSettings.ControlRelativeDeadlineInDays = 1;
       recordManagementSettings.Save();
     }
@@ -1941,22 +1930,6 @@ namespace Sungero.RecordManagement.Server
         .Select(t => t.Modified)
         .OrderByDescending(t => t)
         .FirstOrDefault();
-    }
-    
-    /// <summary>
-    /// Получить активные задания на ознакомление.
-    /// </summary>
-    /// <param name="assignmentsIds">ИД заданий на ознакомление, записанные в виде строки через запятую.</param>
-    /// <returns>Задания на ознакомление.</returns>
-    public virtual List<IAcquaintanceAssignment> GetActiveAcquaintanceAssignments(string assignmentsIds)
-    {
-      var splittedAssignmentsIds = assignmentsIds.Split(',');
-      var assignments = AcquaintanceAssignments.GetAll()
-        .Where(x => splittedAssignmentsIds.Contains(x.Id.ToString()))
-        .Where(x => x.Status != Workflow.Assignment.Status.Completed &&
-                    x.Status != Workflow.Assignment.Status.Aborted)
-        .ToList();
-      return assignments;
     }
   }
   

@@ -127,7 +127,6 @@
         "Name": "Documents",
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconDocuments_136b5b7b053a4ca18f0579af1fc2dffb.png",
-        "TabId": "0bf75d9d-0906-4fcc-89bf-64a2a57cbb02",
         "Versions": []
       },
       {
@@ -136,7 +135,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconLinkedInformation_ed4c55bfaeea46b2ac7fb1000bcf2423.png",
         "PreviousItemGuid": "136b5b7b-053a-4ca1-8f05-79af1fc2dffb",
-        "TabId": "0bf75d9d-0906-4fcc-89bf-64a2a57cbb02",
         "Versions": []
       },
       {
@@ -145,7 +143,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconInvoices_9617fde5c46a4c849f694ae3c6fa12db.png",
         "PreviousItemGuid": "ed4c55bf-aeea-46b2-ac7f-b1000bcf2423",
-        "TabId": "0bf75d9d-0906-4fcc-89bf-64a2a57cbb02",
         "Versions": []
       },
       {
@@ -154,7 +151,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconSearch_3f655ea9b12d427d97de528d9966cab4.png",
         "PreviousItemGuid": "9617fde5-c46a-4c84-9f69-4ae3c6fa12db",
-        "TabId": "0bf75d9d-0906-4fcc-89bf-64a2a57cbb02",
         "Versions": []
       },
       {
@@ -163,7 +159,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconControl_74a832322ab34786b5d790dd4c6809b4.png",
         "PreviousItemGuid": "3f655ea9-b12d-427d-97de-528d9966cab4",
-        "TabId": "0bf75d9d-0906-4fcc-89bf-64a2a57cbb02",
         "Versions": []
       }
     ],
@@ -172,12 +167,6 @@
       "BackgroundPosition": "Stretch",
       "Versions": []
     },
-    "Tabs": [
-      {
-        "NameGuid": "0bf75d9d-0906-4fcc-89bf-64a2a57cbb02",
-        "Name": "Tab"
-      }
-    ],
     "Versions": []
   },
   "Dependencies": [
@@ -1094,7 +1083,7 @@
       "Versions": []
     }
   ],
-  "Version": "4.4.29.0",
+  "Version": "4.3.25.0",
   "Widgets": [
     {
       "NameGuid": "087ec236-6052-4a73-889f-5ba54d416704",
@@ -1289,7 +1278,7 @@
   "Versions": [
     {
       "Type": "ModuleMetadata",
-      "Number": 8
+      "Number": 6
     },
     {
       "Type": "DomainApi",

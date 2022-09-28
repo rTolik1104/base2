@@ -13,17 +13,7 @@ namespace Sungero.Docflow
     {
       base.ConvertingFrom(e);
       
-      if (Sungero.Docflow.Addendums.Is(_source))
-        e.Without(Sungero.Docflow.AccountingDocumentBases.Info.Properties.LeadingDocument);
-      
       e.Without(Sungero.Docflow.AccountingDocumentBases.Info.Properties.Corrected);
-
-      var counterparty = Exchange.PublicFunctions.ExchangeDocumentInfo.GetDocumentCounterparty(_source, _source.LastVersion);
-      if (counterparty != null)
-      {
-        var accountingDocument = AccountingDocumentBases.As(e.Entity);
-        accountingDocument.Counterparty = counterparty;
-      }
     }
   }
 

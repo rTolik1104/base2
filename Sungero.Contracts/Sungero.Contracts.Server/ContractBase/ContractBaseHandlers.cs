@@ -8,17 +8,6 @@ using Sungero.Docflow;
 
 namespace Sungero.Contracts
 {
-  partial class ContractBaseConvertingFromServerHandler
-  {
-
-    public override void ConvertingFrom(Sungero.Domain.ConvertingFromEventArgs e)
-    {
-      base.ConvertingFrom(e);
-      
-      e.Without(Sungero.Docflow.Addendums.Info.Properties.LeadingDocument);
-    }
-  }
-
   partial class ContractBaseDocumentGroupPropertyFilteringServerHandler<T>
   {
 
@@ -38,7 +27,7 @@ namespace Sungero.Contracts
       base.Created(e);
       if (!_obj.State.IsCopied)
       {
-        _obj.IsAutomaticRenewal = false;
+        _obj.IsAutomaticRenewal = false;        
         var availableDocuments = Docflow.PublicFunctions.DocumentGroupBase.GetAvailableDocumentGroup(_obj.DocumentKind).Where(g => ContractCategories.Is(g));
         if (availableDocuments.Count() == 1)
           _obj.DocumentGroup = availableDocuments.FirstOrDefault();

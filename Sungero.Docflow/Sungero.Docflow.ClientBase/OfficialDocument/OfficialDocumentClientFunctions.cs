@@ -15,7 +15,6 @@ namespace Sungero.Docflow.Client
 {
   partial class OfficialDocumentFunctions
   {
-
     #region Регистрация, нумерация и резервирование
 
     /// <summary>
@@ -445,21 +444,9 @@ namespace Sungero.Docflow.Client
     /// Создание письма с вложенными документами.
     /// </summary>
     /// <param name="attachments">Список вложений.</param>
-    [Obsolete("Используйте метод CreateEmail(email, attachments)")]
     public virtual void CreateEmail(List<IOfficialDocument> attachments)
     {
-      this.CreateEmail(string.Empty, attachments);
-    }
-    
-    /// <summary>
-    /// Создание письма с вложенными документами.
-    /// </summary>
-    /// <param name="email">Почта для отправки письма.</param>
-    /// <param name="attachments">Список вложений.</param>
-    public virtual void CreateEmail(string email, List<IOfficialDocument> attachments)
-    {
       var mail = MailClient.CreateMail();
-      mail.To.Add(email);
       mail.Subject = Sungero.Docflow.OfficialDocuments.Resources.SendByEmailSubjectPrefixFormat(_obj.Name);
       mail.AddAttachment(_obj.LastVersion);
       if (attachments != null)
@@ -572,48 +559,28 @@ namespace Sungero.Docflow.Client
     /// <param name="relatedDocuments">Связанные документы.</param>
     public virtual void SelectRelatedDocumentsAndCreateEmail(List<IOfficialDocument> relatedDocuments)
     {
-      var addressees = Functions.OfficialDocument.GetEmailAddressees(_obj);
-      if ((addressees == null || !addressees.Any()) && (relatedDocuments == null || !relatedDocuments.Any()))
+      if (relatedDocuments == null || relatedDocuments.Count == 0)
       {
         if (!this.HaveLastVersionLocks(new List<IOfficialDocument>() { _obj }))
-          this.CreateEmail(string.Empty, relatedDocuments);
+          this.CreateEmail(relatedDocuments);
         return;
       }
       
-      var dialog = Dialogs.CreateInputDialog(OfficialDocuments.Resources.SendByEmailDialogTitle);
+      var dialog = Dialogs.CreateInputDialog(Sungero.Docflow.OfficialDocuments.Resources.SendByEmailDialogTitle);
       dialog.HelpCode = Constants.OfficialDocument.HelpCode.SendByEmail;
-      dialog.Text = OfficialDocuments.Resources.SendByEmailDialogText;
-      
-      var dialogAddresseeString = dialog.AddString(OfficialDocuments.Resources.SendByEmailDialogAddressees, false);
-      var dialogAddressee = dialog
-        .AddSelect(OfficialDocuments.Resources.SendByEmailDialogAddressees, false)
-        .From(addressees.Select(x => x.Label).ToArray());
-      
-      var mainDocument = dialog.AddSelect(OfficialDocuments.Resources.SendByEmailDialogMainDocument, true, _obj);
+      dialog.Text = Sungero.Docflow.OfficialDocuments.Resources.SendByEmailDialogText;
+      var mainDocument = dialog.AddSelect(Sungero.Docflow.OfficialDocuments.Resources.SendByEmailDialogMainDocument, true, _obj);
       mainDocument.IsEnabled = false;
       var selectedRelations = dialog
-        .AddSelectMany(OfficialDocuments.Resources.SendByEmailDialogAttachments, false, OfficialDocuments.Null)
+        .AddSelectMany(Sungero.Docflow.OfficialDocuments.Resources.SendByEmailDialogAttachments, false, OfficialDocuments.Null)
         .From(relatedDocuments);
-      
-      // Установить доступность и видимость полей диалога.
-      selectedRelations.IsEnabled = relatedDocuments.Any();
-      dialogAddressee.IsVisible = addressees.Any();
-      dialogAddresseeString.IsVisible = !addressees.Any();
       
       if (dialog.Show() == DialogButtons.Ok)
       {
         var allDocs = selectedRelations.Value.ToList();
         allDocs.Add(_obj);
         if (!this.HaveLastVersionLocks(allDocs))
-        {
-          var email = string.Empty;
-          if (!string.IsNullOrWhiteSpace(dialogAddressee.Value))
-            email = addressees.SingleOrDefault(x => dialogAddressee.Value == x.Label).Email;
-          else if (!string.IsNullOrWhiteSpace(dialogAddresseeString.Value))
-            email = dialogAddresseeString.Value;
-          
-          this.CreateEmail(email, selectedRelations.Value.ToList());
-        }
+          this.CreateEmail(selectedRelations.Value.ToList());
       }
     }
     
@@ -639,7 +606,7 @@ namespace Sungero.Docflow.Client
       var dialogHeightSmall = ClientApplication.ApplicationType == ApplicationType.Desktop ? 100 : 80;
       var existingActionItems = PublicFunctions.OfficialDocument.Remote.GetCreatedActionItems(_obj);
       var draftActionItems = existingActionItems.Where(x => x.Status == RecordManagement.ActionItemExecutionTask.Status.Draft &&
-                                                       x.ParentTask == null && x.ParentAssignment == null && x.IsDraftResolution != true).ToList();
+                                                      x.ParentTask == null && x.ParentAssignment == null && x.IsDraftResolution != true).ToList();
       
       var dialogItems = new List<RecordManagement.IActionItemExecutionTask>();
       var startFailedItems = new List<RecordManagement.IActionItemExecutionTask>();
@@ -791,27 +758,27 @@ namespace Sungero.Docflow.Client
                               });
       
       existingLink.SetOnExecute(() =>
-                                {
-                                  // Список "Поручения".
-                                  if (stepExistingItems)
-                                  {
-                                    existingActionItems.ToList().ShowModal();
-                                    existingActionItems = PublicFunctions.OfficialDocument.Remote.GetCreatedActionItems(_obj);
-                                    draftActionItems = existingActionItems
-                                      .Where(m => m.Status == RecordManagement.ActionItemExecutionTask.Status.Draft &&
-                                             m.ParentTask == null && m.ParentAssignment == null && m.IsDraftResolution != true).ToList();
-                                    refresh.Invoke(null);
-                                  }
-                                  else
-                                  {
-                                    // Список "Созданные поручения".
-                                    dialogItems.ToList().ShowModal();
-                                    dialogItems = RefreshDialogItems(dialogItems);
-                                    if (startFailedItems.Count > 0)
-                                      startFailedItems = RefreshDialogItems(startFailedItems);
-                                    refresh.Invoke(null);
-                                  }
-                                });
+                               {
+                                 // Список "Поручения".
+                                 if (stepExistingItems)
+                                 {
+                                   existingActionItems.ToList().ShowModal();
+                                   existingActionItems = PublicFunctions.OfficialDocument.Remote.GetCreatedActionItems(_obj);
+                                   draftActionItems = existingActionItems
+                                     .Where(m => m.Status == RecordManagement.ActionItemExecutionTask.Status.Draft &&
+                                            m.ParentTask == null && m.ParentAssignment == null && m.IsDraftResolution != true).ToList();
+                                   refresh.Invoke(null);
+                                 }
+                                 else
+                                 {
+                                   // Список "Созданные поручения".
+                                   dialogItems.ToList().ShowModal();
+                                   dialogItems = RefreshDialogItems(dialogItems);
+                                   if (startFailedItems.Count > 0)
+                                     startFailedItems = RefreshDialogItems(startFailedItems);
+                                   refresh.Invoke(null);
+                                 }
+                               });
       
       dialog.SetOnButtonClick(x =>
                               {
@@ -882,12 +849,6 @@ namespace Sungero.Docflow.Client
       dialog.Show();
     }
     
-    /// <summary>
-    /// Создать поручения по документу.
-    /// </summary>
-    /// <param name="newActionItems">Созданные поручения.</param>
-    /// <param name="e">Аргументы действия.</param>
-    /// <returns>True, если поручения созданы успешно. False, если не создано ни одного или были ошибки.</returns>
     private bool TryCreateActionItemsFromDocument(List<RecordManagement.IActionItemExecutionTask> newActionItems,
                                                   IValidationArgs e)
     {
@@ -937,22 +898,12 @@ namespace Sungero.Docflow.Client
       return Functions.OfficialDocument.Remote.GetActionItemsExecutionTasks(items.Select(t => t.Id).ToList());
     }
     
-    /// <summary>
-    /// Выбрать из списка недозаполненные поручения.
-    /// </summary>
-    /// <param name="items">Список поручений.</param>
-    /// <returns>Недозаполненные поручения.</returns>
     private static IEnumerable<RecordManagement.IActionItemExecutionTask> NeedFillPropertiesItems(List<RecordManagement.IActionItemExecutionTask> items)
     {
       return items.Where(t => t.IsCompoundActionItem != true && t.Status == RecordManagement.ActionItemExecutionTask.Status.Draft &&
                          (t.Assignee == null || (t.Deadline == null && t.HasIndefiniteDeadline != true) || string.IsNullOrWhiteSpace(t.ActionItem)));
     }
     
-    /// <summary>
-    /// Выбрать из списка корректно заполненные поручения.
-    /// </summary>
-    /// <param name="items">Список поручений.</param>
-    /// <returns>Корректно заполненные поручения.</returns>
     private static IEnumerable<RecordManagement.IActionItemExecutionTask> NoNeedFillPropertiesItems(List<RecordManagement.IActionItemExecutionTask> items)
     {
       return items.Where(t => t.IsCompoundActionItem != true && t.Status == RecordManagement.ActionItemExecutionTask.Status.Draft &&
@@ -1603,16 +1554,7 @@ namespace Sungero.Docflow.Client
     /// <returns>Список типов документов, доступных для смены типа.</returns>
     public virtual List<Domain.Shared.IEntityInfo> GetTypesAvailableForChange()
     {
-      return new List<Domain.Shared.IEntityInfo>() { Docflow.SimpleDocuments.Info };
-    }
-    
-    /// <summary>
-    /// Дополнительное условие доступности действия "Сменить тип".
-    /// </summary>
-    /// <returns>True - если действие "Сменить тип" доступно, иначе - false.</returns>
-    public virtual bool CanChangeDocumentType()
-    {
-      return _obj.ExchangeState != null;
+      return new List<Domain.Shared.IEntityInfo>();
     }
     
     #endregion
@@ -1632,16 +1574,6 @@ namespace Sungero.Docflow.Client
     /// <returns>True, если в заданиях нужно показывать сводку по документу.</returns>
     [Public]
     public virtual bool NeedViewDocumentSummary()
-    {
-      return false;
-    }
-    
-    /// <summary>
-    /// Пометить документ как устаревший.
-    /// </summary>
-    /// <returns>True, если документ надо пометить как устаревший, иначе False.</returns>
-    /// <remarks>Используется для отметки документа устаревшим в диалоге запроса причины прекращения задачи согласования.</remarks>
-    public virtual bool MarkDocumentAsObsolete()
     {
       return false;
     }

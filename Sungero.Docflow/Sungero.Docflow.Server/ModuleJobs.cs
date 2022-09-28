@@ -7,6 +7,7 @@ namespace Sungero.Docflow.Server
 {
   public class ModuleJobs
   {
+
     /// <summary>
     /// Перемещение содержимого документа в хранилище.
     /// </summary>
@@ -481,24 +482,9 @@ namespace Sungero.Docflow.Server
       }
     }
 
-    /// <summary>
-    /// Рассылка электронных писем о заданиях.
-    /// </summary>
     public virtual void SendMailNotification()
     {
-      Logger.Debug("SendMailNotification. Start.");
       Functions.Module.SendMailNotification();
-      Logger.Debug("SendMailNotification. Done.");
-    }
-    
-    /// <summary>
-    /// Рассылка электронных писем со сводкой о заданиях.
-    /// </summary>
-    public virtual void SendSummaryMailNotifications()
-    {
-      Functions.Module.SummaryMailLogDebug("Start job SendSummaryMailNotifications.");
-      Functions.Module.SendSummaryMailNotification();
-      Functions.Module.SummaryMailLogDebug("End job SendSummaryMailNotifications.");
     }
     
   }

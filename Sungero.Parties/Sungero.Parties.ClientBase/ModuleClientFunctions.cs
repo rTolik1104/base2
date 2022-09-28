@@ -616,8 +616,9 @@ namespace Sungero.Parties.Client
       
       // Получить ссылку на регистрацию в сервисе.
       var registrationUrl = string.Empty;
-
-      if (box.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Diadoc)
+      if (box.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Synerdocs)
+        registrationUrl = Resources.WizardMailRegisterSynerdocs;
+      else if (box.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Diadoc)
         registrationUrl = Resources.WizardMailRegisterDiadoc;
       else
         registrationUrl = box.ExchangeService.LogonUrl;

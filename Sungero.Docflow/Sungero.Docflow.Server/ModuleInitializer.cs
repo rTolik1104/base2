@@ -130,7 +130,6 @@ namespace Sungero.Docflow.Server
       InitializeExchangeServiceUsersRole();
       CreateReportsTables();
       AddCompanyDataServiceParam();
-      AddSummaryMailNotificationsBunchCountParam();
       
       // Конвертация очереди выдачи прав на документы.
       if (PublicFunctions.Module.GetGrantRightMode() == string.Empty)
@@ -149,10 +148,10 @@ namespace Sungero.Docflow.Server
       ConvertDocumentTemplates();
     }
     
-    #region Выдача прав на спец. папки
+    #region Выдача прав на спец.папки
     
     /// <summary>
-    /// Выдать права на спец. папки модуля.
+    /// Выдать права на спец.папки модуля.
     /// </summary>
     /// <param name="allUsers">Группа "Все пользователи".</param>
     public static void GrantRightsOnFolders(IRole allUsers)
@@ -2214,19 +2213,6 @@ namespace Sungero.Docflow.Server
         Logger.Debug(string.Format("Convert template {0} OK!", documentTemplate.Name));
       }
     }
-    
-    #region Добавление в таблицу параметров значения количества писем в пакете
-    
-    public static void AddSummaryMailNotificationsBunchCountParam()
-    {
-      InitializationLogger.Debug("Init: Adding summary mail notifications bunch count.");
-      
-      if (Docflow.PublicFunctions.Module.GetDocflowParamsValue(Constants.Module.SummaryMailNotificationsBunchCountParamName) == null)
-        Docflow.PublicFunctions.Module.InsertOrUpdateDocflowParam(Constants.Module.SummaryMailNotificationsBunchCountParamName,
-                                                                  Constants.Module.SummaryMailNotificationsBunchCount.ToString());
-    }
-    
-    #endregion
     
     #region Интеллектуальная обработка
     

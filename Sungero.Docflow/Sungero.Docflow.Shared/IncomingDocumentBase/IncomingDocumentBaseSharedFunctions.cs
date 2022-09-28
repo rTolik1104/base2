@@ -94,21 +94,5 @@ namespace Sungero.Docflow.Shared
       using (TenantInfo.Culture.SwitchTo())
         _obj.ManyAddresseesPlaceholder = OfficialDocuments.Resources.ManyAddresseesPlaceholder;
     }
-    
-    /// <summary>
-    /// Получить описание для диалога отмены регистрации.
-    /// </summary>
-    /// <param name="settingType">Тип настройки.</param>
-    /// <returns>Описание.</returns>
-    public override string GetCancelRegistrationDialogDescription(Enumeration? settingType)
-    {
-      if (settingType == Docflow.RegistrationSetting.SettingType.Reservation)
-        return Docflow.Resources.CancelReservationDescription;
-      
-      if (settingType == Docflow.RegistrationSetting.SettingType.Numeration)
-        return IncomingDocumentBases.Resources.CancelNumberingDescription;
-      
-      return IncomingDocumentBases.Resources.CancelRegistrationDescription;
-    }
   }
 }

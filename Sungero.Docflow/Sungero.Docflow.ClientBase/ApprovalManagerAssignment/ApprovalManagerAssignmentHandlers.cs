@@ -27,11 +27,11 @@ namespace Sungero.Docflow
 
     public override void Showing(Sungero.Presentation.FormShowingEventArgs e)
     {
-      Functions.ApprovalManagerAssignment.Remote.CreateParamsCache(_obj);
-      
-      bool hideActionWithSuggestions = false;
-      if (e.Params.TryGetValue(Constants.ApprovalManagerAssignment.HideActionWithSuggestionsParamName, out hideActionWithSuggestions) && hideActionWithSuggestions)
-        e.HideAction(_obj.Info.Actions.WithSuggestions);
+      // Нельзя изменить состав доп. согласующих, если их этап идет до этапа руководителя.
+      var canAddApprovers = Functions.ApprovalTask.Remote.CheckSequenceOfCoupleStages(ApprovalTasks.As(_obj.Task),
+                                                                                      ApprovalStage.StageType.Manager,
+                                                                                      ApprovalStage.StageType.Approvers, true);
+      e.Params.AddOrUpdate(Constants.ApprovalManagerAssignment.CanAddApprovers, canAddApprovers);
     }
 
     public virtual void AddresseeValueInput(Sungero.Docflow.Client.ApprovalManagerAssignmentAddresseeValueInputEventArgs e)
@@ -53,7 +53,7 @@ namespace Sungero.Docflow
     {
       var document = _obj.DocumentGroup.OfficialDocuments.FirstOrDefault();
 
-      var refreshParameters = Functions.ApprovalTask.GetOrUpdateAssignmentRefreshParams(ApprovalTasks.As(_obj.Task), _obj, false);
+      var refreshParameters = Functions.ApprovalTask.Remote.GetFullStagesInfoForRefresh(ApprovalTasks.As(_obj.Task));
       _obj.State.Properties.Addressee.IsVisible = refreshParameters.AddresseeIsVisible;
       _obj.State.Properties.Addressee.IsRequired = refreshParameters.AddresseeIsRequired;
       
@@ -91,7 +91,7 @@ namespace Sungero.Docflow
       if (e.Params.TryGetValue(Constants.ApprovalManagerAssignment.CanAddApprovers, out canAddApprovers))
         _obj.State.Properties.AddApprovers.IsEnabled = canAddApprovers;
       
-      var reworkParameters = Functions.ApprovalTask.GetAssignmentReworkParameters(ApprovalTasks.As(_obj.Task), _obj.StageNumber.Value);     
+      var reworkParameters = Functions.ApprovalTask.Remote.GetReworkParameters(ApprovalTasks.As(_obj.Task), _obj.StageNumber.Value);     
       _obj.State.Properties.ReworkPerformer.IsEnabled = reworkParameters.AllowChangeReworkPerformer;
       _obj.State.Properties.ReworkPerformer.IsVisible = reworkParameters.AllowViewReworkPerformer;
     }

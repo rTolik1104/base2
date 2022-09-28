@@ -5,6 +5,15 @@
   "AccessRightsMode": "Both",
   "Actions": [
     {
+      "NameGuid": "51235fd5-4441-48cc-a6f1-3e5af16d5a64",
+      "Name": "ChangeDocumentType",
+      "GenerateHandler": true,
+      "IsAncestorMetadata": true,
+      "Overridden": [
+        "GenerateHandler"
+      ]
+    },
+    {
       "NameGuid": "60d2879c-d6f5-4ac5-b524-22aef818825e",
       "Name": "ShowDuplicates",
       "ActionArea": "Card",
@@ -1878,52 +1887,6 @@
       ],
       "PreviousPropertyGuid": "c30d80ad-f9f0-4b10-a2e1-b4d57e40604b",
       "Versions": []
-    }
-  ],
-  "PublicFunctions": [
-    {
-      "Name": "ChangeDocumentType",
-      "Parameters": [
-        {
-          "Name": "contractStatement",
-          "ParameterType": "global::Sungero.FinancialArchive.IContractStatement",
-          "ParameterTypeFullName": "Sungero.FinancialArchive.IContractStatement, Sungero.Domain.Interfaces"
-        },
-        {
-          "Name": "types",
-          "ParameterType": "global::System.Collections.Generic.List<Domain.Shared.IEntityInfo>",
-          "ParameterTypeFullName": "System.Collections.Generic.List"
-        }
-      ],
-      "Placement": "Client",
-      "ReturnType": "global::Sungero.Docflow.IOfficialDocument",
-      "ReturnTypeFullName": "Sungero.Docflow.IOfficialDocument, Sungero.Domain.Interfaces"
-    },
-    {
-      "Name": "GetEmailAddressees",
-      "Parameters": [
-        {
-          "Name": "contractStatement",
-          "ParameterType": "global::Sungero.FinancialArchive.IContractStatement",
-          "ParameterTypeFullName": "Sungero.FinancialArchive.IContractStatement, Sungero.Domain.Interfaces"
-        }
-      ],
-      "Placement": "Shared",
-      "ReturnType": "global::System.Collections.Generic.List<global::Sungero.Docflow.Structures.OfficialDocument.IEmailAddressee>",
-      "ReturnTypeFullName": "System.Collections.Generic.List"
-    },
-    {
-      "Name": "IsVerificationModeSupported",
-      "Parameters": [
-        {
-          "Name": "contractStatement",
-          "ParameterType": "global::Sungero.FinancialArchive.IContractStatement",
-          "ParameterTypeFullName": "Sungero.FinancialArchive.IContractStatement, Sungero.Domain.Interfaces"
-        }
-      ],
-      "Placement": "Shared",
-      "ReturnType": "global::System.Boolean",
-      "ReturnTypeFullName": "System.Boolean"
     }
   ],
   "PublicStructures": [],

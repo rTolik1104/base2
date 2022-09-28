@@ -80,43 +80,43 @@ namespace Sungero.Docflow.Server
     public static List<IDocumentRegister> GetDocumentRegistersByParams(IDocumentKind kind, IBusinessUnit unit, IDepartment department,
                                                                        Enumeration? settingType, bool forCurrentUser)
     {
-      // Журналы, указанные в активных настройках регистрации с типом "Регистрация".
-      var documentRegistersWithSettings = RegistrationSettings
-        .GetAll(s => s.Status == CoreEntities.DatabookEntry.Status.Active &&
-                s.SettingType == Docflow.RegistrationSetting.SettingType.Registration)
-        .Select(s => s.DocumentRegister);
-      
-      var documentRegisters = Functions.RegistrationSetting
-        .GetAvailableSettingsByParams(Docflow.RegistrationSetting.SettingType.Registration, unit, kind, department)
-        .Select(s => s.DocumentRegister);
-
-      // Все журналы, кроме журналов из настроек с типом "Регистрация" не подходящих по параметрам.
-      var result = Functions.DocumentRegister.GetFilteredDocumentRegisters(kind.DocumentFlow.Value, true, forCurrentUser)
-        .Where(dr => !documentRegistersWithSettings.Any(d => Equals(d, dr)) || documentRegisters.Any(d => Equals(d, dr)))
+      // Результат сразу замыкается в ToList, так как иначе не транслируется в SQL, если вызывать на сервере.
+      // Все журналы, указанные в настройках регистрации.
+      var documentRegistersWithRegistrationSettings = RegistrationSettings
+        .GetAllCached(s => s.Status == CoreEntities.DatabookEntry.Status.Active &&
+                      s.SettingType == Docflow.RegistrationSetting.SettingType.Registration)
+        .Select(s => s.DocumentRegister)
         .ToList();
-
+      
+      // Все журналы, кроме указанных в настройках регистрации.
+      var documentRegistersWithoutRegistrationSettings = DocumentRegisters.GetAll()
+        .Where(l => !documentRegistersWithRegistrationSettings.Contains(l));
+      
+      // Журналы, подходящие по непротиворечивым настройкам.
+      var documentRegistersBySettings = Functions.RegistrationSetting
+        .GetAvailableSettingsByParams(settingType, unit, kind, department)
+        .Select(s => s.DocumentRegister)
+        .ToList();
+      
+      // Журналы настроек регистрации, подходящих для текущего документа.
+      var documentRegistersByRegistrationSettings = Functions.RegistrationSetting
+        .GetAvailableSettingsByParams(Docflow.RegistrationSetting.SettingType.Registration, unit, kind, department)
+        .Select(s => s.DocumentRegister)
+        .ToList();
+      
+      // Получить все журналы по настройкам.
+      documentRegistersByRegistrationSettings.AddRange(documentRegistersBySettings);
+      
+      // Фильтруем журналы по документопотоку. Только журналы регистрации.
+      var result = Functions.DocumentRegister.GetFilteredDocumentRegisters(kind.DocumentFlow.Value, true, forCurrentUser)
+        .Where(a => documentRegistersByRegistrationSettings.Contains(a) || documentRegistersWithoutRegistrationSettings.Contains(a)).ToList();
+      
       // Для резервирования добавить настройки резервирования в обход проверки доступности журнала группе регистрации.
       // Делопроизводитель должен иметь возможность резервировать номер в документе, который не сможет зарегистрировать.
       if (settingType == Docflow.RegistrationSetting.SettingType.Reservation)
-        result.AddRange(Functions.Module.GetAvailableRegistrationSettings(settingType, unit, kind, department).Select(r => r.DocumentRegister).ToList());
-      
+        result.AddRange(documentRegistersBySettings);
+
       return result.Distinct().ToList();
-    }
-    
-    /// <summary>
-    /// Имеются ли подходящие журналы регистрации\резервирования по параметрам.
-    /// </summary>
-    /// <param name="kind">Вид.</param>
-    /// <param name="unit">НОР.</param>
-    /// <param name="department">Подразделение.</param>
-    /// <param name="settingType">Тип нумерации.</param>
-    /// <param name="forCurrentUser">Для текущего пользователя.</param>
-    /// <returns>True - если есть подходящие журналы.</returns>
-    [Public, Remote(IsPure = true)]
-    public static bool HasDocumentRegistersByParams(IDocumentKind kind, IBusinessUnit unit, IDepartment department,
-                                                    Enumeration? settingType, bool forCurrentUser)
-    {
-      return Functions.DocumentRegister.GetDocumentRegistersByParams(kind, unit, department, settingType, forCurrentUser).Any();
     }
 
     /// <summary>

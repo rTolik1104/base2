@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Xml.Linq;
 using CommonLibrary;
 using NpoComputer.DCX.Common;
 using Sungero.Company;
@@ -121,14 +119,14 @@ namespace Sungero.Exchange.Server
             var transactionQueueItems = ExchangeCore.MessageQueueItems.GetAll(q => queueItemsIds.Contains(q.Id)).ToList();
             if (this.ProcessMessage(message, transactionQueueItems, client))
             {
-              var queueItem = transactionQueueItems.Single(x => x.ExternalId == message.ServiceMessageId);
+              var queueItem = queueItems.Single(x => x.ExternalId == message.ServiceMessageId);
               queueItem.ProcessingStatus = ExchangeCore.MessageQueueItem.ProcessingStatus.Processed;
               queueItem.Save();
               this.LogDebugFormat(message, "Message processed successfully.");
             }
             else
             {
-              var queueItem = transactionQueueItems.SingleOrDefault(x => x.ExternalId == message.ServiceMessageId);
+              var queueItem = queueItems.SingleOrDefault(x => x.ExternalId == message.ServiceMessageId);
               if (queueItem != null)
               {
                 queueItem.Retries += 1;
@@ -213,12 +211,7 @@ namespace Sungero.Exchange.Server
       }
       
       if (message.HasErrors)
-      {
-        var note = string.Format("{0}{1}{2}", queueItem.Note, Environment.NewLine, message.ErrorText);
-        if (note.Length > 1000)
-          note = note.Substring(0, 1000);
-        queueItem.Note = note;
-      }
+        queueItem.Note += string.Format("{0}{1}", Environment.NewLine, message.ErrorText);
       
       foreach (var primary in message.PrimaryDocuments)
       {
@@ -578,9 +571,8 @@ namespace Sungero.Exchange.Server
         processResult = this.ProcessNoteReceipt(message, queueItem, sender, isIncoming, businessUnitBox);
       
       // Подпись неформализованного документа.
-      if (message.PrimaryDocuments.Any(x => x.SignStatus == NpoComputer.DCX.Common.SignStatus.Signed &&
-                                       x.DocumentType == NpoComputer.DCX.Common.DocumentType.Nonformalized &&
-                                       message.Signatures.Any(s => s.DocumentId == x.ServiceEntityId)) && processResult)
+      // BUG 77793 Zamerov, проверка наличия основных документов тут из-за бага, чтобы не копились подписи, которые мы всё равно не обработаем.
+      if ((!message.ReglamentDocuments.Any() || message.ReglamentDocuments.Any(r => r.DocumentType == ReglamentDocumentType.NotificationReceipt)) && message.PrimaryDocuments.Any() && processResult)
         processResult = this.ProcessNonformalizedSign(message, queueItem, client, box, sender, isIncoming, historyOperation, historyComment) && processResult;
 
       // Отказ в подписании.
@@ -603,10 +595,8 @@ namespace Sungero.Exchange.Server
       if (message.ReglamentDocuments.Any(r => r.DocumentType == ReglamentDocumentType.InvoiceConfirmation) && processResult)
         processResult = this.ProcessInvoiceConfirmation(message, queueItem, organizationId, businessUnitBox) && processResult;
       
-      // Титулы формализованных документов и подпись на СЧФ СБИС.
-      if ((message.ReglamentDocuments.Any(x => this.GetSupportedReglamentDocumentTypes().Contains(x.DocumentType)) ||
-           (message.PrimaryDocuments.Any(d => d.DocumentType == NpoComputer.DCX.Common.DocumentType.GeneralTransferSchfSeller) &&
-            businessUnitBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis)) && processResult)
+      // Титулы формализованных документов.
+      if (message.ReglamentDocuments.Any(x => this.GetSupportedReglamentDocumentTypes().Contains(x.DocumentType)) && processResult)
         processResult = this.ProcessFormalizedSign(message, queueItem, queueItems, isIncoming, box, historyOperation, historyComment) && processResult;
       
       // Если все регламентные документы в сообщении не поддерживаются - пропускаем и удаляем из очереди.
@@ -2451,115 +2441,66 @@ namespace Sungero.Exchange.Server
       // Обработка титулов покупателей.
       foreach (var document in message.ReglamentDocuments.Where(x => this.GetSupportedReglamentDocumentTypes().Contains(x.DocumentType)))
       {
-        if (!this.ProcessFormalizedTitlesAndSigns(message, queueItem, queueItems, isIncoming, box, historyOperation, historyComment,
-                                                  document.RootServiceEntityId, document.ServiceEntityId, document.Content))
-          return false;
-      }
-      
-      // Загрузка ответной подписи на СЧФ для СБИС.
-      if (queueItem.RootBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis)
-      {
-        foreach (var document in message.PrimaryDocuments.Where(d => d.SignStatus == NpoComputer.DCX.Common.SignStatus.Signed && d.DocumentType == NpoComputer.DCX.Common.DocumentType.GeneralTransferSchfSeller))
+        var doc = Functions.ExchangeDocumentInfo.GetExDocumentInfoByExternalId(box, document.RootServiceEntityId);
+        if (doc == null)
         {
-          if (!this.ProcessFormalizedTitlesAndSigns(message, queueItem, queueItems, isIncoming, box, historyOperation, historyComment,
-                                                    document.ServiceEntityId, document.ServiceEntityId, null))
-            return false;
-        }
-      }
-      
-      return true;
-    }
-    
-    /// <summary>
-    /// Обработать пришедшие титулы к формализованным документам и ответные подписи на СЧФ из СБИСа.
-    /// </summary>
-    /// <param name="message">Сообщение.</param>
-    /// <param name="queueItem">Элемент очереди.</param>
-    /// <param name="queueItems">Все элементы очереди.</param>
-    /// <param name="isIncoming">Признак входящего сообщения.</param>
-    /// <param name="box">Абонентский ящик.</param>
-    /// <param name="historyOperation">Операция истории - мы подписали или КА подписал.</param>
-    /// <param name="historyComment">Комментарий к операции истории.</param>
-    /// <param name="rootServiceDocumentId">Ид родительского документа на сервисе.</param>
-    /// <param name="serviceDocumentId">Ид документа на сервисе.</param>
-    /// <param name="reglamentDocumentContent">Контент титула.</param>
-    /// <returns>Признак успешности обработки сообщения.</returns>
-    protected virtual bool ProcessFormalizedTitlesAndSigns(IMessage message, IMessageQueueItem queueItem, List<IMessageQueueItem> queueItems,
-                                                           bool isIncoming, IBoxBase box, Enumeration historyOperation, string historyComment,
-                                                           string rootServiceDocumentId, string serviceDocumentId, byte[] reglamentDocumentContent)
-    {
-      var doc = Functions.ExchangeDocumentInfo.GetExDocumentInfoByExternalId(box, rootServiceDocumentId);
-      if (doc == null)
-      {
-        // Если документ был аннулирован, то титул нам больше не нужен. Иначе документ ещё может загрузиться.
-        var documentInService = message.PrimaryDocuments.FirstOrDefault(d => d.ServiceEntityId == rootServiceDocumentId);
-        if (documentInService != null && documentInService.RevocationStatus == RevocationStatus.RevocationAccepted)
-          return true;
-        
-        if (documentInService != null && documentInService.BuyerAcceptanceStatus == NpoComputer.DCX.Common.BuyerAcceptanceStatus.Rejected)
-          return true;
-        
-        // Если документ ещё в очереди, обработаем позже.
-        if (queueItems.Any(m => !Equals(m, queueItem) && m.Documents.Any(d => d.ExternalId == rootServiceDocumentId &&
-                                                                         d.Type == ExchangeCore.MessageQueueItemDocuments.Type.Primary)))
-        {
-          this.LogDebugFormat(queueItem, "Document not found for received signature: ServiceEntityId: '{0}', RootServiceEntityId '{1}'.",
-                              serviceDocumentId, rootServiceDocumentId);
-          return false;
-        }
-        
-        return true;
-      }
-      
-      // Документ был подписан в RX, заканчиваем обработку.
-      if (doc.OutgoingStatus == Exchange.ExchangeDocumentInfo.OutgoingStatus.Signed ||
-          doc.OutgoingStatus == Exchange.ExchangeDocumentInfo.OutgoingStatus.Rejected && doc.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Rejected)
-        return true;
-      
-      var sign = message.Signatures.FirstOrDefault(x => x.DocumentId == serviceDocumentId);
-      if (sign == null)
-      {
-        this.LogDebugFormat(message, queueItem, box, "Message not contain a signature for document with id = '{0}'.", serviceDocumentId);
-        return false;
-      }
-      
-      var primaryDocument = message.PrimaryDocuments.FirstOrDefault(d => d.ServiceEntityId == rootServiceDocumentId);
-      if (primaryDocument != null && primaryDocument.BuyerAcceptanceStatus != null)
-        doc.BuyerAcceptanceStatus = this.GetBuyerAcceptanceStatus(primaryDocument);
-      
-      var x509certificate = Docflow.PublicFunctions.Module.GetSignatureCertificateInfo(sign.Content);
-      var signatoryInfo = Docflow.PublicFunctions.Module.GetCertificateSignatoryName(x509certificate.SubjectInfo);
-      
-      if (doc.Document != null)
-      {
-        var formalizedDocument = Sungero.Docflow.AccountingDocumentBases.As(doc.Document);
-        if (formalizedDocument != null && reglamentDocumentContent != null)
-        {
-          using (var memory = new System.IO.MemoryStream(reglamentDocumentContent))
+          // Если документ был аннулирован, то титул нам больше не нужен. Иначе документ ещё может загрузиться.
+          var documentInService = message.PrimaryDocuments.FirstOrDefault(d => d.ServiceEntityId == document.RootServiceEntityId);
+          if (documentInService != null && documentInService.RevocationStatus == RevocationStatus.RevocationAccepted)
+            continue;
+          
+          // Если документ ещё в очереди, обработаем позже.
+          if (queueItems.Any(m => !Equals(m, queueItem) && m.Documents.Any(d => d.ExternalId == document.RootServiceEntityId &&
+                                                                           d.Type == ExchangeCore.MessageQueueItemDocuments.Type.Primary)))
           {
-            formalizedDocument.CreateVersion();
-            var version = formalizedDocument.LastVersion;
-            version.AssociatedApplication = GetOrCreateAssociatedApplicationByDocumentName("file.xml");
-            version.Note = FinancialArchive.Resources.BuyerTitleVersionNote;
-            formalizedDocument.BuyerTitleId = version.Id;
-            version.Body.Write(memory);
-            formalizedDocument.Save();
+            this.LogDebugFormat(message, document, "Document not found for received buyer title: RootServiceEntityId {0}.", document.RootServiceEntityId);
+            return false;
           }
+          
+          continue;
         }
-
-        this.SignDocument(doc, sign, doc.Document.LastVersion, signatoryInfo, message.TimeStamp);
-        if (formalizedDocument != null)
+        
+        // Документ был подписан в RX, заканчиваем обработку.
+        if (doc.OutgoingStatus == Exchange.ExchangeDocumentInfo.OutgoingStatus.Signed)
+          continue;
+        
+        var sign = message.Signatures.FirstOrDefault(x => x.DocumentId == document.ServiceEntityId);
+        if (sign == null)
         {
-          var lastSignature = this.GetLastDocumentSignature(formalizedDocument);
-          formalizedDocument.BuyerSignatureId = lastSignature.Id;
+          this.LogDebugFormat(message, queueItem, box, "Message not contain a signature.");
+          return false;
         }
         
-        var sentVersion = doc.Document.Versions.FirstOrDefault(x => x.Id == doc.VersionId);
+        var x509certificate = Docflow.PublicFunctions.Module.GetSignatureCertificateInfo(sign.Content);
+        var signatoryInfo = Docflow.PublicFunctions.Module.GetCertificateSignatoryName(x509certificate.SubjectInfo);
         
-        if (doc.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Rejected)
-          this.ProcessSharedReject(doc, doc.Document, isIncoming, box, sign.Content, historyOperation, historyComment, string.Empty, string.Empty, true);
-        else
+        if (doc.Document != null)
+        {
+          var formalizedDocument = Sungero.Docflow.AccountingDocumentBases.As(doc.Document);
+          if (formalizedDocument != null)
+          {
+            using (var memory = new System.IO.MemoryStream(document.Content))
+            {
+              formalizedDocument.CreateVersion();
+              var version = formalizedDocument.LastVersion;
+              version.AssociatedApplication = GetOrCreateAssociatedApplicationByDocumentName("file.xml");
+              version.Note = FinancialArchive.Resources.BuyerTitleVersionNote;
+              formalizedDocument.BuyerTitleId = version.Id;
+              version.Body.Write(memory);
+              formalizedDocument.Save();
+            }
+          }
+
+          this.SignDocument(doc, sign, doc.Document.LastVersion, signatoryInfo, message.TimeStamp);
+          if (formalizedDocument != null)
+          {
+            var lastSignature = this.GetLastDocumentSignature(formalizedDocument);
+            formalizedDocument.BuyerSignatureId = lastSignature.Id;
+          }
+          
+          var sentVersion = doc.Document.Versions.FirstOrDefault(x => x.Id == doc.VersionId);
           this.ProcessSharedSign(doc.Document, doc, isIncoming, box, doc.Document.LastVersion, signatoryInfo, false, historyOperation, historyComment, true);
+        }
       }
 
       return true;
@@ -2619,7 +2560,7 @@ namespace Sungero.Exchange.Server
         trackingString.ReturnResult = Docflow.OfficialDocumentTracking.ReturnResult.Signed;
         
         // Логика по прекращению согласования (контроль возврата и т.д.), уведомление ответственному.
-        if (isAgent)
+        if (isAgent && needReceive)
           this.SendDocumentReplyNotice(box, trackingString, signedVersion.Number, sentVersionIsChanged, true, signatoryInfo, false, exchangeService.Name, string.Empty);
       }
       
@@ -2896,7 +2837,7 @@ namespace Sungero.Exchange.Server
       document.LocationState = document.LocationState;
       
       var sentVersion = document.Versions.FirstOrDefault(x => x.Id == info.VersionId);
-      if (isIncoming && isAgent)
+      if (isIncoming && isAgent && needReceive)
       {
         var externalApprovalInTracking = document.Tracking.Where(x => !x.ReturnResult.HasValue && x.ExternalLinkId == info.Id
                                                                  && (x.Action == Docflow.OfficialDocumentTracking.Action.Sending || x.Action == Docflow.OfficialDocumentTracking.Action.Endorsement));
@@ -2981,22 +2922,19 @@ namespace Sungero.Exchange.Server
       
       var x509Certificate = Docflow.PublicFunctions.Module.GetSignatureCertificateInfo(signature);
       var signatoryInfo = Docflow.PublicFunctions.Module.GetCertificateSignatoryName(x509Certificate.SubjectInfo);
-      
-      var rejectedVersion = info.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Rejected
-        ? document.LastVersion
-        : document.Versions.FirstOrDefault(x => x.Id == info.VersionId);
+      var sentVersion = document.Versions.FirstOrDefault(x => x.Id == info.VersionId);
       
       foreach (var trackingString in externalApprovalInTracking)
       {
         trackingString.ReturnResult = Docflow.OfficialDocumentTracking.ReturnResult.NotSigned;
         
         // Логика по прекращению согласования (контроль возврата и т.д.), уведомление ответственному.
-        if (isAgent)
-          this.SendDocumentReplyNotice(box, trackingString, rejectedVersion.Number, false, false, signatoryInfo, false, ExchangeCore.PublicFunctions.BoxBase.GetExchangeService(box).Name, serviceComment);
+        if (isAgent && needReceive)
+          this.SendDocumentReplyNotice(box, trackingString, sentVersion.Number, false, false, signatoryInfo, false, ExchangeCore.PublicFunctions.BoxBase.GetExchangeService(box).Name, serviceComment);
       }
       
       // Генерация PDF.
-      this.GeneratePublicBody(document, rejectedVersion, isAgent);
+      this.GeneratePublicBody(document, sentVersion, isAgent);
 
       if (!string.IsNullOrEmpty(rejectNotice) && !isRejected)
         document.Note += string.IsNullOrEmpty(document.Note) ? Resources.RejectNoticeFormat(rejectNotice) : Environment.NewLine + Resources.RejectNoticeFormat(rejectNotice);
@@ -3006,7 +2944,7 @@ namespace Sungero.Exchange.Server
         document.Note = CutText(document.Note, maxLength);
       
       if (!isRejected)
-        document.History.Write(historyOperation, detailedOperation, historyComment, rejectedVersion.Number);
+        document.History.Write(historyOperation, detailedOperation, historyComment, sentVersion.Number);
       
       document.Save();
     }
@@ -3372,8 +3310,7 @@ namespace Sungero.Exchange.Server
         }
       }
       
-      if (ExchangeCore.PublicFunctions.BoxBase.NeedReceiveTask(box))
-        this.CreateDocumentReplyNotice(box, trackingString, signed, false, isInvoiceAmendmentRequest, performers, activeText);
+      this.CreateDocumentReplyNotice(box, trackingString, signed, false, isInvoiceAmendmentRequest, performers, activeText);
     }
 
     private static string FillDocumentReplyNoticeTexts(int? versionNumber, bool versionIsChanged, bool signed, string signatoryInfo,
@@ -4200,16 +4137,11 @@ namespace Sungero.Exchange.Server
           exchangeDocumentInfo.DeliveryConfirmationStatus != Exchange.ExchangeDocumentInfo.DeliveryConfirmationStatus.Sent)
       {
         var historyComment = string.Format("{0}|{1}", sender.Name, businessUnitBox.ExchangeService.Name);
-        var operation = new Enumeration(isIncoming ? Constants.Module.Exchange.GetRNoteReceiptReadMark : Constants.Module.Exchange.SendRNoteReceiptReadMark);
-        
+        var detailedOperation = new Enumeration(isIncoming ? Constants.Module.Exchange.GetRNoteReceiptReadMark : Constants.Module.Exchange.SendRNoteReceiptReadMark);
         if (documentType == Exchange.ExchangeDocumentInfoServiceDocuments.DocumentType.NoteReceipt)
-          operation = new Enumeration(isIncoming ? Constants.Module.Exchange.GetNoteReceiptReadMark : Constants.Module.Exchange.SendNoteReceiptReadMark);
-        
-        var detailedOperation = new Enumeration(isIncoming ? Constants.Module.Exchange.GetReadMark : Constants.Module.Exchange.SendReadMark);
-        
+          detailedOperation = new Enumeration(isIncoming ? Constants.Module.Exchange.GetNoteReceiptReadMark : Constants.Module.Exchange.SendNoteReceiptReadMark);
         var sentVersion = exchangeDocumentInfo.Document.Versions.FirstOrDefault(x => x.Id == exchangeDocumentInfo.VersionId);
-        exchangeDocumentInfo.Document.History.Write(operation, detailedOperation, historyComment, sentVersion.Number);
-        
+        exchangeDocumentInfo.Document.History.Write(detailedOperation, detailedOperation, historyComment, sentVersion.Number);
         if (this.FixReceiptNotificationForSbis(exchangeDocumentInfo))
           exchangeDocumentInfo.DeliveryConfirmationStatus = Exchange.ExchangeDocumentInfo.DeliveryConfirmationStatus.Sent;
         exchangeDocumentInfo.Save();
@@ -4419,7 +4351,7 @@ namespace Sungero.Exchange.Server
 
         // Для формирования ссылки СБИС достаточно ИД сообщения.
         if (Equals(messageQueueItem.RootBox.ExchangeService.ExchangeProvider, ExchangeCore.ExchangeService.ExchangeProvider.Sbis))
-          return client.GetDocumentUri(string.Empty, messageQueueItem.ExternalId).ToString();
+          return client.GetDocumentUri(string.Empty, messageQueueItem.ExternalId).ToString();        
 
         // Для регламентных документов запрашиваем информацию из сервиса.
         var message = client.GetMessage(messageQueueItem.ExternalId);
@@ -4456,7 +4388,7 @@ namespace Sungero.Exchange.Server
     /// <summary>
     /// Привести дату к тенантному времени.
     /// </summary>
-    /// <param name="datetime">Дата, пришедшая из МКДО.</param>
+    /// <param name="datetime">Дата пришедшая из МКДО.</param>
     /// <returns>Дата во времени тенанта.</returns>
     private static DateTime ToTenantTime(DateTime datetime)
     {
@@ -4631,23 +4563,26 @@ namespace Sungero.Exchange.Server
           throw AppliedCodeException.Create(Resources.SendCounterpartyNotApproved);
       }
       
+      // Обработка пакета докуметов Сбис.
+      bool packageProcessing = false;
+      if (box.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis &&
+          documents.Count > 1)
+      {
+        this.SendAnswerDocumentsPackage(documents, box, certificate, isAgent);
+        packageProcessing = true;
+      }
+      
       foreach (var document in documents)
       {
         try
         {
-          Docflow.PublicFunctions.OfficialDocument.SendAnswer(document, box, counterparty, certificate, isAgent);
+          if (!packageProcessing)
+            Docflow.PublicFunctions.OfficialDocument.SendAnswer(document, box, counterparty, certificate, isAgent);
           
           var info = Functions.ExchangeDocumentInfo.GetIncomingExDocumentInfo(document);
           var sendSignOperation = new Enumeration(Constants.Module.Exchange.SendAnswer);
           var comment = string.Format("{0}|{1}", counterparty.Name, box.ExchangeService.Name);
-          
-          if (info.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Rejected)
-          {
-            var signature = this.GetDocumentSignature(document, certificate);
-            this.ProcessSharedReject(info, document, false, box, signature.Body, sendSignOperation, comment, string.Empty, string.Empty, false);
-          }
-          else
-            this.ProcessSharedSign(document, info, false, box, document.LastVersion, string.Empty, false, sendSignOperation, comment, false);
+          this.ProcessSharedSign(document, info, false, box, document.LastVersion, string.Empty, false, sendSignOperation, comment, false);
         }
         catch (AppliedCodeException)
         {
@@ -4667,7 +4602,6 @@ namespace Sungero.Exchange.Server
     /// <param name="box">Абонентский ящик обмена.</param>
     /// <param name="certificate">Сертификат.</param>
     /// <param name="isAgent">Признак вызова из фонового процесса. Иначе - пользователем в RX.</param>
-    [Obsolete("Теперь функция не актуальна, т.к. реализована поддержка частичного подписания.")]
     public virtual void SendAnswerDocumentsPackage(List<Docflow.IOfficialDocument> documents, Sungero.ExchangeCore.IBusinessUnitBox box,
                                                    ICertificate certificate, bool isAgent)
     {
@@ -4789,7 +4723,7 @@ namespace Sungero.Exchange.Server
       if (exchangeDocumentInfo.NeedSign == true)
       {
         // Если документ требовал подписания, проверяем - не подписан/отказан он в вебе.
-        var allowedAnswers = client.GetAllowedAnswers(exchangeDocumentInfo.ServiceDocumentId, exchangeDocumentInfo.ServiceMessageId, null);
+        var allowedAnswers = client.GetAllowedAnswers(exchangeDocumentInfo.ServiceDocumentId, exchangeDocumentInfo.ServiceMessageId);
         if (!allowedAnswers.CanSendSign)
           return;
       }
@@ -4852,21 +4786,10 @@ namespace Sungero.Exchange.Server
         
         var version = waybill.Versions.Single(v => v.Id == waybill.BuyerTitleId);
         byte[] receipt;
-        var documentName = string.Empty;
         using (var memory = new System.IO.MemoryStream())
         {
           version.Body.Read().CopyTo(memory);
           receipt = memory.ToArray();
-          try
-          {
-            var encoding = Encoding.GetEncoding(1251);
-            var title = XDocument.Parse(encoding.GetString(receipt));
-            documentName = title.Element("Файл").Attribute("ИдФайл").Value + ".xml";
-          }
-          catch (Exception ex)
-          {
-            Logger.Error("Can't parse document name from xml", ex);
-          }
         }
         
         var sign = Signatures.Get(version)
@@ -4877,8 +4800,8 @@ namespace Sungero.Exchange.Server
         externalDocumentInfo.ReceiverSignId = sign.Id;
         externalDocumentInfo.Save();
         
-        docsWithCertificate = Structures.Module.ReglamentDocumentWithCertificate.Create(string.IsNullOrEmpty(documentName) ? FinancialArchive.Resources.BuyerTitleVersionNote : documentName,
-                                                                                        receipt, certificate, signBody, externalDocumentInfo.ServiceDocumentId,
+        docsWithCertificate = Structures.Module.ReglamentDocumentWithCertificate.Create(FinancialArchive.Resources.BuyerTitleVersionNote, receipt,
+                                                                                        certificate, signBody, externalDocumentInfo.ServiceDocumentId,
                                                                                         box, waybill, externalDocumentInfo.ServiceMessageId, null, null,
                                                                                         externalDocumentInfo.ServiceCounterpartyId, false,
                                                                                         externalDocumentInfo, false, null);
@@ -4945,15 +4868,14 @@ namespace Sungero.Exchange.Server
       // Для счетов-фактур и УПД тип служебного документа в сервисе другой.
       var invoiceDocuments = signedDocuments.Where(d => d.IsInvoiceFlow).ToList();
       
-      // Отправляем одним сообщением УОУ на комплект документов из СБИС.
-      var packageProcessingSbis = signedDocuments.Count > 1 && businessUnitBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis;
-      if (packageProcessingSbis)
-        this.SendServiceDocument(signedDocuments,
-                                 ExchangeCore.PublicFunctions.BoxBase.GetRootBox(box), ReglamentDocumentType.InvoiceAmendmentRequest);
-
-      if (!packageProcessingSbis && invoiceDocuments.Any())
-        this.SendServiceDocument(invoiceDocuments,
-                                 ExchangeCore.PublicFunctions.BoxBase.GetRootBox(box), ReglamentDocumentType.InvoiceAmendmentRequest);
+      if (invoiceDocuments.Any())
+        if (businessUnitBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis &&
+            invoiceDocuments.Where(d => d.ServiceMessageId == invoiceDocuments.First().ServiceMessageId).Count() > 1)
+          this.SendPackageServiceDocuments(invoiceDocuments,
+                                           ExchangeCore.PublicFunctions.BoxBase.GetRootBox(box), ReglamentDocumentType.InvoiceAmendmentRequest);
+        else
+          this.SendServiceDocument(invoiceDocuments,
+                                   ExchangeCore.PublicFunctions.BoxBase.GetRootBox(box), ReglamentDocumentType.InvoiceAmendmentRequest);
       
       foreach (var document in invoiceDocuments)
       {
@@ -4965,7 +4887,7 @@ namespace Sungero.Exchange.Server
       var notInvoiceDocuments = signedDocuments.Where(d => !d.IsInvoiceFlow).ToList();
       var reglamentDocumentType = businessUnitBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Diadoc ?
         ReglamentDocumentType.Rejection : ReglamentDocumentType.AmendmentRequest;
-      if (!packageProcessingSbis && notInvoiceDocuments.Any())
+      if (notInvoiceDocuments.Any())
         this.SendServiceDocument(notInvoiceDocuments,
                                  ExchangeCore.PublicFunctions.BoxBase.GetRootBox(box), reglamentDocumentType);
       
@@ -5065,11 +4987,6 @@ namespace Sungero.Exchange.Server
                                           innerExceptionText, document.Name, reglamentDocumentTypeValue, document.ParentDocumentId);
             this.LogDebugFormat(debugText);
           }
-          else if (this.GetSupportedReglamentDocumentTypes().Contains(documentType))
-          {
-            this.LogDebugFormat(ex.Message);
-            throw AppliedCodeException.Create(Resources.OneOrMoreDocumentAlreadyProcessing);
-          }
           else
             throw;
         }
@@ -5091,7 +5008,6 @@ namespace Sungero.Exchange.Server
     /// <param name="signedDocuments">Коллекция подписанных документов.</param>
     /// <param name="box">Ящик.</param>
     /// <param name="documentType">Тип документа.</param>
-    [Obsolete("Теперь функция не актуальна, т.к. реализована поддержка частичного подписания.")]
     protected virtual void SendPackageServiceDocuments(List<ReglamentDocumentWithCertificate> signedDocuments, IBusinessUnitBox box, ReglamentDocumentType documentType)
     {
       var client = GetClient(box);
@@ -5334,10 +5250,7 @@ namespace Sungero.Exchange.Server
       primaryDocuments.Add(Functions.Module.CreatePrimaryExchangeServiceDocument(document, needSign, comment));
       foreach (var doc in addenda)
       {
-        // Для СБИС нельзя на часть документов комплекта запросить подпись, а на остальные не запрашивать.
-        primaryDocuments.Add(Functions.Module.CreatePrimaryExchangeServiceDocument(doc,
-                                                                                   box.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis ? needSign : isNeedSign(doc),
-                                                                                   string.Empty));
+        primaryDocuments.Add(Functions.Module.CreatePrimaryExchangeServiceDocument(doc, isNeedSign(doc), string.Empty));
       }
       
       var documents = new List<Sungero.Docflow.IOfficialDocument>() { document };
@@ -5366,10 +5279,9 @@ namespace Sungero.Exchange.Server
         /* Для основного документа признак Требуется подписание заполяется переданным в метод параметром.
          * Для приложений дополнительно проверить требование подписи.
          * Не требуется подпись для счет-фактур и исх. счетов.
-         * Исключение СБИС - подпись на счет-фактуру требуется.
          */
         var isPrimaryDocument = doc.Id == document.Id;
-        var needSignSentDocument = isPrimaryDocument || box.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis ? needSign : isNeedSign(doc);
+        var needSignSentDocument = isPrimaryDocument ? needSign : isNeedSign(doc);
         doc.DeliveryMethod = Docflow.PublicFunctions.MailDeliveryMethod.Remote.GetExchangeDeliveryMethod();
         
         var info = SaveExternalDocumentInfo(doc, ids.ServiceId, sentMessage.ServiceMessageId, needSignSentDocument, receiver, box);
@@ -5696,8 +5608,9 @@ namespace Sungero.Exchange.Server
       var title = new NpoComputer.DCX.Common.BuyerTitle();
       title.AcceptanceDate = buyerTitle.AcceptanceDate.Value;
       title.OrganizationName = statement.BusinessUnit.LegalName;
-      title.ActOfDisagreement = this.GetActOfDisagreementText(buyerTitle);
-      title.SignResult = this.GetBuyerTitleSignResult(buyerTitle);
+      title.ActOfDisagreement = buyerTitle.SignResult ? string.Empty : ("Подписан с учетом расхождений: " + buyerTitle.ActOfDisagreement);
+      title.SignResult = buyerTitle.SignResult ? SignResult.Signed : SignResult.SignedWithAct;
+      
       title.Signer.FirstName = buyerTitle.Signatory.Person.FirstName;
       title.Signer.LastName = buyerTitle.Signatory.Person.LastName;
       title.Signer.MiddleName = buyerTitle.Signatory.Person.MiddleName;
@@ -5732,18 +5645,16 @@ namespace Sungero.Exchange.Server
       
       FileFromService xml = null;
       
-      var signResultAccepted = buyerTitle.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Accepted;
-      
       if (statement.FormalizedServiceType == Docflow.AccountingDocumentBase.FormalizedServiceType.WorksTransfer)
       {
-        title.OperationContent = signResultAccepted ? "Результаты работ (оказанных услуг) приняты без претензий" : title.ActOfDisagreement;
+        title.OperationContent = buyerTitle.SignResult ? "Результаты работ (оказанных услуг) приняты без претензий" : title.ActOfDisagreement;
         this.LogDebugFormat(exchangeInfo, "Start GenerateWorksTransferXmlForBuyer.");
         xml = client.GenerateWorksTransferXmlForBuyer(title, exchangeInfo.ServiceMessageId, exchangeInfo.ServiceDocumentId);
       }
       
       if (statement.FormalizedServiceType == Docflow.AccountingDocumentBase.FormalizedServiceType.Act)
       {
-        title.OperationContent = signResultAccepted ? "Услуги оказаны в полном объеме" : title.ActOfDisagreement;
+        title.OperationContent = buyerTitle.SignResult ? "Услуги оказаны в полном объеме" : title.ActOfDisagreement;
         this.LogDebugFormat(exchangeInfo, "Start GenerateActXmlForBuyer.");
         xml = client.GenerateActXmlForBuyer(title, exchangeInfo.ServiceMessageId, exchangeInfo.ServiceDocumentId);
       }
@@ -5751,10 +5662,7 @@ namespace Sungero.Exchange.Server
       if (statement.FormalizedServiceType == Docflow.AccountingDocumentBase.FormalizedServiceType.GeneralTransfer &&
           statement.FormalizedFunction != Docflow.AccountingDocumentBase.FormalizedFunction.Schf)
       {
-        if (statement.IsAdjustment != true)
-          title.OperationContent = string.IsNullOrEmpty(buyerTitle.ActOfDisagreement) ? this.GetBuyerAcceptanceStatusText(buyerTitle) : title.ActOfDisagreement;
-        else
-          title.OperationContent = "С изменением стоимости согласен";
+        title.OperationContent = buyerTitle.SignResult ? "Товары приняты без претензий" : title.ActOfDisagreement;
         
         this.LogDebugFormat(exchangeInfo, "Start {0}.", statement.IsAdjustment == true ? "GenerateUniversalTransferCorrectionDocumentXmlForBuyer" : "GenerateUniversalTransferDocumentXmlForBuyer");
         xml = statement.IsAdjustment == true ?
@@ -5764,14 +5672,14 @@ namespace Sungero.Exchange.Server
       
       if (statement.FormalizedServiceType == Docflow.AccountingDocumentBase.FormalizedServiceType.GoodsTransfer)
       {
-        title.OperationContent = signResultAccepted ? "Перечисленные в документе ценности приняты без претензий" : title.ActOfDisagreement;
+        title.OperationContent = buyerTitle.SignResult ? "Перечисленные в документе ценности приняты без претензий" : title.ActOfDisagreement;
         this.LogDebugFormat(exchangeInfo, "Start GenerateGoodsTransferXmlForBuyer.");
         xml = client.GenerateGoodsTransferXmlForBuyer(title, exchangeInfo.ServiceMessageId, exchangeInfo.ServiceDocumentId);
       }
       
       if (statement.FormalizedServiceType == Docflow.AccountingDocumentBase.FormalizedServiceType.Waybill)
       {
-        title.OperationContent = signResultAccepted ? "Товары переданы" : title.ActOfDisagreement;
+        title.OperationContent = buyerTitle.SignResult ? "Товары переданы" : title.ActOfDisagreement;
         this.LogDebugFormat(exchangeInfo, "Start GenerateTorg12XmlForBuyer.");
         xml = client.GenerateTorg12XmlForBuyer(title, exchangeInfo.ServiceMessageId, exchangeInfo.ServiceDocumentId);
       }
@@ -5800,60 +5708,7 @@ namespace Sungero.Exchange.Server
         // Сохранить ИД титула покупателя и ИД этапа. ID передается для СБИС, для SD и Диадок - пустое значение.
         exchangeInfo.ExternalBuyerTitleId = xml.ServiceDocumentId;
         exchangeInfo.StageId = xml.StageId;
-        
-        if (statement.FormalizedServiceType == Docflow.AccountingDocumentBase.FormalizedServiceType.GeneralTransfer && statement.IsAdjustment != true)
-          exchangeInfo.BuyerAcceptanceStatus = buyerTitle.BuyerAcceptanceStatus;
       }
-    }
-    
-    /// <summary>
-    /// Получить текст разногласий.
-    /// </summary>
-    /// <param name="buyerTitle">Титул покупателя.</param>
-    /// <returns>Текст разногласий.</returns>
-    protected virtual string GetActOfDisagreementText(Docflow.Structures.AccountingDocumentBase.IBuyerTitle buyerTitle)
-    {
-      var actOfDisagreementText = !string.IsNullOrEmpty(buyerTitle.ActOfDisagreement) ? ": " + buyerTitle.ActOfDisagreement : string.Empty;
-      if (buyerTitle.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.PartiallyAccepted)
-        return "Принято с разногласиями" + actOfDisagreementText;
-      else if (buyerTitle.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Rejected)
-        return "Не принято" + actOfDisagreementText;
-      else
-        return string.Empty;
-    }
-    
-    /// <summary>
-    /// Получить текст расшифровки кода итога.
-    /// </summary>
-    /// <param name="buyerTitle">Титул покупателя.</param>
-    /// <returns>Текст расшифровки кода итога.</returns>
-    protected virtual string GetBuyerAcceptanceStatusText(Docflow.Structures.AccountingDocumentBase.IBuyerTitle buyerTitle)
-    {
-      if (buyerTitle.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Accepted)
-        return "Товары (работы, услуги, права) приняты без расхождений (претензий)";
-      else if (buyerTitle.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.PartiallyAccepted)
-        return "Товары (работы, услуги, права) приняты с расхождениями (претензией)";
-      else if (buyerTitle.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Rejected)
-        return "Товары (работы, услуги, права) не приняты";
-
-      return string.Empty;
-    }
-    
-    /// <summary>
-    /// Получить результат приемки для титула покупателя.
-    /// </summary>
-    /// <param name="buyerTitle">Титул покупателя.</param>
-    /// <returns>Результат приемки в DCX.</returns>
-    protected virtual SignResult GetBuyerTitleSignResult(Docflow.Structures.AccountingDocumentBase.IBuyerTitle buyerTitle)
-    {
-      if (buyerTitle.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Accepted)
-        return SignResult.Signed;
-      else if (buyerTitle.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.PartiallyAccepted)
-        return SignResult.SignedWithAct;
-      else if (buyerTitle.BuyerAcceptanceStatus == Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Rejected)
-        return SignResult.NotAccepted;
-      
-      throw AppliedCodeException.Create(string.Format("Unsupported BuyerAcceptanceStatus: '{0}'.", buyerTitle.BuyerAcceptanceStatus));
     }
     
     /// <summary>
@@ -5919,7 +5774,7 @@ namespace Sungero.Exchange.Server
     /// </summary>
     /// <param name="document">Документ.</param>
     /// <returns>True, если запрошено УОУ.</returns>
-    [Public, Remote, Obsolete("Теперь функция не актуальна, т.к. реализована поддержка частичного подписания.")]
+    [Public, Remote]
     public virtual bool IsInvoiceAmendmentRequest(IOfficialDocument document)
     {
       var documentInfo = Sungero.Exchange.PublicFunctions.ExchangeDocumentInfo.Remote.GetLastDocumentInfo(document);
@@ -5930,23 +5785,6 @@ namespace Sungero.Exchange.Server
         .Where(x => x.Date != null && (x.DocumentType == ExchDocumentType.Reject || x.DocumentType == ExchDocumentType.IReject))
         .OrderByDescending(x => x.Date);
       return serviceDocuments.Any();
-    }
-    
-    /// <summary>
-    /// Проверка возможности отправки ответной подписи по документу.
-    /// </summary>
-    /// <param name="document">Документ.</param>
-    /// <returns>True - если можно отправить подпись, иначе  - false.</returns>
-    [Public, Remote]
-    public virtual bool CanSendSign(IOfficialDocument document)
-    {
-      var documentInfo = Sungero.Exchange.PublicFunctions.ExchangeDocumentInfo.Remote.GetLastDocumentInfo(document);
-      if (documentInfo == null)
-        return false;
-      
-      var client = GetClient(documentInfo.RootBox);
-      var allowedAnswers = client.GetAllowedAnswers(documentInfo.ServiceDocumentId, documentInfo.ServiceMessageId, documentInfo.ExternalBuyerTitleId);
-      return allowedAnswers.CanSendSign;
     }
     
     /// <summary>
@@ -6162,13 +6000,13 @@ namespace Sungero.Exchange.Server
     /// <param name="note">Комментарий.</param>
     /// <param name="throwError">Не гасить ошибку.</param>
     /// <param name="certificate">Сертификат для подписания УОУ.</param>
-    /// <param name="sendInvoiceAmendmentRequest">True для УОУ, False для отказа.</param>
+    /// <param name="isInvoiceAmendmentRequest">True для УОУ, False для отказа.</param>
     /// <returns>Уведомления об уточнении и сертификат, которым они должны быть подписаны.</returns>
     [Remote]
     public virtual List<Structures.Module.ReglamentDocumentWithCertificate> GenerateAmendmentRequestDocuments(List<Docflow.IOfficialDocument> documents,
                                                                                                               ExchangeCore.IBoxBase box, string note,
                                                                                                               bool throwError, ICertificate certificate,
-                                                                                                              bool sendInvoiceAmendmentRequest)
+                                                                                                              bool isInvoiceAmendmentRequest)
     {
       if (box == null)
         throw AppliedCodeException.Create(Resources.BoxIsNotValid);
@@ -6187,14 +6025,13 @@ namespace Sungero.Exchange.Server
             continue;
           
           var client = GetClient(ExchangeCore.PublicFunctions.BoxBase.GetRootBox(box));
-          var allowedAnswers = client.GetAllowedAnswers(externalDocumentInfo.ServiceDocumentId, externalDocumentInfo.ServiceMessageId, externalDocumentInfo.ExternalBuyerTitleId);
+          var allowedAnswers = client.GetAllowedAnswers(externalDocumentInfo.ServiceDocumentId, externalDocumentInfo.ServiceMessageId);
           
           // Убеждаемся, что можно отправить хоть что-то.
           if (!allowedAnswers.CanSendInvoiceAmendmentRequest && !allowedAnswers.CanSendAmendmentRequest)
             throw AppliedCodeException.Create(Resources.AnswerIsAlreadySent);
           
           // Если нельзя отправить УОУ - отправляем отказ и наоборот.
-          var isInvoiceAmendmentRequest = sendInvoiceAmendmentRequest;
           if (isInvoiceAmendmentRequest && !allowedAnswers.CanSendInvoiceAmendmentRequest)
             isInvoiceAmendmentRequest = false;
           if (!isInvoiceAmendmentRequest && !allowedAnswers.CanSendAmendmentRequest)
@@ -6203,26 +6040,17 @@ namespace Sungero.Exchange.Server
           var receipts = new List<NpoComputer.DCX.Common.IReglamentDocument>();
           var rootBox = ExchangeCore.PublicFunctions.BoxBase.GetRootBox(box);
           var packageDocumentsExchangeInfos = GetPackageDocumentsExchangeInfos(externalDocumentInfo.ServiceMessageId);
-          var documentIds = documents.Select(d => d.Id);
-          packageDocumentsExchangeInfos = packageDocumentsExchangeInfos.Where(info => documentIds.Contains(info.Document.Id)).ToList();
-          var invoiceExchangeInfoIds = new List<int>();
           if (rootBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis &&
               packageDocumentsExchangeInfos.Count > 1)
           {
             var tempDocs = new List<NpoComputer.DCX.Common.IDocument>();
             foreach (IExchangeDocumentInfo info in packageDocumentsExchangeInfos)
             {
-              var allowedAnswersSbis = client.GetAllowedAnswers(info.ServiceDocumentId, info.ServiceMessageId, info.ExternalBuyerTitleId);
-              if (allowedAnswersSbis.CanSendAmendmentRequest || allowedAnswersSbis.CanSendInvoiceAmendmentRequest)
-              {
-                tempDocs.Add(new NpoComputer.DCX.Common.Document()
-                             {
-                               ServiceMessageId = info.ServiceMessageId,
-                               ServiceEntityId = info.ServiceDocumentId
-                             });
-                if (allowedAnswersSbis.CanSendInvoiceAmendmentRequest == true)
-                  invoiceExchangeInfoIds.Add(info.Id);
-              }
+              tempDocs.Add(new NpoComputer.DCX.Common.Document()
+                           {
+                             ServiceMessageId = info.ServiceMessageId,
+                             ServiceEntityId = info.ServiceDocumentId
+                           });
             }
             // Для Сбиса передаем сразу сертификат, чтобы не искать в хранилище по отпечатку.
             receipts = client.GenerateInvoiceAmendmentRequestsForPackage(tempDocs, certificate.X509Certificate, note);
@@ -6236,17 +6064,17 @@ namespace Sungero.Exchange.Server
               ServiceEntityId = externalDocumentInfo.ServiceDocumentId
             };
 
-            // Для Сбиса передаем сразу сертификат, чтобы не искать в хранилище по отпечатку.
-            // Для Сбиса генерируем всегда только уведомление об уточнении, т.к. нет разделения между отказом и уведомлением об уточнении.
-            if (externalDocumentInfo.RootBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis)
-              receipts.Add(client.GenerateInvoiceAmendmentRequest(tempDoc, certificate.X509Certificate, note));
-            else
+            // Для СБИС только УОУ.
+            if (isInvoiceAmendmentRequest)
             {
-              if (isInvoiceAmendmentRequest)
-                receipts.Add(client.GenerateInvoiceAmendmentRequest(tempDoc, certificate.Thumbprint, note));
+              // Для Сбиса передаем сразу сертификат, чтобы не искать в хранилище по отпечатку.
+              if (externalDocumentInfo.RootBox.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Sbis)
+                receipts.Add(client.GenerateInvoiceAmendmentRequest(tempDoc, certificate.X509Certificate, note));
               else
-                receipts.Add(client.GenerateAmendmentRequest(tempDoc, note, certificate.Thumbprint));
+                receipts.Add(client.GenerateInvoiceAmendmentRequest(tempDoc, certificate.Thumbprint, note));
             }
+            else
+              receipts.Add(client.GenerateAmendmentRequest(tempDoc, note, certificate.Thumbprint));
           }
           
           foreach (NpoComputer.DCX.Common.IReglamentDocument receipt in receipts)
@@ -6254,8 +6082,6 @@ namespace Sungero.Exchange.Server
             var exchangeDocumentInfo = ExchangeDocumentInfos.GetAll().Where(i => i.ServiceDocumentId == receipt.ParentServiceEntityId && Equals(i.RootBox, box)).First();
             var exchangeDocument = OfficialDocuments.Get(exchangeDocumentInfo.Document.Id);
             
-            if (packageProcessing)
-              isInvoiceAmendmentRequest = invoiceExchangeInfoIds.Contains(exchangeDocumentInfo.Id);
             var documentType = isInvoiceAmendmentRequest ? Exchange.ExchangeDocumentInfoServiceDocuments.DocumentType.IReject : Exchange.ExchangeDocumentInfoServiceDocuments.DocumentType.Reject;
             var doc = Structures.Module.ReglamentDocumentWithCertificate.Create(receipt.FileName, receipt.Content, certificate,
                                                                                 null, exchangeDocumentInfo.ServiceDocumentId,
@@ -6363,7 +6189,6 @@ namespace Sungero.Exchange.Server
       
       var exchangeDocumentInfo = Functions.ExchangeDocumentInfo.GetIncomingExDocumentInfo(document);
       result.IsSignedByCounterparty = Docflow.PublicFunctions.OfficialDocument.Remote.CanSendAnswer(document);
-      result.BuyerAcceptanceStatus = exchangeDocumentInfo?.BuyerAcceptanceStatus;
 
       // Нельзя отправлять уже отправленные формализованные документы.
       var accountingDocument = Docflow.AccountingDocumentBases.As(document);
@@ -6389,7 +6214,7 @@ namespace Sungero.Exchange.Server
           if (firstBox != null)
           {
             var client = GetClient(firstBox);
-            documentAllowedAnswer = client.GetAllowedAnswers(exchangeDocumentInfo.ServiceDocumentId, exchangeDocumentInfo.ServiceMessageId, exchangeDocumentInfo.ExternalBuyerTitleId);
+            documentAllowedAnswer = client.GetAllowedAnswers(exchangeDocumentInfo.ServiceDocumentId, exchangeDocumentInfo.ServiceMessageId);
             result.NeedRejectFirstVersion = documentAllowedAnswer.CanSendAmendmentRequest;
           }
         }
@@ -6472,7 +6297,7 @@ namespace Sungero.Exchange.Server
           if (documentAllowedAnswers == null)
           {
             var client = GetClient(result.DefaultBox);
-            documentAllowedAnswers = client.GetAllowedAnswers(exchangeDocumentInfo.ServiceDocumentId, exchangeDocumentInfo.ServiceMessageId, exchangeDocumentInfo.ExternalBuyerTitleId);
+            documentAllowedAnswers = client.GetAllowedAnswers(exchangeDocumentInfo.ServiceDocumentId, exchangeDocumentInfo.ServiceMessageId);
           }
           result.CanSendSignAsAnswer = documentAllowedAnswers.CanSendSign;
           result.CanSendAmendmentRequestAsAnswer = documentAllowedAnswers.CanSendAmendmentRequest;
@@ -6520,9 +6345,6 @@ namespace Sungero.Exchange.Server
         addendumInfo.Addendum = addendum;
 
         var exchangeDocInfo = Functions.ExchangeDocumentInfo.GetIncomingExDocumentInfo(addendum);
-        
-        addendumInfo.BuyerAcceptanceStatus = exchangeDocInfo?.BuyerAcceptanceStatus;
-        
         if (result.IsSignedByCounterparty)
         {
           if (!addendum.HasVersions)
@@ -6760,10 +6582,17 @@ namespace Sungero.Exchange.Server
       var certificate = box.CertificateReceiptNotifications;
       var documentInfos = ExchangeDocumentInfos.GetAll()
         .Where(x => Equals(x.RootBox, box) && x.Document != null &&
-               (!x.ServiceDocuments.Any(d => (d.DocumentType == Exchange.ExchangeDocumentInfoServiceDocuments.DocumentType.IReceipt ||
-                                              d.DocumentType == Exchange.ExchangeDocumentInfoServiceDocuments.DocumentType.Receipt) &&
-                                        (withoutGenerated ? d.Certificate == certificate : d.Date != null)) &&
-                x.DeliveryConfirmationStatus == null));
+               ((!x.ServiceDocuments.Any(d => (d.DocumentType == Exchange.ExchangeDocumentInfoServiceDocuments.DocumentType.IReceipt ||
+                                               d.DocumentType == Exchange.ExchangeDocumentInfoServiceDocuments.DocumentType.Receipt) && (withoutGenerated ? d.Certificate == certificate : d.Date != null)) &&
+                 x.DeliveryConfirmationStatus == null) ||
+                (box.ExchangeService.ExchangeProvider == Sungero.ExchangeCore.ExchangeService.ExchangeProvider.Synerdocs &&
+                 x.ServiceDocuments.Any(d => d.DocumentType == Exchange.ExchangeDocumentInfoServiceDocuments.DocumentType.Reject && Equals(x.ServiceDocumentId, d.ParentDocumentId)) &&
+                 !x.ServiceDocuments.Any(d => d.DocumentType == Exchange.ExchangeDocumentInfoServiceDocuments.DocumentType.Receipt && (withoutGenerated ? d.Certificate == certificate : d.Date != null))) ||
+                (box.ExchangeService.ExchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Synerdocs &&
+                 x.ExchangeState == Docflow.OfficialDocument.ExchangeState.Signed && x.ServiceDocuments.Any() &&
+                 x.MessageType == Exchange.ExchangeDocumentInfo.MessageType.Incoming &&
+                 !x.ServiceDocuments.Any(d => (d.DocumentType == Exchange.ExchangeDocumentInfoServiceDocuments.DocumentType.Receipt ||
+                                               d.DocumentType == Exchange.ExchangeDocumentInfoServiceDocuments.DocumentType.IReceipt) && (withoutGenerated ? d.Certificate == certificate : d.Date != null)))));
       
       return documentInfos;
     }
@@ -7272,7 +7101,7 @@ namespace Sungero.Exchange.Server
     /// Записать сообщение в лог.
     /// </summary>
     /// <param name="message">Сообщение из сервиса обмена.</param>
-    /// <param name="primaryDocument">Документ сообщения.</param>
+    /// <param name="primaryDocument">Документы сообщения.</param>
     /// <param name="logFormat">Формат строки.</param>
     /// <param name="args">Аргументы.</param>
     public virtual void LogDebugFormat(NpoComputer.DCX.Common.IMessage message, NpoComputer.DCX.Common.IDocument primaryDocument, string logFormat, params object[] args)
@@ -7489,29 +7318,5 @@ namespace Sungero.Exchange.Server
       if (counterpartyConflictCount > 0)
         this.LogErrorFormat(box, "{0} messages with unresolved counterparty conflicts for business unit box.", counterpartyConflictCount);
     }
-    
-    /// <summary>
-    /// Получить статус приемки.
-    /// </summary>
-    /// <param name="primaryDocument">Документ сообщения.</param>
-    /// <returns>Статус приемки.</returns>
-    public Enumeration? GetBuyerAcceptanceStatus(NpoComputer.DCX.Common.IDocument primaryDocument)
-    {
-      switch (primaryDocument.BuyerAcceptanceStatus)
-      {
-        case NpoComputer.DCX.Common.BuyerAcceptanceStatus.Accepted:
-          return Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Accepted;
-          
-        case NpoComputer.DCX.Common.BuyerAcceptanceStatus.PartiallyAccepted:
-          return Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.PartiallyAccepted;
-          
-        case NpoComputer.DCX.Common.BuyerAcceptanceStatus.Rejected:
-          return Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Rejected;
-          
-        default:
-          return null;
-      }
-    }
-    
   }
 }

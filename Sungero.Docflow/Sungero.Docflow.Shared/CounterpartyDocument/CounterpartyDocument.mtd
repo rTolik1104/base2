@@ -378,8 +378,7 @@
   ],
   "HandledEvents": [
     "CreatedServer",
-    "FilteringServer",
-    "ConvertingFromServer"
+    "FilteringServer"
   ],
   "IconName": "CounterpartyDocument.ico",
   "IconResourcesKeys": [],

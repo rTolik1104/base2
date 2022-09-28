@@ -152,7 +152,6 @@ namespace Sungero.Docflow
       _obj.AllowChangeReworkPerformer = false;
       _obj.RightType = Sungero.Docflow.ApprovalStage.RightType.Edit;
       _obj.NeedRestrictPerformerRights = false;
-      _obj.AllowApproveWithSuggestions = false;
       
       _obj.StageType = ApprovalStages.Info.Properties.StageType.GetFilter();
     }

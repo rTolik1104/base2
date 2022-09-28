@@ -368,8 +368,7 @@
     "BeforeSaveServer",
     "CreatedServer",
     "RefreshClient",
-    "ClosingClient",
-    "ConvertingFromServer"
+    "ClosingClient"
   ],
   "IconName": "ContractBase.ico",
   "IconResourcesKeys": [],

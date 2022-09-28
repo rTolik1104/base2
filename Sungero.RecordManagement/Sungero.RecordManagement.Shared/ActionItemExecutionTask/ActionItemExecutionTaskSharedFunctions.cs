@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sungero.Content;
 using Sungero.Core;
 using Sungero.CoreEntities;
 using Sungero.RecordManagement.ActionItemExecutionTask;
@@ -416,9 +415,9 @@ namespace Sungero.RecordManagement.Shared
         var parts = _obj.ActionItemParts.Where(itemPart => itemPart.Deadline == null && itemPart.CoAssigneesDeadline != null &&
                                                !Docflow.PublicFunctions.Module.CheckAssigneesDeadlines(_obj.FinalDeadline, itemPart.CoAssigneesDeadline)).ToList();
         if (parts.Any())
-          foreach (var part in parts)
-            e.AddError(part, _obj.Info.Properties.ActionItemParts.Properties.CoAssignees,
-                       RecordManagement.ActionItemExecutionTasks.Resources.CoAssigneesDeadlineError, new[] { _obj.Info.Properties.ActionItemParts.Properties.CoAssignees });
+        foreach (var part in parts)
+          e.AddError(part, _obj.Info.Properties.ActionItemParts.Properties.CoAssignees,
+                     RecordManagement.ActionItemExecutionTasks.Resources.CoAssigneesDeadlineError, new[] { _obj.Info.Properties.ActionItemParts.Properties.CoAssignees });
         
         var notValidCoAssigneeDeadlineItems = _obj.ActionItemParts.Where(item => _obj.PartsCoAssignees.Any(i => i.PartGuid == item.PartGuid) && item.CoAssigneesDeadline == null);
         if (_obj.HasIndefiniteDeadline != true && notValidCoAssigneeDeadlineItems.Any())
@@ -481,184 +480,5 @@ namespace Sungero.RecordManagement.Shared
     {
       return _obj.PartsCoAssignees.Where(p => p.PartGuid == partGuid).Select(p => p.CoAssignee).ToList();
     }
-    
-    #region Синхронизация группы приложений
-    
-    /// <summary>
-    /// Синхронизировать приложения документа и группы вложения.
-    /// </summary>
-    public virtual void SynchronizeAddendaAndAttachmentsGroup()
-    {
-      var document = _obj.DocumentsGroup.OfficialDocuments.FirstOrDefault();
-      if (document == null)
-      {
-        _obj.AddendaGroup.All.Clear();
-        _obj.AddedAddenda.Clear();
-        _obj.RemovedAddenda.Clear();
-        return;
-      }
-
-      // Документы, связанные связью Приложение с основным документом.
-      var documentAddenda = Docflow.PublicFunctions.Module.GetAddenda(document);
-      // Документы в группе Приложения.
-      var taskAddenda = Functions.ActionItemExecutionTask.GetAddendaGroupAttachments(_obj);
-      // Документы в коллекции добавленных вручную документов.
-      var taskAddedAddenda = this.GetAddedAddenda();
-      
-      // Удалить из гр. Приложения документы, которые не связаны связью "Приложение" и не добавлены вручную.
-      var addendaToRemove = taskAddenda.Except(documentAddenda).Where(x => !taskAddedAddenda.Contains(x.Id)).ToList();
-      foreach (var addendum in addendaToRemove)
-      {
-        _obj.AddendaGroup.All.Remove(addendum);
-        this.RemovedAddendaRemove(addendum);
-      }
-      
-      // Добавить документы, связанные связью типа Приложение с основным документом.
-      var taskRemovedAddenda = this.GetRemovedAddenda();
-      var addendaToAdd = documentAddenda.Except(taskAddenda).Where(x => !taskRemovedAddenda.Contains(x.Id)).ToList();
-      foreach (var addendum in addendaToAdd)
-      {
-        _obj.AddendaGroup.All.Add(addendum);
-        this.AddedAddendaRemove(addendum);
-      }
-    }
-    
-    /// <summary>
-    /// Получить вложения группы "Приложения".
-    /// </summary>
-    /// <returns>Вложения группы "Приложения".</returns>
-    public virtual List<IElectronicDocument> GetAddendaGroupAttachments()
-    {
-      return _obj.AddendaGroup.OfficialDocuments
-        .Select(x => ElectronicDocuments.As(x))
-        .ToList();
-    }
-    
-    /// <summary>
-    /// Получить список ИД документов, добавленных в группу "Приложения".
-    /// </summary>
-    /// <returns>Список ИД документов.</returns>
-    public virtual List<int> GetAddedAddenda()
-    {
-      return _obj.AddedAddenda
-        .Where(x => x.AddendumId.HasValue)
-        .Select(x => x.AddendumId.Value)
-        .ToList();
-    }
-    
-    /// <summary>
-    /// Получить список ИД документов, удаленных из группы "Приложения".
-    /// </summary>
-    /// <returns>Список ИД документов.</returns>
-    public virtual List<int> GetRemovedAddenda()
-    {
-      return _obj.RemovedAddenda
-        .Where(x => x.AddendumId.HasValue)
-        .Select(x => x.AddendumId.Value)
-        .ToList();
-    }
-    
-    /// <summary>
-    /// Дополнить коллекцию добавленных вручную документов в задаче документами из заданий.
-    /// </summary>
-    public virtual void AddedAddendaAppend()
-    {
-      Logger.DebugFormat("ActionItemExecutionTask (ID={0}). Append to AddedAddenda from assignments.", _obj.Id);
-      var addedAttachments = Docflow.PublicFunctions.Module.GetAddedAddendaFromAssignments(_obj, Constants.ActionItemExecutionTask.AddendaGroupGuid);
-      foreach (var attachment in addedAttachments)
-      {
-        if (attachment == null)
-          continue;
-        
-        this.AddedAddendaAppend(attachment);
-        this.RemovedAddendaRemove(attachment);
-      }
-    }
-    
-    /// <summary>
-    /// Дополнить коллекцию удаленных вручную документов в задаче документами из заданий.
-    /// </summary>
-    public virtual void RemovedAddendaAppend()
-    {
-      Logger.DebugFormat("ActionItemExecutionTask (ID={0}). Append to RemovedAddenda from assignments.", _obj.Id);
-      var removedAttachments = Docflow.PublicFunctions.Module.GetRemovedAddendaFromAssignments(_obj, Constants.ActionItemExecutionTask.AddendaGroupGuid);
-      foreach (var attachment in removedAttachments)
-      {
-        if (attachment == null)
-          continue;
-        
-        this.RemovedAddendaAppend(attachment);
-        this.AddedAddendaRemove(attachment);
-      }
-    }
-    
-    /// <summary>
-    /// Дополнить коллекцию добавленных вручную документов в задаче.
-    /// </summary>
-    /// <param name="addendum">Документ, добавленный в группу "Приложения".</param>
-    public virtual void AddedAddendaAppend(IElectronicDocument addendum)
-    {
-      if (addendum == null)
-        return;
-      
-      var addedAddendaItem = _obj.AddedAddenda.Where(x => x.AddendumId == addendum.Id).FirstOrDefault();
-      if (addedAddendaItem == null)
-      {
-        _obj.AddedAddenda.AddNew().AddendumId = addendum.Id;
-        Logger.DebugFormat("ActionItemExecutionTask (ID={0}). Append to AddedAddenda. Document (Id={1}).", _obj.Id, addendum.Id);
-      }
-    }
-    
-    /// <summary>
-    /// Из коллекции добавленных вручную документов удалить запись о приложении.
-    /// </summary>
-    /// <param name="addendum">Удаляемый документ.</param>
-    public virtual void AddedAddendaRemove(IElectronicDocument addendum)
-    {
-      if (addendum == null)
-        return;
-      
-      var addedAddendaItem = _obj.AddedAddenda.Where(x => x.AddendumId == addendum.Id).FirstOrDefault();
-      if (addedAddendaItem != null)
-      {
-        _obj.AddedAddenda.Remove(addedAddendaItem);
-        Logger.DebugFormat("ActionItemExecutionTask (ID={0}). Remove from AddedAddenda. Document (Id={1}).", _obj.Id, addendum.Id);
-      }
-    }
-    
-    /// <summary>
-    /// Из коллекции удаленных вручную документов удалить запись о приложении.
-    /// </summary>
-    /// <param name="addendum">Удаляемый документ.</param>
-    public virtual void RemovedAddendaRemove(IElectronicDocument addendum)
-    {
-      if (addendum == null)
-        return;
-      
-      var removedAddendaItem = _obj.RemovedAddenda.Where(x => x.AddendumId == addendum.Id).FirstOrDefault();
-      if (removedAddendaItem != null)
-      {
-        _obj.RemovedAddenda.Remove(removedAddendaItem);
-        Logger.DebugFormat("ActionItemExecutionTask (ID={0}). Remove from RemovedAddenda. Document (Id={1}).", _obj.Id, addendum.Id);
-      }
-    }
-    
-    /// <summary>
-    /// Дополнить коллекцию удаленных вручную документов в задаче.
-    /// </summary>
-    /// <param name="addendum">Документ, удаленный вручную из группы "Приложения".</param>
-    public virtual void RemovedAddendaAppend(IElectronicDocument addendum)
-    {
-      if (addendum == null)
-        return;
-      
-      if (_obj.RemovedAddenda.Any(x => x.AddendumId == addendum.Id))
-        return;
-      
-      _obj.RemovedAddenda.AddNew().AddendumId = addendum.Id;
-      Logger.DebugFormat("ActionItemExecutionTask (ID={0}). Append to RemovedAddenda. Document (Id={1}).", _obj.Id, addendum.Id);
-    }
-    
-    #endregion
   }
 }

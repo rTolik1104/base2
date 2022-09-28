@@ -11,11 +11,6 @@ namespace Sungero.Docflow
   partial class ApprovalTaskClientHandlers
   {
 
-    public override void Showing(Sungero.Presentation.FormShowingEventArgs e)
-    {
-      Functions.ApprovalTask.Remote.CreateParamsCache(_obj);
-    }
-
     public virtual void DeliveryMethodValueInput(Sungero.Docflow.Client.ApprovalTaskDeliveryMethodValueInputEventArgs e)
     {
       if (e.NewValue != null && e.NewValue.Sid == Constants.MailDeliveryMethod.Exchange)
@@ -49,7 +44,7 @@ namespace Sungero.Docflow
 
     public override void Refresh(Sungero.Presentation.FormRefreshEventArgs e)
     {
-      Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, false);
+      Functions.ApprovalTask.RefreshApprovalTaskForm(_obj);
       // Обновить предметное отображение регламента.
       _obj.State.Controls.Control.Refresh();
 

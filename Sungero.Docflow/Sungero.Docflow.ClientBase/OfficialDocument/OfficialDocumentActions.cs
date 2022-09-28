@@ -11,40 +11,6 @@ namespace Sungero.Docflow.Client
 {
   partial class OfficialDocumentVersionsActions
   {
-    public override void HideVersion(Sungero.Domain.Client.ExecuteChildCollectionActionArgs e)
-    {
-      var document = OfficialDocuments.As(_obj.RootEntity);
-      if (PublicFunctions.OfficialDocument.CanHideVersion(document, _obj.Number))
-      {
-        Dialogs.ShowMessage(OfficialDocuments.Resources.HideVersionOnAcquaintanceError, MessageType.Error);
-        return;
-      }
-      
-      base.HideVersion(e);
-    }
-
-    public override bool CanHideVersion(Sungero.Domain.Client.CanExecuteChildCollectionActionArgs e)
-    {
-      return base.CanHideVersion(e);
-    }
-
-    public override void DeleteVersion(Sungero.Domain.Client.ExecuteChildCollectionActionArgs e)
-    {
-      var document = OfficialDocuments.As(_obj.RootEntity);
-      if (PublicFunctions.OfficialDocument.CanDeleteVersion(document, _obj.Number))
-      {
-        Dialogs.ShowMessage(OfficialDocuments.Resources.DeleteVersionOnAcquaintanceError, MessageType.Error);
-        return;
-      }
-      
-      base.DeleteVersion(e);
-    }
-
-    public override bool CanDeleteVersion(Sungero.Domain.Client.CanExecuteChildCollectionActionArgs e)
-    {
-      return base.CanDeleteVersion(e);
-    }
-
     public virtual bool CanOpenOriginal(Sungero.Domain.Client.CanExecuteChildCollectionActionArgs e)
     {
       return _obj.PublicBody.Size != 0;
@@ -81,7 +47,10 @@ namespace Sungero.Docflow.Client
       
       var document = OfficialDocuments.As(_objs.FirstOrDefault());
       var relations = Functions.OfficialDocument.GetRelatedDocumentsWithVersions(document);
-      Functions.OfficialDocument.SelectRelatedDocumentsAndCreateEmail(document, relations);
+      if (relations.Count > 0)
+        Functions.OfficialDocument.SelectRelatedDocumentsAndCreateEmail(document, relations);
+      else
+        base.SendByMail(e);
     }
 
     public override bool CanSendByMail(Sungero.Domain.Client.CanExecuteActionArgs e)
@@ -152,37 +121,10 @@ namespace Sungero.Docflow.Client
 
     public virtual void ChangeDocumentType(Sungero.Domain.Client.ExecuteActionArgs e)
     {
-      // Для смены типа необходимо отменить регистрацию.
-      if (_obj.RegistrationState == OfficialDocument.RegistrationState.Registered &&
-          _obj.DocumentKind.NumberingType != DocumentKind.NumberingType.Numerable ||
-          _obj.RegistrationState == OfficialDocument.RegistrationState.Reserved)
-      {
-        // Используем диалоги, чтобы хинт не пробрасывался в задачу, в которую он вложен.
-        Dialogs.ShowMessage(OfficialDocuments.Resources.NeedCancelRegistration, MessageType.Error);
-        return;
-      }
-      
       if (Functions.OfficialDocument.Remote.HasApprovalTasksWithCurrentDocument(_obj))
       {
         // Для смены типа необходимо остановить все активные задачи согласования по регламенту.
         Dialogs.ShowMessage(SimpleDocuments.Resources.NeedAbortApproval, MessageType.Error);
-        return;
-      }
-      
-      if (Functions.OfficialDocument.Remote.HasSpecifiedTypeRelations(_obj))
-      {
-        var dialog = Dialogs.CreateTaskDialog(OfficialDocuments.Resources.NeedDeleteLink, MessageType.Error);
-        var relatedDocumentsHyperlink = dialog.AddHyperlink(OfficialDocuments.Resources.RelatedDocumentsHyperlinkDisplayName);
-        
-        Action relatedDocumentsHyperlinkAction = () =>
-        {
-          var relatedDocuments = _obj.Relations.GetRelated().Union(_obj.Relations.GetRelatedFrom());
-          relatedDocuments.ShowModal();
-        };
-        
-        relatedDocumentsHyperlink.SetOnExecute(relatedDocumentsHyperlinkAction);
-        dialog.Buttons.AddOk();
-        dialog.Show();
         return;
       }
       
@@ -198,8 +140,7 @@ namespace Sungero.Docflow.Client
 
     public virtual bool CanChangeDocumentType(Sungero.Domain.Client.CanExecuteActionArgs e)
     {
-      return !_obj.State.IsInserted && !_obj.State.IsChanged && _obj.AccessRights.CanUpdate() &&
-        Functions.OfficialDocument.CanChangeDocumentType(_obj);
+      return !_obj.State.IsInserted && !_obj.State.IsChanged && _obj.AccessRights.CanUpdate();
     }
     
     public virtual void CreateManyAddendum(Sungero.Domain.Client.ExecuteActionArgs e)
@@ -235,29 +176,28 @@ namespace Sungero.Docflow.Client
         }
       }
       
-      // Сообщение об ошибке при асинхронном преобразовании.
+      // Сообщение о статусе асинхронного преобразования.
+      var title = string.Empty;
+      var message = string.Empty;
       if (needConversion && result.HasErrors)
       {
-        Dialogs.ShowMessage(result.ErrorTitle, result.ErrorMessage, MessageType.Information);
-        return;
+        // Возникла ошибка.
+        title = result.ErrorTitle;
+        message = result.ErrorMessage;
       }
-      
-      if (needConversion && Sungero.Docflow.Functions.OfficialDocument.Remote.IsExchangeDocument(_obj, _obj.LastVersion.Id))
+      else
       {
-        Dialogs.ShowMessage(OfficialDocuments.Resources.ConvertionInProgress, OfficialDocuments.Resources.CloseDocumentAndOpenLater, MessageType.Information);
-        return;
+        // Преобразование "В процессе".
+        title = OfficialDocuments.Resources.ConvertionInProgress;
+        message = OfficialDocuments.Resources.CloseDocumentAndOpenLater;
       }
+      Dialogs.ShowMessage(title, message, MessageType.Information);
     }
 
     public virtual bool CanConvertToPdf(Sungero.Domain.Client.CanExecuteActionArgs e)
     {
-      var isDesktop = ClientApplication.ApplicationType == ApplicationType.Desktop;
-      return !isDesktop &&
-        !_obj.State.IsInserted &&
-        _obj.HasVersions &&
-        !_obj.State.IsChanged &&
-        _obj.AccessRights.CanUpdate() &&
-        Locks.GetLockInfo(_obj).IsLockedByMe;
+      return !_obj.State.IsInserted && _obj.HasVersions && !_obj.State.IsChanged &&
+        _obj.AccessRights.CanUpdate() && Locks.GetLockInfo(_obj).IsLockedByMe;
     }
 
     public virtual void ShowRelatedDocuments(Sungero.Domain.Client.ExecuteActionArgs e)
@@ -761,16 +701,23 @@ namespace Sungero.Docflow.Client
         return;
       
       var text = Docflow.Resources.CancelRegistration;
-      var description = Functions.OfficialDocument.GetCancelRegistrationDialogDescription(_obj, settingType);
+      var description = Docflow.Resources.CancelRegistrationDescription;
+
       if (settingType == Docflow.RegistrationSetting.SettingType.Reservation)
+      {
         text = Docflow.Resources.CancelReservation;
+        description = Docflow.Resources.CancelReservationDescription;
+      }
       if (settingType == Docflow.RegistrationSetting.SettingType.Numeration)
+      {
         text = Docflow.Resources.CancelNumbering;
+        description = Docflow.Resources.CancelNumberingDescription;
+      }
       
-      var dialog = Dialogs.CreateTaskDialog(text, description, MessageType.Information);
-      dialog.Buttons.AddYesNo();
-      dialog.Buttons.Default = DialogButtons.Yes;
-      if (dialog.Show() == DialogButtons.Yes)
+      var dialog = Dialogs.CreateTaskDialog(text, description, MessageType.Warning);
+      dialog.Buttons.AddOkCancel();
+      dialog.Buttons.Default = DialogButtons.Ok;
+      if (dialog.Show() == DialogButtons.Ok)
       {
         var needSaveDocument = _obj.DocumentKind.NumberingType != Docflow.DocumentKind.NumberingType.Numerable ||
           !_obj.DocumentKind.AutoNumbering.Value;
@@ -854,7 +801,7 @@ namespace Sungero.Docflow.Client
       var canReserveNumber = accessRights.CanRegister() ||
         (e.Params.TryGetValue(Sungero.Docflow.Constants.OfficialDocument.HasReservationSetting, out hasReservationSetting) && hasReservationSetting);
       
-      return accessRights.CanUpdate() &&
+      return accessRights.CanUpdate() && 
         (Functions.Module.IsLockedByMe(_obj) || _obj.State.IsInserted) &&
         ((isNumerable && !isRegistered) ||
          (documentKind.DocumentFlow != Docflow.DocumentKind.DocumentFlow.Incoming &&

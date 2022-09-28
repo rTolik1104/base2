@@ -7,5 +7,4 @@ using Sungero.RecordManagement.OutgoingLetter;
 
 namespace Sungero.RecordManagement
 {
-
 }

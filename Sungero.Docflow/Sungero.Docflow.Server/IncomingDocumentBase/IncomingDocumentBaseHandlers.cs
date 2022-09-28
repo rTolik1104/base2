@@ -67,17 +67,6 @@ namespace Sungero.Docflow
       // Для Входящих документов эл. обмена мапим Контрагента в Корреспондента.
       if (ExchangeDocuments.Is(_source))
         e.Map(_info.Properties.Correspondent, ExchangeDocuments.Info.Properties.Counterparty);
-      else
-      {
-        var counterparty = Exchange.PublicFunctions.ExchangeDocumentInfo.GetDocumentCounterparty(_source, _source.LastVersion);
-        if (counterparty != null)
-        {
-          var incomingDocument = IncomingDocumentBases.As(e.Entity);
-          incomingDocument.Correspondent = counterparty;
-        }
-      }
-      
-      e.Without(Sungero.Docflow.Addendums.Info.Properties.LeadingDocument);
     }
   }
 

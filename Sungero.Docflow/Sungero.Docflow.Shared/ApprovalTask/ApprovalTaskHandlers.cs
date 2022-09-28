@@ -29,8 +29,6 @@ namespace Sungero.Docflow
       
       Functions.ApprovalTask.RemovedAddendaAppend(_obj, addendum);
       Functions.ApprovalTask.AddedAddendaRemove(_obj, addendum);
-      
-      Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, true);
     }
 
     public virtual void AddendaGroupAdded(Sungero.Workflow.Interfaces.AttachmentAddedEventArgs e)
@@ -41,8 +39,6 @@ namespace Sungero.Docflow
       
       Functions.ApprovalTask.AddedAddendaAppend(_obj, addendum);
       Functions.ApprovalTask.RemovedAddendaRemove(_obj, addendum);
-      
-      Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, true);
     }
     
     public virtual void SignatoryChanged(Sungero.Docflow.Shared.ApprovalTaskSignatoryChangedEventArgs e)
@@ -50,15 +46,9 @@ namespace Sungero.Docflow
       if (Equals(e.NewValue, e.OldValue))
         return;
       
-      bool skipRefreshEvents = false;
-      e.Params.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.SkipRefreshEventsParamName, out skipRefreshEvents);
-      
-      if (!skipRefreshEvents)
-      {
-        var stages = Functions.ApprovalTask.Remote.GetBaseStages(_obj).BaseStages;
-        Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, stages, true);
-        Functions.ApprovalTask.Remote.UpdateReglamentApprovers(_obj, _obj.ApprovalRule, stages);
-      }
+      var stages = Functions.ApprovalTask.Remote.GetBaseStages(_obj).BaseStages;
+      Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, stages);
+      Functions.ApprovalTask.Remote.UpdateReglamentApprovers(_obj, _obj.ApprovalRule, stages);
     }
 
     public virtual void StageNumberChanged(Sungero.Domain.Shared.IntegerPropertyChangedEventArgs e)
@@ -92,18 +82,10 @@ namespace Sungero.Docflow
         _obj.ExchangeService = Functions.ApprovalTask.Remote.GetExchangeServices(_obj).DefaultService;
       }
       
-      bool skipRefreshEvents = false;
-      e.Params.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.SkipRefreshEventsParamName, out skipRefreshEvents);
-      
-      if (!skipRefreshEvents)
-      {
-        var stages = Functions.ApprovalTask.Remote.GetBaseStages(_obj).BaseStages;
-        Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, stages, true);
-        Functions.ApprovalTask.Remote.UpdateReglamentApprovers(_obj, _obj.ApprovalRule);
-        // Обновить предметное отображение регламента.
-        _obj.State.Controls.Control.Refresh();
-
-      }
+      Functions.ApprovalTask.RefreshApprovalTaskForm(_obj);
+      // Обновить предметное отображение регламента.
+      _obj.State.Controls.Control.Refresh();
+      Functions.ApprovalTask.Remote.UpdateReglamentApprovers(_obj, _obj.ApprovalRule);
     }
     
     public virtual void AddresseeChanged(Sungero.Docflow.Shared.ApprovalTaskAddresseeChangedEventArgs e)
@@ -116,16 +98,10 @@ namespace Sungero.Docflow
           firstAddressee != null && !Equals(e.NewValue, firstAddressee.Addressee))
         Functions.ApprovalTask.ClearAddresseesAndFillFirstAddressee(_obj);
       
-      bool skipRefreshEvents = false;
-      e.Params.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.SkipRefreshEventsParamName, out skipRefreshEvents);
-      
-      if (!skipRefreshEvents)
-      {
-        var stages = Functions.ApprovalTask.Remote.GetBaseStages(_obj).BaseStages;
-        Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, stages, true);
-        // Обновить обязательных согласующих.
-        Sungero.Docflow.Functions.ApprovalTask.Remote.UpdateReglamentApprovers(_obj, _obj.ApprovalRule, stages);
-      }
+      var stages = Functions.ApprovalTask.Remote.GetBaseStages(_obj).BaseStages;
+      Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, stages);
+      // Обновить обязательных согласующих.
+      Sungero.Docflow.Functions.ApprovalTask.Remote.UpdateReglamentApprovers(_obj, _obj.ApprovalRule, stages);
     }
     
     public virtual void ReqApproversChanged(Sungero.Domain.Shared.CollectionPropertyChangedEventArgs e)
@@ -170,30 +146,11 @@ namespace Sungero.Docflow
       if (Equals(e.NewValue, e.OldValue))
         return;
       
-      bool skipRefreshEvents = false;
-      e.Params.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.SkipRefreshEventsParamName, out skipRefreshEvents);
-      
-      if (!skipRefreshEvents)
-        e.Params.AddOrUpdate(Constants.ApprovalTask.RefreshApprovalTaskForm.SkipRefreshEventsParamName, true);
-      
+      var stages = Functions.ApprovalTask.Remote.GetBaseStages(_obj).BaseStages;
       // Очистить на клиенте, т.к. с сервера изменения могут прийти позже.
       _obj.Signatory = null;
-      
-      if (!skipRefreshEvents)
-      {
-        var document = _obj.DocumentGroup.OfficialDocuments.FirstOrDefault();
-        var memo = document != null ? Memos.As(document) : null;
-        
-        if (memo != null)
-          Functions.ApprovalTask.SychronizeMemoAddressees(_obj, memo);
-        
-        var stages = Functions.ApprovalTask.Remote.GetBaseStages(_obj).BaseStages;
-        Functions.ApprovalTask.Remote.ApprovalRuleChanged(_obj, e.NewValue, stages);
-        
-        e.Params.AddOrUpdate(Constants.ApprovalTask.RefreshApprovalTaskForm.SkipRefreshEventsParamName, false);
-        
-        Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, true);
-      }
+      Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, stages);
+      Functions.ApprovalTask.Remote.ApprovalRuleChanged(_obj, e.NewValue, stages);
     }
 
     public virtual void DocumentGroupDeleted(Sungero.Workflow.Interfaces.AttachmentDeletedEventArgs e)
@@ -206,15 +163,10 @@ namespace Sungero.Docflow
         Functions.OfficialDocument.RemoveRelatedDocumentsFromAttachmentGroup(OfficialDocuments.As(document), _obj.OtherGroup);
 
       _obj.Subject = Docflow.Resources.AutoformatTaskSubject;
-      
-      Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, true);
     }
 
     public virtual void DocumentGroupAdded(Sungero.Workflow.Interfaces.AttachmentAddedEventArgs e)
     {
-      var taskParams = ((Domain.Shared.IExtendedEntity)_obj).Params;
-      taskParams[Constants.ApprovalTask.RefreshApprovalTaskForm.SkipRefreshEventsParamName] = true;
-      
       var document = _obj.DocumentGroup.OfficialDocuments.First();
 
       using (TenantInfo.Culture.SwitchTo())
@@ -237,10 +189,8 @@ namespace Sungero.Docflow
         Functions.ApprovalTask.SychronizeMemoAddressees(_obj, memo);
       
       var stages = Functions.ApprovalTask.Remote.GetBaseStages(_obj).BaseStages;
+      Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, stages);
       Functions.ApprovalTask.Remote.ApprovalRuleChanged(_obj, _obj.ApprovalRule, stages);
-      
-      taskParams[Constants.ApprovalTask.RefreshApprovalTaskForm.SkipRefreshEventsParamName] = false;
-      Functions.ApprovalTask.RefreshApprovalTaskForm(_obj, true);
     }
 
     public override void SubjectChanged(Sungero.Domain.Shared.StringPropertyChangedEventArgs e)

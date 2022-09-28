@@ -28,8 +28,6 @@ namespace Sungero.Docflow
       
       if (_obj.Result == Result.Approved)
         e.Result = ApprovalTasks.Resources.Endorsed;
-      else if (_obj.Result == Result.WithSuggestions)
-        e.Result = ApprovalTasks.Resources.EndorsedWithSuggestions;
       else if (_obj.Result == Result.Forward)
         e.Result = FreeApprovalTasks.Resources.ForwardedFormat(Company.PublicFunctions.Employee.GetShortName(_obj.Addressee, DeclensionCase.Dative, true));
       else

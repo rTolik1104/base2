@@ -132,8 +132,7 @@
     "ReworkDeadline",
     "ReworkPerformer",
     "RuleNeedRestrictInitiatorAccessRights",
-    "AccessRightsForEmployee",
-    "StageAllowApproveWithSuggestions"
+    "AccessRightsForEmployee"
   ],
   "Versions": []
 }

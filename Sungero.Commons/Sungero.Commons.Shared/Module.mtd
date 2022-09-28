@@ -77,7 +77,6 @@
         "Name": "Location",
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconLocation_00df3aeec8d54194a21ba4617a8e53e0.png",
-        "TabId": "cdd0df61-5cc5-4342-9c3c-942e567a5520",
         "Versions": []
       },
       {
@@ -86,7 +85,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconInfo_056413d6d13e41cfa4e31b05196c4d4f.png",
         "PreviousItemGuid": "00df3aee-c8d5-4194-a21b-a4617a8e53e0",
-        "TabId": "cdd0df61-5cc5-4342-9c3c-942e567a5520",
         "Versions": []
       }
     ],
@@ -96,12 +94,6 @@
       "IconName": "",
       "Versions": []
     },
-    "Tabs": [
-      {
-        "NameGuid": "cdd0df61-5cc5-4342-9c3c-942e567a5520",
-        "Name": "Tab"
-      }
-    ],
     "Versions": []
   },
   "Dependencies": [
@@ -598,12 +590,12 @@
   "SharedAssemblyName": "Sungero.Commons.Shared",
   "SharedNamespace": "Sungero.Commons.Shared",
   "SpecialFolders": [],
-  "Version": "4.4.29.0",
+  "Version": "4.3.25.0",
   "Widgets": [],
   "Versions": [
     {
       "Type": "ModuleMetadata",
-      "Number": 8
+      "Number": 6
     },
     {
       "Type": "DomainApi",

@@ -156,7 +156,6 @@
     {
       "NameGuid": "d44a8df5-3fe9-4a1b-a5a0-e8aaa65820da",
       "Name": "AddendaGroup",
-      "CanDeleteTaskFamilyAttachments": true,
       "Constraints": [
         {
           "NameGuid": "4049ec5e-87e7-486c-9af4-b4d8b592b67c",
@@ -165,17 +164,12 @@
           "Versions": []
         }
       ],
-      "HandledEvents": [
-        "CreatedShared",
-        "AddedShared",
-        "DeletedShared"
-      ],
+      "IsEnabled": false,
       "Versions": []
     },
     {
       "NameGuid": "13a98dcd-c5ec-4fd0-a682-424613f615d4",
       "Name": "OtherGroup",
-      "CanDeleteTaskFamilyAttachments": true,
       "Constraints": [],
       "Versions": []
     },
@@ -1341,28 +1335,6 @@
       "IsVisibility": false,
       "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.BooleanEditorToBooleanBinder",
       "PreviousPropertyGuid": "cfdaea47-eb0f-47d9-8183-ca631d722373"
-    },
-    {
-      "$type": "Sungero.Metadata.CollectionPropertyMetadata, Sungero.Metadata",
-      "NameGuid": "1e8b4051-5d97-4884-ae3f-c0c7cf56eba3",
-      "Name": "AddedAddenda",
-      "Code": "TAIAddAddenda",
-      "EntityGuid": "1ff589b3-bdb9-4900-a1db-0790693052ba",
-      "IsShowedInList": false,
-      "IsVisibility": false,
-      "PreviousPropertyGuid": "87c7b81a-77d7-4859-941c-4606a5723675",
-      "Versions": []
-    },
-    {
-      "$type": "Sungero.Metadata.CollectionPropertyMetadata, Sungero.Metadata",
-      "NameGuid": "cc7884af-68c4-4974-9c67-bab4e54874aa",
-      "Name": "RemovedAddenda",
-      "Code": "TAIRemAddenda",
-      "EntityGuid": "17dc81ea-b23e-4b1c-9c6b-ea2c2a1f7b7e",
-      "IsShowedInList": false,
-      "IsVisibility": false,
-      "PreviousPropertyGuid": "1e8b4051-5d97-4884-ae3f-c0c7cf56eba3",
-      "Versions": []
     }
   ],
   "PublicConstants": [
@@ -2026,20 +1998,6 @@
           "ParameterTypeFullName": "System.Boolean"
         }
       ],
-      "ReturnType": "void",
-      "ReturnTypeFullName": "System.Void"
-    },
-    {
-      "Name": "SetCompletedByInParentAssignment",
-      "IsRemote": true,
-      "Parameters": [
-        {
-          "Name": "actionItemExecutionTask",
-          "ParameterType": "global::Sungero.RecordManagement.IActionItemExecutionTask",
-          "ParameterTypeFullName": "Sungero.RecordManagement.IActionItemExecutionTask, Sungero.Domain.Interfaces"
-        }
-      ],
-      "Placement": "Shared",
       "ReturnType": "void",
       "ReturnTypeFullName": "System.Void"
     },

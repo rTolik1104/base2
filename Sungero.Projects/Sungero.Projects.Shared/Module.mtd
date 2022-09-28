@@ -93,7 +93,6 @@
         "Name": "Projects",
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconProjects_c4d7f2f423bd4ce99d44deb8a8630d9d.png",
-        "TabId": "91db6b18-421d-41f7-b86c-33e35d5ab8f6",
         "Versions": []
       },
       {
@@ -102,7 +101,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconLinks_821917ab51b3452e997e47752771a991.png",
         "PreviousItemGuid": "c4d7f2f4-23bd-4ce9-9d44-deb8a8630d9d",
-        "TabId": "91db6b18-421d-41f7-b86c-33e35d5ab8f6",
         "Versions": []
       },
       {
@@ -111,7 +109,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconDocuments_494e3180b02a422bbe85018c24d6cea7.png",
         "PreviousItemGuid": "821917ab-51b3-452e-997e-47752771a991",
-        "TabId": "91db6b18-421d-41f7-b86c-33e35d5ab8f6",
         "Versions": []
       },
       {
@@ -119,7 +116,6 @@
         "Name": "Group",
         "BackgroundPosition": "Stretch",
         "PreviousItemGuid": "494e3180-b02a-422b-be85-018c24d6cea7",
-        "TabId": "91db6b18-421d-41f7-b86c-33e35d5ab8f6",
         "Versions": []
       },
       {
@@ -128,7 +124,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconSettings_424630f089e0461786a166e670f6232e.png",
         "PreviousItemGuid": "6d352911-890b-48b6-bd71-9c0892f1456d",
-        "TabId": "91db6b18-421d-41f7-b86c-33e35d5ab8f6",
         "Versions": []
       }
     ],
@@ -137,12 +132,6 @@
       "BackgroundPosition": "Stretch",
       "Versions": []
     },
-    "Tabs": [
-      {
-        "NameGuid": "91db6b18-421d-41f7-b86c-33e35d5ab8f6",
-        "Name": "Tab"
-      }
-    ],
     "Versions": []
   },
   "Dependencies": [
@@ -636,7 +625,7 @@
       "Versions": []
     }
   ],
-  "Version": "4.4.29.0",
+  "Version": "4.3.25.0",
   "Widgets": [
     {
       "NameGuid": "0a50b572-9cb1-40cf-9307-dc760bd0485d",
@@ -743,7 +732,7 @@
   "Versions": [
     {
       "Type": "ModuleMetadata",
-      "Number": 8
+      "Number": 6
     },
     {
       "Type": "DomainApi",

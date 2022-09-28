@@ -77,6 +77,8 @@ namespace Sungero.Docflow.Shared
       {
         if (document.Versions.Any())
         {
+          var isIncomingDocument = Docflow.PublicFunctions.OfficialDocument.Remote.CanSendAnswer(document);
+          var isFormalizedDocument = Docflow.AccountingDocumentBases.Is(document) && Docflow.AccountingDocumentBases.As(document).IsFormalized == true;
           taskProperties.DeliveryMethod.IsEnabled = refreshParameters.DeliveryMethodIsEnabled;
           taskProperties.ExchangeService.IsEnabled = refreshParameters.ExchangeServiceIsEnabled;
         }
@@ -122,58 +124,22 @@ namespace Sungero.Docflow.Shared
     }
     
     /// <summary>
-    ///  Обновить видимость, доступность и обязательность полей с учетом базовых этапов согласования в карточке задачи.
+    /// Обновить видимость, доступность и обязательность полей в карточке задачи.
     /// </summary>
-    /// <param name="stages">Этапы согласования.</param>
-    /// <param name="updateCache">Обновить параметры обновления формы.</param>
-    public void RefreshApprovalTaskForm(List<Structures.Module.DefinedApprovalBaseStageLite> stages, bool updateCache)
+    public void RefreshApprovalTaskForm()
     {
-      var refreshParameters = updateCache ? null : this.GetRefreshParams((Domain.Shared.IExtendedEntity)_obj);
-      if (refreshParameters == null)
-      {
-        Logger.Debug("Start RefreshApprovalTaskForm(stages)");
-        
-        refreshParameters = stages == null ? Functions.ApprovalTask.Remote.GetFullStagesInfoForRefresh(_obj) :
-          Functions.ApprovalTask.Remote.GetFullStagesInfoForRefresh(_obj, stages);
-        
-        this.SetRefreshParams((Domain.Shared.IExtendedEntity)_obj, refreshParameters);
-      }
-      else
-        Logger.Debug("Start RefreshApprovalTaskForm(stages) with cache");
-      
+      var refreshParameters = Functions.ApprovalTask.Remote.GetFullStagesInfoForRefresh(_obj);
       this.RefreshProperties(refreshParameters);
     }
     
     /// <summary>
     /// Обновить видимость, доступность и обязательность полей с учетом базовых этапов согласования в карточке задачи.
     /// </summary>
-    /// <param name="updateCache">Обновить параметры обновления формы.</param>
-    public void RefreshApprovalTaskForm(bool updateCache)
+    /// <param name="stages">Этапы согласования.</param>
+    public void RefreshApprovalTaskForm(List<Structures.Module.DefinedApprovalBaseStageLite> stages)
     {
-      this.RefreshApprovalTaskForm(null, updateCache);
-    }
-    
-    /// <summary>
-    /// Получить или обновить параметры обновления формы задания.
-    /// </summary>
-    /// <param name="assignment">Задание.</param>
-    /// <param name="updateCache">Обновить параметры обновления формы.</param>
-    /// <returns>Параметры обновления формы задания.</returns>
-    public virtual Structures.ApprovalTask.RefreshParameters GetOrUpdateAssignmentRefreshParams(Sungero.Workflow.IAssignment assignment, bool updateCache)
-    {
-      var refreshParameters = updateCache ? null : this.GetRefreshParams((Domain.Shared.IExtendedEntity)assignment);
-      if (refreshParameters == null)
-      {
-        Logger.Debug("Start GetOrUpdateAssignmentRefreshParams");
-        
-        refreshParameters = Functions.ApprovalTask.Remote.GetFullStagesInfoForRefresh(_obj);
-        
-        this.SetRefreshParams((Domain.Shared.IExtendedEntity)assignment, refreshParameters);
-      }
-      else
-        Logger.Debug("Start GetOrUpdateAssignmentRefreshParams with cache");
-      
-      return refreshParameters;
+      var refreshParameters = Functions.ApprovalTask.Remote.GetFullStagesInfoForRefresh(_obj, stages);
+      this.RefreshProperties(refreshParameters);
     }
     
     /// <summary>
@@ -186,99 +152,6 @@ namespace Sungero.Docflow.Shared
       var fullStages = Functions.ApprovalRuleBase.CastToBaseApprovalStageLite(stages);
       var refreshParameters = Functions.ApprovalTask.Remote.GetFullStagesInfoForRefresh(_obj, fullStages);
       this.RefreshProperties(refreshParameters);
-    }
-    
-    /// <summary>
-    /// Получить информацию по базовым этапам для обновления формы задачи из параметров обновления формы.
-    /// </summary>
-    /// <param name="entity">Задача.</param>
-    /// <returns>Информация по базовым этапам для обновления формы задачи на согласование по регламенту.</returns>
-    public virtual Structures.ApprovalTask.RefreshParameters GetRefreshParams(Domain.Shared.IExtendedEntity entity)
-    {
-      var entityParams = entity.Params;
-      
-      object addresseeIsEnabled = null;
-      object exchangeServiceIsEnabled = null;
-      object deliveryMethodIsEnabled = null;
-      object addApproversIsVisible = null;
-      object addresseeIsVisible = null;
-      object signatoryIsVisible = null;
-      object deliveryMethodIsVisible = null;
-      object exchangeServiceIsVisible = null;
-      object addresseeIsRequired = null;
-      object signatoryIsRequired = null;
-      object exchangeServiceIsRequired = null;
-      object addresseesIsEnabled = null;
-      object addresseesIsVisible = null;
-      object addresseesIsRequired = null;
-      
-      var formParamsExist = entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.AddresseeIsEnabledParamName, out addresseeIsEnabled) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.ExchangeServiceIsEnabledParamName, out exchangeServiceIsEnabled) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.DeliveryMethodIsEnabledParamName, out deliveryMethodIsEnabled) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.AddApproversIsVisibleParamName, out addApproversIsVisible) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.AddresseeIsVisibleParamName, out addresseeIsVisible) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.SignatoryIsVisibleParamName, out signatoryIsVisible) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.DeliveryMethodIsVisibleParamName, out deliveryMethodIsVisible) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.ExchangeServiceIsVisibleParamName, out exchangeServiceIsVisible) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.AddresseeIsRequiredParamName, out addresseeIsRequired) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.SignatoryIsRequiredParamName, out signatoryIsRequired) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.ExchangeServiceIsRequiredParamName, out exchangeServiceIsRequired) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.AddresseesIsEnabledParamName, out addresseesIsEnabled) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.AddresseesIsVisibleParamName, out addresseesIsVisible) &&
-        entityParams.TryGetValue(Constants.ApprovalTask.RefreshApprovalTaskForm.AddresseesIsRequiredParamName, out addresseesIsRequired);
-      
-      if (formParamsExist)
-      {
-        try
-        {
-          var formParams = Structures.ApprovalTask.RefreshParameters.Create();
-          formParams.AddresseeIsEnabled = (bool)addresseeIsEnabled;
-          formParams.ExchangeServiceIsEnabled = (bool)exchangeServiceIsEnabled;
-          formParams.DeliveryMethodIsEnabled = (bool)deliveryMethodIsEnabled;
-          formParams.AddApproversIsVisible = (bool)addApproversIsVisible;
-          formParams.AddresseeIsVisible = (bool)addresseeIsVisible;
-          formParams.SignatoryIsVisible = (bool)signatoryIsVisible;
-          formParams.DeliveryMethodIsVisible = (bool)deliveryMethodIsVisible;
-          formParams.ExchangeServiceIsVisible = (bool)exchangeServiceIsVisible;
-          formParams.AddresseeIsRequired = (bool)addresseeIsRequired;
-          formParams.SignatoryIsRequired = (bool)signatoryIsRequired;
-          formParams.ExchangeServiceIsRequired = (bool)exchangeServiceIsRequired;
-          formParams.AddresseesIsEnabled = (bool)addresseesIsEnabled;
-          formParams.AddresseesIsVisible = (bool)addresseesIsVisible;
-          formParams.AddresseesIsRequired = (bool)addresseesIsRequired;
-          return formParams;
-        } catch
-        {
-          return null;
-        }
-        
-      }
-      
-      return null;
-    }
-    
-    /// <summary>
-    /// Установить параметры обновления формы.
-    /// </summary>
-    /// <param name="entity">Задача.</param>
-    /// <param name="refreshParameters">Информация по базовым этапам для обновления формы задачи на согласование по регламенту.</param>
-    public virtual void SetRefreshParams(Domain.Shared.IExtendedEntity entity, Structures.ApprovalTask.RefreshParameters refreshParameters)
-    {
-      var entityParams = entity.Params;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.AddresseeIsEnabledParamName] = refreshParameters.AddresseeIsEnabled;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.ExchangeServiceIsEnabledParamName] = refreshParameters.ExchangeServiceIsEnabled;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.DeliveryMethodIsEnabledParamName] = refreshParameters.DeliveryMethodIsEnabled;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.AddApproversIsVisibleParamName] = refreshParameters.AddApproversIsVisible;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.AddresseeIsVisibleParamName] = refreshParameters.AddresseeIsVisible;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.SignatoryIsVisibleParamName] = refreshParameters.SignatoryIsVisible;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.DeliveryMethodIsVisibleParamName] = refreshParameters.DeliveryMethodIsVisible;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.ExchangeServiceIsVisibleParamName] = refreshParameters.ExchangeServiceIsVisible;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.AddresseeIsRequiredParamName] = refreshParameters.AddresseeIsRequired;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.SignatoryIsRequiredParamName] = refreshParameters.SignatoryIsRequired;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.ExchangeServiceIsRequiredParamName] = refreshParameters.ExchangeServiceIsRequired;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.AddresseesIsEnabledParamName] = refreshParameters.AddresseesIsEnabled;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.AddresseesIsVisibleParamName] = refreshParameters.AddresseesIsVisible;
-      entityParams[Constants.ApprovalTask.RefreshApprovalTaskForm.AddresseesIsRequiredParamName] = refreshParameters.AddresseesIsRequired;
     }
     
     /// <summary>
@@ -299,15 +172,6 @@ namespace Sungero.Docflow.Shared
     public virtual bool SchemeVersionSupportsRework()
     {
       return _obj.GetStartedSchemeVersion() >= LayerSchemeVersions.V3;
-    }
-    
-    /// <summary>
-    /// Доступность результата выполнения "Согласовать с замечаниями".
-    /// </summary>
-    /// <returns>True - если доступно, иначе - False.</returns>
-    public virtual bool SchemeVersionSupportsApproveWithSuggestions()
-    {
-      return _obj.GetStartedSchemeVersion() >= LayerSchemeVersions.V5;
     }
     
     /// <summary>
@@ -661,7 +525,6 @@ namespace Sungero.Docflow.Shared
     /// Получить вложения группы "Приложения".
     /// </summary>
     /// <returns>Вложения группы "Приложения".</returns>
-    [Public]
     public virtual List<IOfficialDocument> GetAddendaGroupAttachments()
     {
       return _obj.AddendaGroup.All
@@ -674,7 +537,6 @@ namespace Sungero.Docflow.Shared
     /// Получить список ИД документов, добавленных в группу "Приложения".
     /// </summary>
     /// <returns>Список ИД документов.</returns>
-    [Public]
     public virtual List<int> GetAddedAddenda()
     {
       return _obj.AddedAddenda
@@ -687,7 +549,6 @@ namespace Sungero.Docflow.Shared
     /// Получить список ИД документов, удаленных из группы "Приложения".
     /// </summary>
     /// <returns>Список ИД документов.</returns>
-    [Public]
     public virtual List<int> GetRemovedAddenda()
     {
       return _obj.RemovedAddenda
@@ -697,7 +558,7 @@ namespace Sungero.Docflow.Shared
     }
     
     /// <summary>
-    /// Получить список документов, добавленных в группу "Приложения" в заданиях.
+    /// Получить список документов добавленных в группу "Приложения" в заданиях.
     /// </summary>
     /// <returns>Список документов.</returns>
     public virtual List<IOfficialDocument> GetAddedAddendaFromAssignments()
@@ -728,7 +589,7 @@ namespace Sungero.Docflow.Shared
     }
     
     /// <summary>
-    /// Получить список документов, удаленных из группы "Приложения" в заданиях.
+    /// Получить список документов удаленных из группы "Приложения" в заданиях.
     /// </summary>
     /// <returns>Список документов.</returns>
     public virtual List<IOfficialDocument> GetRemovedAddendaFromAssignments()
@@ -758,26 +619,5 @@ namespace Sungero.Docflow.Shared
     }
     
     #endregion
-    
-    /// <summary>
-    /// Получить параметры для отправки на доработку.
-    /// </summary>
-    /// <param name="stageNumber">Номер этапа.</param>
-    /// <returns>Параметры доработки.</returns>
-    public virtual Sungero.Docflow.Structures.ApprovalTask.ReworkParameters GetAssignmentReworkParameters(int stageNumber)
-    {
-      var reworkParameters = Structures.ApprovalTask.ReworkParameters.Create();
-      reworkParameters.AllowChangeReworkPerformer = false;
-      reworkParameters.AllowViewReworkPerformer = false;
-      reworkParameters.AllowSendToRework = false;
-      var item = _obj.ApprovalRule.Stages.Where(s => s.Number == stageNumber).FirstOrDefault();
-      if (item == null)
-        return reworkParameters;
-      var stage = item.Stage;
-      reworkParameters.AllowChangeReworkPerformer = stage.AllowChangeReworkPerformer ?? false;
-      reworkParameters.AllowViewReworkPerformer = stage.AllowChangeReworkPerformer ?? false;
-      reworkParameters.AllowSendToRework = stage.AllowSendToRework ?? false;
-      return reworkParameters;
-    }
   }
 }

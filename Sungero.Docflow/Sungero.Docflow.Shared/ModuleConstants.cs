@@ -487,57 +487,5 @@ namespace Sungero.Docflow.Constants
     /// Разделитель элементов в комментарии записи в истории.
     /// </summary>
     public const char HistoryCommentDelimiter = '|';
-    
-    /// <summary>
-    /// Пробел нулевой ширины.
-    /// </summary>
-    public const char ZeroWidthSpace = '\u200b';
-    
-    public const string ApprovalSignatureType = "Approval";
-    
-    public const string EndorsingSignatureType = "Endorsing";
-    
-    /// <summary>
-    /// Отступ справа для простановки отметки о поступлении, в сантиметрах.
-    /// </summary>
-    [Sungero.Core.PublicAttribute]
-    public const double RegistrationStampDefaultRightIndent = 1.0;
-    
-    /// <summary>
-    /// Отступ снизу для простановки отметки о поступлении, в сантиметрах.
-    /// </summary>
-    [Sungero.Core.PublicAttribute]
-    public const double RegistrationStampDefaultBottomIndent = 0.3;
-    
-    /// <summary>
-    /// Отступ справа для простановки отметки о поступлении в центре страницы, в сантиметрах.
-    /// </summary>
-    [Sungero.Core.PublicAttribute]
-    public const double RegistrationStampDefaultPageCenterIndent = 8.5;
-    
-    /// <summary>
-    /// Имя параметра с датой последнего запуска ФП "Документооборот. Рассылка электронных писем о заданиях".
-    /// </summary>
-    public const string LastNotificationOfAssignment = "LastNotificationOfAssignment";
-    
-    /// <summary>
-    /// Имя параметра "Количество писем в пакете".
-    /// </summary>
-    public const string SummaryMailNotificationsBunchCountParamName = "SummaryMailNotificationsBunchCount";
-    
-    /// <summary>
-    /// Количество рабочих дней, которые считаются как ближайшее время для выполнения заданий.
-    /// </summary>
-    public const int SummaryMailNotificationClosestDaysCount = 3;
-    
-    /// <summary>
-    /// Количество писем в пакете.
-    /// </summary>
-    public const int SummaryMailNotificationsBunchCount = 50;
-    
-    /// <summary>
-    /// Размер отступа для шаблона письма.
-    /// </summary>
-    public const int SummaryMailLeftMarginSize = 12;
   }
 }

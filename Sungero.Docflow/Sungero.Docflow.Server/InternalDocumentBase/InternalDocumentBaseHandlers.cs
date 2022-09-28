@@ -7,17 +7,6 @@ using Sungero.Docflow.InternalDocumentBase;
 
 namespace Sungero.Docflow
 {
-  partial class InternalDocumentBaseConvertingFromServerHandler
-  {
-
-    public override void ConvertingFrom(Sungero.Domain.ConvertingFromEventArgs e)
-    {
-      base.ConvertingFrom(e);
-      
-      e.Without(Sungero.Docflow.Addendums.Info.Properties.LeadingDocument);
-    }
-  }
-
   partial class InternalDocumentBaseFilteringServerHandler<T>
   {
     

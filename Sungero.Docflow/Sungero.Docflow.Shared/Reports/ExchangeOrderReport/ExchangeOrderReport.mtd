@@ -81,9 +81,7 @@
     "Document",
     "Date",
     "RejectSended",
-    "RejectAccepted",
-    "BuyerTitleRejected",
-    "BuyerTitlePartiallyAccepted"
+    "RejectAccepted"
   ],
   "Versions": []
 }

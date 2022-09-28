@@ -103,7 +103,6 @@
         "Name": "SearchAndExport",
         "FunctionName": "SearchByRequisitesAndExport",
         "GroupId": "7f8ba0a3-7b13-474b-bc99-86a21a6f7b6a",
-        "IsVisibleInDesktopClient": false,
         "PreviousItemGuid": "5135efab-a080-4159-9811-9914cf6a14aa",
         "Versions": []
       }
@@ -120,7 +119,6 @@
         "Name": "Documents",
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconDocuments_71b4e7f79afd44f6b908212f50f84379.png",
-        "TabId": "9814011a-09ae-4eab-a6d6-5c5c9e2f3bf2",
         "Versions": []
       },
       {
@@ -129,7 +127,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconLinkedInformation_c3cb3ce114dc48b69d08a97f30292f8d.png",
         "PreviousItemGuid": "71b4e7f7-9afd-44f6-b908-212f50f84379",
-        "TabId": "9814011a-09ae-4eab-a6d6-5c5c9e2f3bf2",
         "Versions": []
       },
       {
@@ -138,7 +135,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconExchange_4d0b742f8fc3466fa657746f4a0bcb50.png",
         "PreviousItemGuid": "c3cb3ce1-14dc-48b6-9d08-a97f30292f8d",
-        "TabId": "9814011a-09ae-4eab-a6d6-5c5c9e2f3bf2",
         "Versions": []
       },
       {
@@ -147,7 +143,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconControl_8437ba16aa6b4e23ba2703c915a24ee7.png",
         "PreviousItemGuid": "4d0b742f-8fc3-466f-a657-746f4a0bcb50",
-        "TabId": "9814011a-09ae-4eab-a6d6-5c5c9e2f3bf2",
         "Versions": []
       },
       {
@@ -156,7 +151,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconSearch_7f8ba0a37b13474bbc9986a21a6f7b6a.png",
         "PreviousItemGuid": "8437ba16-aa6b-4e23-ba27-03c915a24ee7",
-        "TabId": "9814011a-09ae-4eab-a6d6-5c5c9e2f3bf2",
         "Versions": []
       }
     ],
@@ -165,12 +159,6 @@
       "BackgroundPosition": "Stretch",
       "Versions": []
     },
-    "Tabs": [
-      {
-        "NameGuid": "9814011a-09ae-4eab-a6d6-5c5c9e2f3bf2",
-        "Name": "Tab"
-      }
-    ],
     "Versions": []
   },
   "Dependencies": [
@@ -673,12 +661,12 @@
       "Versions": []
     }
   ],
-  "Version": "4.4.29.0",
+  "Version": "4.3.25.0",
   "Widgets": [],
   "Versions": [
     {
       "Type": "ModuleMetadata",
-      "Number": 8
+      "Number": 6
     },
     {
       "Type": "DomainApi",

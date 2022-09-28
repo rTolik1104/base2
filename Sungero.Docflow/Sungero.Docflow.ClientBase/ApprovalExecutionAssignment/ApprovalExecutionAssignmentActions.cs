@@ -44,8 +44,7 @@ namespace Sungero.Docflow.Client
 
     public virtual void CreateAcquaintance(Sungero.Domain.Client.ExecuteActionArgs e)
     {
-      var approvalTask = ApprovalTasks.As(_obj.Task);
-      if (!Functions.ApprovalTask.Remote.HasDocumentAndCanRead(approvalTask))
+      if (!Functions.ApprovalTask.Remote.HasDocumentAndCanRead(ApprovalTasks.As(_obj.Task)))
       {
         e.AddError(ApprovalTasks.Resources.NoRightsToDocument);
         return;
@@ -56,15 +55,7 @@ namespace Sungero.Docflow.Client
       
       var subTask = RecordManagement.PublicFunctions.Module.Remote.CreateAcquaintanceTaskAsSubTask(document, _obj);
       if (subTask != null)
-      {
-        RecordManagement.PublicFunctions.Module.SynchronizeAttachmentsToAcquaintance(_obj.DocumentGroup.OfficialDocuments.FirstOrDefault(),
-                                                                                     _obj.AddendaGroup.OfficialDocuments.Select(x => Sungero.Content.ElectronicDocuments.As(x)).ToList(),
-                                                                                     Functions.ApprovalTask.GetAddedAddenda(approvalTask),
-                                                                                     Functions.ApprovalTask.GetRemovedAddenda(approvalTask),
-                                                                                     _obj.OtherGroup.All.ToList(),
-                                                                                     subTask);
         subTask.ShowModal();
-      }
     }
 
     public virtual bool CanCreateAcquaintance(Sungero.Domain.Client.CanExecuteActionArgs e)

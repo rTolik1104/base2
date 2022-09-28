@@ -187,7 +187,7 @@ namespace Sungero.Docflow
     {
       if (_obj.AccessRights.CanUpdate() && !Functions.Module.IsLockedByOther(_obj))
       {
-        var hasReservationSetting = PublicFunctions.Module.Remote.GetRegistrationSettings(Docflow.RegistrationSetting.SettingType.Reservation, _obj.BusinessUnit, _obj.DocumentKind, e.NewValue).Any();
+        var hasReservationSetting = PublicFunctions.RegistrationSetting.GetAvailableSettingsByParams(Docflow.RegistrationSetting.SettingType.Reservation, _obj.BusinessUnit, _obj.DocumentKind, e.NewValue).Any();
         e.Params.AddOrUpdate(Sungero.Docflow.Constants.OfficialDocument.HasReservationSetting, hasReservationSetting);
       }
     }
@@ -196,7 +196,7 @@ namespace Sungero.Docflow
     {
       if (_obj.AccessRights.CanUpdate() && !Functions.Module.IsLockedByOther(_obj))
       {
-        var hasReservationSetting = PublicFunctions.Module.Remote.GetRegistrationSettings(Docflow.RegistrationSetting.SettingType.Reservation, e.NewValue, _obj.DocumentKind, _obj.Department).Any();
+        var hasReservationSetting = PublicFunctions.RegistrationSetting.GetAvailableSettingsByParams(Docflow.RegistrationSetting.SettingType.Reservation, e.NewValue, _obj.DocumentKind, _obj.Department).Any();
         e.Params.AddOrUpdate(Sungero.Docflow.Constants.OfficialDocument.HasReservationSetting, hasReservationSetting);
       }
     }
@@ -209,9 +209,8 @@ namespace Sungero.Docflow
           _obj.RegistrationState == RegistrationState.NotRegistered &&
           !Functions.OfficialDocument.IsObsolete(_obj, e.NewValue))
       {
-        var hasNumerationSetting = Functions.OfficialDocument.HasDocumentRegistersByDocument(_obj, Docflow.RegistrationSetting.SettingType.Numeration); 
-        e.Params.AddOrUpdate(Sungero.Docflow.Constants.OfficialDocument.HasNumerationSetting, hasNumerationSetting);
-        if (!hasNumerationSetting)
+        var documentRegisters = Functions.OfficialDocument.GetDocumentRegistersByDocument(_obj, Docflow.RegistrationSetting.SettingType.Numeration);
+        if (!documentRegisters.Any())
           e.AddWarning(_obj.Info.Properties.LifeCycleState, Sungero.Docflow.Resources.NumberingSettingsRequiredForSave, _obj.Info.Properties.DocumentKind);
         else
           e.AddInformation(_obj.Info.Properties.LifeCycleState, Sungero.Docflow.Resources.DocumentNumberAutomaticallyGeneratedOnSave, _obj.Info.Properties.DocumentKind);
@@ -238,7 +237,15 @@ namespace Sungero.Docflow
 
     public override void Showing(Sungero.Presentation.FormShowingEventArgs e)
     {
-      PublicFunctions.OfficialDocument.CreateParamsCache(_obj);
+      // BUG 29674.
+      e.Params.Remove(Sungero.Docflow.Constants.OfficialDocument.ShowParam);
+      
+      if (_obj.AccessRights.CanUpdate() && !Functions.Module.IsLockedByOther(_obj))
+      {
+        var hasReservationSetting = Docflow.PublicFunctions.RegistrationSetting.GetSettingByDocument(_obj, Docflow.RegistrationSetting.SettingType.Reservation) != null;
+        e.Params.AddOrUpdate(Sungero.Docflow.Constants.OfficialDocument.HasReservationSetting, hasReservationSetting);
+      }
+      
       PublicFunctions.OfficialDocument.SwitchVerificationMode(_obj);
     }
 
@@ -276,14 +283,8 @@ namespace Sungero.Docflow
           _obj.RegistrationState == RegistrationState.NotRegistered &&
           !Functions.OfficialDocument.IsObsolete(_obj, _obj.LifeCycleState))
       {
-        bool hasNumerationSetting;
-        if (!e.Params.TryGetValue(Sungero.Docflow.Constants.OfficialDocument.HasNumerationSetting, out hasNumerationSetting))
-        {
-          hasNumerationSetting = Functions.OfficialDocument.HasDocumentRegistersByDocument(_obj, Docflow.RegistrationSetting.SettingType.Numeration);
-          e.Params.AddOrUpdate(Sungero.Docflow.Constants.OfficialDocument.HasNumerationSetting, hasNumerationSetting);
-        }
-        
-        if (!hasNumerationSetting)
+        var documentRegisters = Functions.OfficialDocument.GetDocumentRegistersByDocument(_obj, Docflow.RegistrationSetting.SettingType.Numeration);
+        if (!documentRegisters.Any())
           e.AddWarning(_obj.Info.Properties.DocumentKind, Sungero.Docflow.Resources.NumberingSettingsRequiredForSave, _obj.Info.Properties.LifeCycleState);
         else if (_obj.VerificationState != VerificationState.InProcess)
           e.AddInformation(_obj.Info.Properties.DocumentKind, Sungero.Docflow.Resources.DocumentNumberAutomaticallyGeneratedOnSave, _obj.Info.Properties.LifeCycleState);
@@ -359,7 +360,6 @@ namespace Sungero.Docflow
           !Functions.OfficialDocument.IsObsolete(_obj, _obj.LifeCycleState))
       {
         var setting = Docflow.PublicFunctions.RegistrationSetting.GetSettingForKind(_obj, Docflow.RegistrationSetting.SettingType.Numeration, e.NewValue);
-        e.Params.AddOrUpdate(Sungero.Docflow.Constants.OfficialDocument.HasNumerationSetting, setting != null);
         if (setting == null)
           e.AddWarning(_obj.Info.Properties.DocumentKind, Sungero.Docflow.Resources.NumberingSettingsRequiredForSave, _obj.Info.Properties.LifeCycleState);
         else
@@ -368,7 +368,7 @@ namespace Sungero.Docflow
       
       if (_obj.AccessRights.CanUpdate() && !Functions.Module.IsLockedByOther(_obj))
       {
-        var hasReservationSetting = PublicFunctions.Module.Remote.GetRegistrationSettings(Docflow.RegistrationSetting.SettingType.Reservation, _obj.BusinessUnit, e.NewValue, _obj.Department).Any();
+        var hasReservationSetting = PublicFunctions.RegistrationSetting.GetAvailableSettingsByParams(Docflow.RegistrationSetting.SettingType.Reservation, _obj.BusinessUnit, e.NewValue, _obj.Department).Any();
         e.Params.AddOrUpdate(Sungero.Docflow.Constants.OfficialDocument.HasReservationSetting, hasReservationSetting);
       }
     }

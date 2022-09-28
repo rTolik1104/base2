@@ -53,65 +53,12 @@ namespace Sungero.Docflow.Server
     /// Получить права подписи приложения.
     /// </summary>
     /// <returns>Права подписи на приложение и ведущий документ.</returns>
-    [Obsolete("Используйте метод GetSignatureSettingsQuery")]
     public override List<ISignatureSetting> GetSignatureSettings()
     {
       var baseSettings = base.GetSignatureSettings();
       if (_obj.LeadingDocument != null)
         baseSettings.AddRange(Functions.OfficialDocument.GetSignatureSettings(_obj.LeadingDocument));
       return baseSettings;
-    }
-    
-    /// <summary>
-    /// Получить права подписи приложения.
-    /// </summary>
-    /// <returns>Права подписи на приложение и ведущий документ.</returns>
-    public override IQueryable<ISignatureSetting> GetSignatureSettingsQuery()
-    {
-      var settings = base.GetSignatureSettingsQuery();
-      
-      return this.GetSignatureSettingsWithLeadingDocument(settings);
-    }
-    
-    /// <summary>
-    /// Получить права подписи приложения.
-    /// </summary>
-    /// <param name="settings">Список прав подписи на приложения.</param>
-    /// <returns>Права подписи на приложение и ведущий документ.</returns>
-    public virtual IQueryable<ISignatureSetting> GetSignatureSettingsWithLeadingDocument(IQueryable<ISignatureSetting> settings)
-    {
-      if (_obj.LeadingDocument != null)
-      {
-        var settingIds = settings.Select(s => s.Id).ToList();
-        settingIds.AddRange(Functions.OfficialDocument.GetSignatureSettingsQuery(_obj.LeadingDocument)
-                            .Where(s => !settingIds.Contains(s.Id))
-                            .Select(s => s.Id)
-                            .ToList());
-        
-        return SignatureSettings.GetAll(s => settingIds.Contains(s.Id));
-      }
-      else
-        return settings;
-    }
-    
-    /// <summary>
-    /// Восстановить связь приложения с ведущим документом.
-    /// </summary>
-    /// <param name="addendumId">Идентификатор приложения.</param>
-    [Remote]
-    public static void RestoreAddendumRelationToLeadingDocument(int addendumId)
-    {
-      var addendum = Addendums.GetAll(x => x.Id == addendumId).FirstOrDefault();
-      if (addendum == null || addendum.LeadingDocument == null)
-        return;
-      
-      var hasRelationToLeadingDocument = addendum.Relations.GetRelatedFrom(Constants.Module.AddendumRelationName)
-        .Any(x => Equals(x, addendum.LeadingDocument));
-      if (hasRelationToLeadingDocument)
-        return;
-      
-      addendum.Relations.AddFrom(Constants.Module.AddendumRelationName, addendum.LeadingDocument);
-      addendum.Relations.Save();
     }
   }
 }

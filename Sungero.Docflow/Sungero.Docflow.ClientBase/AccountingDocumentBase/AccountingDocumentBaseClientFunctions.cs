@@ -37,40 +37,22 @@ namespace Sungero.Docflow.Client
         dialog.HelpCode = Constants.AccountingDocumentBase.HelpCodes.SellerUniversalCorrectionTransfer;
 
       Action<CommonLibrary.InputDialogRefreshEventArgs> refresh = null;
+      var signatories = Functions.OfficialDocument.Remote.GetSignatories(_obj);
       
       dialog.Text = AccountingDocumentBases.Resources.PropertiesFillingDialog_Text_SellerTitle;
       
-      // Поле Подписал.
-      var showSaveAndSignButton = false;
       var defaultSignatory = Company.Employees.Null;
-      var signedBy = dialog.AddSelect(AccountingDocumentBases.Resources.PropertiesFillingDialog_SignedBy, true, Company.Employees.Null);
+      if (signatories.Any(s => _obj.OurSignatory != null && Equals(s.EmployeeId, _obj.OurSignatory.Id)))
+        defaultSignatory = _obj.OurSignatory;
+      else if (signatories.Any(s => Company.Employees.Current != null && Equals(s.EmployeeId, Company.Employees.Current.Id)))
+        defaultSignatory = Company.Employees.Current;
+      else if (signatories.Select(s => s.EmployeeId).Distinct().Count() == 1)
+        defaultSignatory = Functions.AccountingDocumentBase.Remote.GetEmployeesByIds(signatories.Select(s => s.EmployeeId).ToList()).FirstOrDefault();
       
-      if (Functions.OfficialDocument.Remote.SignatorySettingWithAllUsersExist(_obj))
-      {
-        if (_obj.OurSignatory != null)
-          defaultSignatory = _obj.OurSignatory;
-        else if (Company.Employees.Current != null)
-          defaultSignatory = Company.Employees.Current;
-        
-        showSaveAndSignButton = Users.Current != null;
-      }
-      else
-      {
-        var signatoriesIds = Functions.OfficialDocument.Remote.GetSignatoriesIds(_obj);
-        
-        if (signatoriesIds.Any(s => _obj.OurSignatory != null && Equals(s, _obj.OurSignatory.Id)))
-          defaultSignatory = _obj.OurSignatory;
-        else if (signatoriesIds.Any(s => Company.Employees.Current != null && Equals(s, Company.Employees.Current.Id)))
-          defaultSignatory = Company.Employees.Current;
-        else if (signatoriesIds.Count() == 1)
-          defaultSignatory = Company.PublicFunctions.Module.Remote.GetEmployeeById(signatoriesIds.First());
-        
-        var defaultEmployees = Functions.AccountingDocumentBase.Remote.GetEmployeesByIds(signatoriesIds);
-        
-        signedBy.From(defaultEmployees);
-        
-        showSaveAndSignButton = signatoriesIds.Any(s => Users.Current != null && Equals(s, Users.Current.Id));
-      }
+      // Поле Подписал.
+      var defaultEmployees = Functions.AccountingDocumentBase.Remote.GetEmployeesByIds(signatories.Select(s => s.EmployeeId).ToList());
+      var signedBy = dialog.AddSelect(AccountingDocumentBases.Resources.PropertiesFillingDialog_SignedBy, true, Company.Employees.Null)
+        .From(defaultEmployees.Distinct());
       
       // Поле Полномочия.
       CommonLibrary.IDropDownDialogValue hasAuthority = null;
@@ -98,7 +80,7 @@ namespace Sungero.Docflow.Client
       basisDocument = dialog.AddSelect(AccountingDocumentBases.Resources.PropertiesFillingDialog_Document, false, null);
 
       CommonLibrary.CustomDialogButton saveAndSignButton = null;
-      if (showSaveAndSignButton)
+      if (signatories.Any(s => Users.Current != null && Equals(s.EmployeeId, Users.Current.Id)))
         saveAndSignButton = dialog.Buttons.AddCustom(AccountingDocumentBases.Resources.PropertiesFillingDialog_SaveAndSign);
       
       var saveButton = dialog.Buttons.AddCustom(AccountingDocumentBases.Resources.PropertiesFillingDialog_Save);
@@ -260,7 +242,8 @@ namespace Sungero.Docflow.Client
         dialog.HelpCode = Constants.AccountingDocumentBase.HelpCodes.UniversalCorrectionTransfer;
 
       Action<CommonLibrary.InputDialogRefreshEventArgs> refresh = null;
-
+      var signatories = Functions.OfficialDocument.Remote.GetSignatories(_obj);
+      
       var dialogText = string.Empty;
       
       if (isUtdNotCorrection)
@@ -277,37 +260,18 @@ namespace Sungero.Docflow.Client
       
       dialog.Text = dialogText;
       
-      // Поле Подписал.
-      var showSaveAndSignButton = false;
       var defaultSignatory = Company.Employees.Null;
-      var signatory = dialog.AddSelect(AccountingDocumentBases.Resources.PropertiesFillingDialog_SignedBy, true, Company.Employees.Null);
-
-      if (Functions.OfficialDocument.Remote.SignatorySettingWithAllUsersExist(_obj))
-      {
-        if (_obj.OurSignatory != null)
-          defaultSignatory = _obj.OurSignatory;
-        else if (Company.Employees.Current != null)
-          defaultSignatory = Company.Employees.Current;
-        
-        showSaveAndSignButton = Users.Current != null;
-      }
-      else
-      {
-        var signatoriesIds = Functions.OfficialDocument.Remote.GetSignatoriesIds(_obj);
-        
-        if (signatoriesIds.Any(s => _obj.OurSignatory != null && Equals(s, _obj.OurSignatory.Id)))
-          defaultSignatory = _obj.OurSignatory;
-        else if (signatoriesIds.Any(s => Company.Employees.Current != null && Equals(s, Company.Employees.Current.Id)))
-          defaultSignatory = Company.Employees.Current;
-        else if (signatoriesIds.Count() == 1)
-          defaultSignatory = Company.PublicFunctions.Module.Remote.GetEmployeeById(signatoriesIds.First());
-        
-        var defaultEmployees = Functions.AccountingDocumentBase.Remote.GetEmployeesByIds(signatoriesIds);
-        
-        signatory.From(defaultEmployees);
-        
-        showSaveAndSignButton = signatoriesIds.Any(s => Users.Current != null && Equals(s, Users.Current.Id));
-      }
+      if (signatories.Any(s => _obj.OurSignatory != null && Equals(s.EmployeeId, _obj.OurSignatory.Id)))
+        defaultSignatory = _obj.OurSignatory;
+      else if (signatories.Any(s => Company.Employees.Current != null && Equals(s.EmployeeId, Company.Employees.Current.Id)))
+        defaultSignatory = Company.Employees.Current;
+      else if (signatories.Select(s => s.EmployeeId).Distinct().Count() == 1)
+        defaultSignatory = Functions.AccountingDocumentBase.Remote.GetEmployeesByIds(signatories.Select(s => s.EmployeeId).ToList()).FirstOrDefault();
+      
+      // Поле Подписал.
+      var defaultEmployees = Functions.AccountingDocumentBase.Remote.GetEmployeesByIds(signatories.Select(s => s.EmployeeId).ToList());
+      var signatory = dialog.AddSelect(AccountingDocumentBases.Resources.PropertiesFillingDialog_SignedBy, true, Company.Employees.Null)
+        .From(defaultEmployees.Distinct());
       
       // Поле Полномочия.
       CommonLibrary.IDropDownDialogValue hasAuthority = null;
@@ -315,6 +279,11 @@ namespace Sungero.Docflow.Client
       {
         hasAuthority = dialog.AddSelect(AccountingDocumentBases.Resources.PropertiesFillingDialog_HasAuthority, true, 0);
         if (isOldUtdCorrection)
+        {
+          hasAuthority.From(AccountingDocumentBases.Resources.PropertiesFillingDialog_HasAuthority_Register);
+          hasAuthority.IsEnabled = false;
+        }
+        else if (isUtdCorrection && exchangeProvider == ExchangeCore.ExchangeService.ExchangeProvider.Synerdocs)
         {
           hasAuthority.From(AccountingDocumentBases.Resources.PropertiesFillingDialog_HasAuthority_Register);
           hasAuthority.IsEnabled = false;
@@ -346,7 +315,7 @@ namespace Sungero.Docflow.Client
       // Дата подписания (Дата согласования, если УКД).
       var signingLabel = isUtdCorrection ?
         AccountingDocumentBases.Resources.PropertiesFillingDialog_DateApproving :
-        AccountingDocumentBases.Resources.PropertiesFillingDialog_AcceptanceDate;
+        AccountingDocumentBases.Resources.PropertiesFillingDialog_SigningDate;
       var signingDate = dialog.AddDate(signingLabel, true, Calendar.UserToday);
       
       // Результат и Разногласия.
@@ -354,11 +323,19 @@ namespace Sungero.Docflow.Client
       CommonLibrary.IMultilineStringDialogValue disagreement = null;
       if (!isUtdCorrection && !isContractStatement)
       {
-        result = dialog.AddSelect(AccountingDocumentBases.Resources.PropertiesFillingDialog_Result, true, 0)
-          .From(AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_Accepted,
-                AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_AcceptedWithDisagreement,
-                isUtdNotCorrection ? AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_NotAccepted : null);
-        disagreement = dialog.AddMultilineString(AccountingDocumentBases.Resources.PropertiesFillingDialog_Disagreement, false);
+        // СБИС не поддерживает подписание с разногласиями.
+        if (exchangeProvider != ExchangeCore.ExchangeService.ExchangeProvider.Sbis)
+        {
+          result = dialog.AddSelect(AccountingDocumentBases.Resources.PropertiesFillingDialog_Result, true, 0)
+            .From(AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_Accepted, 
+                  AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_AcceptedWithDisagreement);
+          disagreement = dialog.AddMultilineString(AccountingDocumentBases.Resources.PropertiesFillingDialog_Disagreement, false);
+        }
+        else
+        {
+          result = dialog.AddSelect(AccountingDocumentBases.Resources.PropertiesFillingDialog_Result, true, 0)
+            .From(AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_Accepted);  
+        }
       }
       
       // Поле Результат для УКД.
@@ -387,8 +364,7 @@ namespace Sungero.Docflow.Client
       }
 
       CommonLibrary.CustomDialogButton saveAndSignButton = null;
-      
-      if (showSaveAndSignButton)
+      if (signatories.Any(s => Users.Current != null && Equals(s.EmployeeId, Users.Current.Id)))
         saveAndSignButton = dialog.Buttons.AddCustom(AccountingDocumentBases.Resources.PropertiesFillingDialog_SaveAndSign);
       
       var saveButton = dialog.Buttons.AddCustom(AccountingDocumentBases.Resources.PropertiesFillingDialog_Save);
@@ -507,20 +483,11 @@ namespace Sungero.Docflow.Client
           }
         });
       
-      if (result != null)
-        result.SetOnValueChanged(
-          r =>
-          {
-            if (string.Equals(r.NewValue, AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_Accepted) && disagreement != null)
-              disagreement.Value = string.Empty;
-          });
-      
       refresh = (r) =>
       {
         if (disagreement != null)
-          disagreement.IsEnabled = string.Equals(result.Value, AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_AcceptedWithDisagreement) ||
-            string.Equals(result.Value, AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_NotAccepted);
-        
+          disagreement.IsEnabled = result.Value == AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_AcceptedWithDisagreement;
+
         if (isSameConsignee != null)
         {
           var needConsignee = !isSameConsignee.Value.Value;
@@ -574,6 +541,9 @@ namespace Sungero.Docflow.Client
             
             if (b.IsValid)
             {
+              var signed = (result != null && result.IsVisible) ?
+                result.Value != AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_AcceptedWithDisagreement :
+                true;
               var consigneeBasisValue = isSameConsignee != null && basis != null ? (isSameConsignee.Value == true ? basis.Value : consigneeBasis.Value) : string.Empty;
               var disagreementValue = disagreement != null ? disagreement.Value : string.Empty;
               var basisValue = basis != null ? basis.Value : string.Empty;
@@ -586,16 +556,7 @@ namespace Sungero.Docflow.Client
               title.SignatoryPowersBase = basisValue;
               title.Consignee = consigneeValue;
               title.ConsigneePowersBase = consigneeBasisValue;
-              
-              if (result == null || !result.IsVisible || string.Equals(result.Value, AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_Accepted))
-                title.BuyerAcceptanceStatus = Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Accepted;
-              else if (string.Equals(result.Value, AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_AcceptedWithDisagreement))
-                title.BuyerAcceptanceStatus = Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.PartiallyAccepted;
-              else if (string.Equals(result.Value, AccountingDocumentBases.Resources.PropertiesFillingDialog_Result_NotAccepted))
-                title.BuyerAcceptanceStatus = Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Rejected;
-              else
-                title.BuyerAcceptanceStatus = Exchange.ExchangeDocumentInfo.BuyerAcceptanceStatus.Accepted;
-              
+              title.SignResult = signed;
               title.SignatoryPowers = hasAuthorityValue;
               title.AcceptanceDate = signingDate.Value;
               title.SignatoryPowerOfAttorney = signatoryPowerOfAttorney.Document;
@@ -699,15 +660,6 @@ namespace Sungero.Docflow.Client
       {
         Docflow.PublicFunctions.AccountingDocumentBase.Remote.GenerateDefaultSellerTitle(_obj, Sungero.Company.Employees.Current);
       }
-    }
-    
-    /// <summary>
-    /// Дополнительное условие доступности действия "Сменить тип".
-    /// </summary>
-    /// <returns>True - если действие "Сменить тип" доступно, иначе - false.</returns>
-    public override bool CanChangeDocumentType()
-    {
-      return _obj.IsFormalized != true && base.CanChangeDocumentType();
     }
   }
 }

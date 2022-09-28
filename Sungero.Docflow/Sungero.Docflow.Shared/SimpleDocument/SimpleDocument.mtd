@@ -3,6 +3,17 @@
   "NameGuid": "09584896-81e2-4c83-8f6c-70eb8321e1d0",
   "Name": "SimpleDocument",
   "AccessRightsMode": "Both",
+  "Actions": [
+    {
+      "NameGuid": "51235fd5-4441-48cc-a6f1-3e5af16d5a64",
+      "Name": "ChangeDocumentType",
+      "GenerateHandler": true,
+      "IsAncestorMetadata": true,
+      "Overridden": [
+        "GenerateHandler"
+      ]
+    }
+  ],
   "BaseGuid": "ce3e34ed-7be2-4426-a951-d5a70f966650",
   "CanBeNavigationPropertyType": true,
   "CanBeSearch": true,
@@ -242,8 +253,7 @@
     }
   ],
   "HandledEvents": [
-    "ClosingClient",
-    "ShowingClient"
+    "ClosingClient"
   ],
   "IconResourcesKeys": [],
   "IsVisible": false,
@@ -799,9 +809,9 @@
     "DocumentNameAutotext",
     "Number",
     "DateFrom",
+    "NeedCancelRegistration",
     "NeedAbortApproval",
-    "TypeChange",
-    "UnbindAddendumHint"
+    "TypeChange"
   ],
   "RibbonCardMetadata": {
     "NameGuid": "b57d50f5-8d93-49e9-9a2f-b31c8c2679cf",

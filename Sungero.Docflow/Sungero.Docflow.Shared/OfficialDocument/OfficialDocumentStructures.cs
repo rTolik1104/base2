@@ -7,19 +7,6 @@ using Sungero.CoreEntities;
 
 namespace Sungero.Docflow.Structures.OfficialDocument
 {
-  /// <summary>
-  /// Адресат для отправки по электронной почте.
-  /// </summary>
-  [Public]
-  partial class EmailAddressee
-  {
-    // Наименование адресата.
-    public string Label { get; set; }
-    
-    // Электронная почта.
-    public string Email { get; set; }
-  }
-  
   partial class DialogResult
   {
     public IDocumentRegister Register { get; set; }
@@ -100,20 +87,5 @@ namespace Sungero.Docflow.Structures.OfficialDocument
     
     // Позиция.
     public string Position { get; set; }
-  }
-  
-  /// <summary>
-  /// Параметры, получаемые с сервера, для клиентских событий OfficialDocument.
-  /// </summary>
-  [Public]
-  partial class OfficialDocumentParams
-  {
-    public bool? HasReservationSetting { get; set; }
-    
-    public bool? HasNumerationSetting { get; set; }
-    
-    public bool? NeedShowRegistrationPane { get; set; }
-    
-    public bool? CanChangeAssignee { get; set; }
-  }
+  }  
 }

@@ -59,7 +59,7 @@ namespace Sungero.Docflow.Server
       queueItem.Save();
     }
     
-    #region Этап выполнения сценария
+    #region Этап выполнение сценария.
     
     #region Пропустить этап по истечению срока?
     
@@ -1470,7 +1470,6 @@ namespace Sungero.Docflow.Server
         var documents = new List<IOfficialDocument>();
         documents.Add(_obj.DocumentGroup.OfficialDocuments.First());
         documents.AddRange(_obj.AddendaGroup.OfficialDocuments.ToList());
-        documents.AddRange(_obj.OtherGroup.All.Where(x => OfficialDocuments.Is(x)).Cast<IOfficialDocument>().ToList());
         
         foreach (var id in documents.Where(d => d.HasVersions).Select(d => d.Id))
           Exchange.PublicFunctions.Module.Remote.GeneratePublicBody(id);

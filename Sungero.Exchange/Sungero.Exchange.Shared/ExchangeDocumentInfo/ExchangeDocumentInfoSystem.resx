@@ -199,16 +199,4 @@
   <data name="ControlGroup_f3967adf69634fd89a530e89cfe3d5a8" xml:space="preserve">
     <value>Exchange state</value>
   </data>
-  <data name="Property_BuyerAcceptanceStatus" xml:space="preserve">
-    <value>Acceptance status</value>
-  </data>
-  <data name="Enum_BuyerAcceptanceStatus_Accepted" xml:space="preserve">
-    <value>Accepted</value>
-  </data>
-  <data name="Enum_BuyerAcceptanceStatus_PartiallyAccepted" xml:space="preserve">
-    <value>Partially accepted</value>
-  </data>
-  <data name="Enum_BuyerAcceptanceStatus_Rejected" xml:space="preserve">
-    <value>Not accepted</value>
-  </data>
 </root>

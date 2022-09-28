@@ -187,7 +187,6 @@
       "ActionArea": "CardAndCollection",
       "GenerateHandler": true,
       "IsMultiSelectAction": true,
-      "IsVisibleInDesktopClient": false,
       "LargeIconName": "Action_ExportFinancialDocument_large_cf63dc4e66844c9cbdb455757fe67380.png",
       "SmallIconName": "Action_ExportFinancialDocument_small_cf63dc4e66844c9cbdb455757fe67380.png",
       "Versions": []
@@ -1996,24 +1995,6 @@
       "ReturnTypeFullName": "System.DateTime"
     },
     {
-      "Name": "FillLeadingDocument",
-      "Parameters": [
-        {
-          "Name": "accountingDocumentBase",
-          "ParameterType": "global::Sungero.Docflow.IAccountingDocumentBase",
-          "ParameterTypeFullName": "Sungero.Docflow.IAccountingDocumentBase, Sungero.Domain.Interfaces"
-        },
-        {
-          "Name": "leadingDocument",
-          "ParameterType": "global::Sungero.Docflow.IOfficialDocument",
-          "ParameterTypeFullName": "Sungero.Docflow.IOfficialDocument, Sungero.Domain.Interfaces"
-        }
-      ],
-      "Placement": "Shared",
-      "ReturnType": "void",
-      "ReturnTypeFullName": "System.Void"
-    },
-    {
       "Name": "GenerateAnswer",
       "IsRemote": true,
       "Parameters": [
@@ -2165,9 +2146,8 @@
           "TypeFullName": "global::System.Nullable<global::System.DateTime>"
         },
         {
-          "Name": "BuyerAcceptanceStatus",
-          "IsNullable": true,
-          "TypeFullName": "global::Sungero.Core.Enumeration"
+          "Name": "SignResult",
+          "TypeFullName": "global::System.Boolean"
         },
         {
           "Name": "ActOfDisagreement",
@@ -2274,7 +2254,7 @@
     "PropertiesFillingDialog_HasAuthority_Register",
     "PropertiesFillingDialog_HasAuthority_DealAndRegister",
     "PropertiesFillingDialog_Basis",
-    "PropertiesFillingDialog_AcceptanceDate",
+    "PropertiesFillingDialog_SigningDate",
     "PropertiesFillingDialog_Result",
     "PropertiesFillingDialog_Result_Accepted",
     "PropertiesFillingDialog_Result_AcceptedWithDisagreement",
@@ -2315,8 +2295,7 @@
     "ErrorSellerTitlePropertiesFilling",
     "PropertiesFillingDialog_HasAuthority_SignSchf",
     "PropertiesFillingDialog_HasAuthority_SignSchfAndRegister",
-    "PropertiesFillingDialog_HasAuthority_Other",
-    "PropertiesFillingDialog_Result_NotAccepted"
+    "PropertiesFillingDialog_HasAuthority_Other"
   ],
   "RibbonCardMetadata": {
     "NameGuid": "0271e2ac-0989-47e3-a06e-399cba5a61be",

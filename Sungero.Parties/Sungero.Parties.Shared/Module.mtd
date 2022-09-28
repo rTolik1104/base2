@@ -154,7 +154,6 @@
         "Name": "Companies",
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconCompanies_ad56e847534f45fcbb6889422da6f002.png",
-        "TabId": "9bf42f02-9604-4bf0-97b7-8aed8795fe09",
         "Versions": []
       },
       {
@@ -163,7 +162,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconExchange_accdd7aaea5249c3b63467738e98d1a9.png",
         "PreviousItemGuid": "ad56e847-534f-45fc-bb68-89422da6f002",
-        "TabId": "9bf42f02-9604-4bf0-97b7-8aed8795fe09",
         "Versions": []
       },
       {
@@ -172,7 +170,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconContactPersons_f11faba82ffa4c2ab96abe73705cccc5.png",
         "PreviousItemGuid": "accdd7aa-ea52-49c3-b634-67738e98d1a9",
-        "TabId": "9bf42f02-9604-4bf0-97b7-8aed8795fe09",
         "Versions": []
       },
       {
@@ -181,7 +178,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconLinks_4587e4ba98c4428eabee37d8eab138cd.png",
         "PreviousItemGuid": "f11faba8-2ffa-4c2a-b96a-be73705cccc5",
-        "TabId": "9bf42f02-9604-4bf0-97b7-8aed8795fe09",
         "Versions": []
       },
       {
@@ -190,7 +186,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconPersons_f95eb69172654bca878c4dcbb2cecdf8.png",
         "PreviousItemGuid": "4587e4ba-98c4-428e-abee-37d8eab138cd",
-        "TabId": "9bf42f02-9604-4bf0-97b7-8aed8795fe09",
         "Versions": []
       },
       {
@@ -198,7 +193,6 @@
         "Name": "Empty",
         "BackgroundPosition": "Stretch",
         "PreviousItemGuid": "f95eb691-7265-4bca-878c-4dcbb2cecdf8",
-        "TabId": "9bf42f02-9604-4bf0-97b7-8aed8795fe09",
         "Versions": []
       },
       {
@@ -207,7 +201,6 @@
         "BackgroundPosition": "Stretch",
         "IconName": "GroupIconCheckCounterparty_87826cb7c8074d7a985513002fa7a7d0.png",
         "PreviousItemGuid": "11b4aab8-7cfc-46a3-8b92-94c5de9b6c90",
-        "TabId": "9bf42f02-9604-4bf0-97b7-8aed8795fe09",
         "Versions": []
       }
     ],
@@ -217,12 +210,6 @@
       "IconName": "",
       "Versions": []
     },
-    "Tabs": [
-      {
-        "NameGuid": "9bf42f02-9604-4bf0-97b7-8aed8795fe09",
-        "Name": "Tab"
-      }
-    ],
     "Versions": []
   },
   "Dependencies": [
@@ -427,6 +414,7 @@
     "WizardInviteByEmail",
     "WizardInvite",
     "WizardCompleted",
+    "WizardMailRegisterSynerdocs",
     "WizardCounterpartyView",
     "WizardCounterpartyViewShort",
     "ContactAdministrator",
@@ -544,12 +532,12 @@
       "Versions": []
     }
   ],
-  "Version": "4.4.29.0",
+  "Version": "4.3.25.0",
   "Widgets": [],
   "Versions": [
     {
       "Type": "ModuleMetadata",
-      "Number": 8
+      "Number": 6
     },
     {
       "Type": "DomainApi",

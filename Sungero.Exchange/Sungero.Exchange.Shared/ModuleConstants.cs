@@ -101,13 +101,13 @@ namespace Sungero.Exchange.Constants
       public const string GetNoteReceiptReadMark = "ExchReadNRFrom";
       
       /// <summary>
-      /// Отправка извещение о получении уведомления о приеме.
+      /// Отправка извещения о уведомлении о приеме.
       /// </summary>
       [Sungero.Core.Public]
       public const string SendRNoteReceiptReadMark = "ExchReadRNRecTo";
       
       /// <summary>
-      /// Получение извещение о получении уведомления о приеме.
+      /// Получение извещения о уведомлении о приеме.
       /// </summary>
       [Sungero.Core.Public]
       public const string GetRNoteReceiptReadMark = "ExchReadRNRFrom";

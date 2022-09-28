@@ -72,25 +72,13 @@
     {
       "NameGuid": "5320f83f-1364-4035-a7ab-44e457b9b388",
       "Name": "AddendaGroup",
-      "CanDeleteTaskFamilyAttachments": true,
-      "Constraints": [
-        {
-          "NameGuid": "831f750d-5111-4096-a3f2-d9a38bb91cce",
-          "Name": "OfficialDocuments",
-          "ConstraintTypeId": "58cca102-1e97-4f07-b6ac-fd866a8b7cb1"
-        }
-      ],
-      "HandledEvents": [
-        "AddedShared",
-        "DeletedShared",
-        "CreatedShared"
-      ],
+      "Constraints": [],
+      "IsEnabled": false,
       "Versions": []
     },
     {
       "NameGuid": "4cee386f-c292-4735-af4c-3e2069c6b057",
       "Name": "OtherGroup",
-      "CanDeleteTaskFamilyAttachments": true,
       "Constraints": [],
       "Versions": []
     },
@@ -602,37 +590,9 @@
       "IsRequired": true,
       "IsShowedInList": false,
       "PreviousPropertyGuid": "d549a15d-9ca0-4128-9897-222ee4d3b056"
-    },
-    {
-      "$type": "Sungero.Metadata.CollectionPropertyMetadata, Sungero.Metadata",
-      "NameGuid": "8f246b75-463e-46b5-b66a-1b03e562bd27",
-      "Name": "AddedAddenda",
-      "Code": "TRevAddAddenda",
-      "EntityGuid": "5ea8896a-9f98-49bc-8716-d57a68dc60bc",
-      "IsShowedInList": false,
-      "IsVisibility": false,
-      "PreviousPropertyGuid": "b147f61b-e189-42a5-aca0-d87658cb0257"
-    },
-    {
-      "$type": "Sungero.Metadata.CollectionPropertyMetadata, Sungero.Metadata",
-      "NameGuid": "885c485d-b49f-4f98-a986-3ba096a8d827",
-      "Name": "RemovedAddenda",
-      "Code": "TRevRmvAddenda",
-      "EntityGuid": "b0f46c3e-797b-4421-bb2b-4550da7baa80",
-      "IsShowedInList": false,
-      "IsVisibility": false,
-      "PreviousPropertyGuid": "8f246b75-463e-46b5-b66a-1b03e562bd27"
     }
   ],
   "PublicConstants": [
-    {
-      "Name": "AddendaGroupGuid",
-      "ParentClasses": [
-        "DocumentReviewTask"
-      ],
-      "TypeName": "System.Guid",
-      "Value": "new System.Guid(\"5320f83f-1364-4035-a7ab-44e457b9b388\")"
-    },
     {
       "Name": "CanPrepareDraftResolutionParamName",
       "ParentClasses": [
@@ -643,19 +603,6 @@
     }
   ],
   "PublicFunctions": [
-    {
-      "Name": "AddResolution",
-      "Parameters": [
-        {
-          "Name": "documentReviewTask",
-          "ParameterType": "global::Sungero.RecordManagement.IDocumentReviewTask",
-          "ParameterTypeFullName": "Sungero.RecordManagement.IDocumentReviewTask, Sungero.Domain.Interfaces"
-        }
-      ],
-      "Placement": "Client",
-      "ReturnType": "void",
-      "ReturnTypeFullName": "System.Void"
-    },
     {
       "Name": "GetDocumentReviewStateView",
       "Parameters": [
@@ -802,11 +749,7 @@
     "ReworkDraftResolutionThreadSubject",
     "ReviewCompletionNoticeThreadSubject",
     "ReviewBeginingNoticeThreadSubject",
-    "NoRightsToDocument",
-    "NeedToRework",
-    "AddresseeAlreadyExists",
-    "ConfirmDeleteDraftResolutionsForWrongAddressee",
-    "ReviewReworkAssignment"
+    "NoRightsToDocument"
   ],
   "RibbonCardMetadata": {
     "NameGuid": "fd1faac6-e7e6-48b8-90f2-3527d5e95c10",
@@ -853,7 +796,7 @@
   "Scheme": {
     "NameGuid": "c7ae4ee8-f2a6-4784-8e61-7f7f642dbcd1",
     "Name": "RouteScheme",
-    "CurrentVersionGuid": "79c59dd3-941e-48bf-8a12-18f90fbfeaf9",
+    "CurrentVersionGuid": "f2ab4250-9e59-4909-8e25-834b7153a59f",
     "IsAncestorMetadata": true,
     "Overridden": [
       "CurrentVersionGuid",
@@ -871,14 +814,9 @@
         "NameGuid": "f2ab4250-9e59-4909-8e25-834b7153a59f",
         "Name": "V4",
         "Version": 4
-      },
-      {
-        "NameGuid": "79c59dd3-941e-48bf-8a12-18f90fbfeaf9",
-        "Name": "V5",
-        "Version": 5
       }
     ],
-    "VersionsCounter": 5
+    "VersionsCounter": 4
   },
   "ShowTypeNameInThread": true,
   "Versions": [

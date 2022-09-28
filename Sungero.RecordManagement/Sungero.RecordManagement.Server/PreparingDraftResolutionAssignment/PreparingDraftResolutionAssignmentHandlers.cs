@@ -18,8 +18,6 @@ namespace Sungero.RecordManagement
         e.Result = PreparingDraftResolutionAssignments.Resources.SentForReview;
       if (_obj.Result.Value == Result.AddAssignment)
         e.Result = ReviewManagerAssignments.Resources.AssignmentCreated;
-      if (_obj.Result.Value == Result.ForRework)
-        e.Result = ReviewDraftResolutionAssignments.Resources.ReworkResolution;
     }
   }
 

@@ -1,0 +1,78 @@
+{
+  "$type": "Sungero.Metadata.EntityMetadata, Sungero.Metadata",
+  "NameGuid": "6f8fab4f-2928-4bba-a9f8-a634ee6210d8",
+  "Name": "AssignmentQueueAttachments",
+  "AccessRightsMode": "NoRight",
+  "BaseGuid": "a3d38bf5-0414-41f6-bb33-a4621d2e5a60",
+  "CanBeNavigationPropertyType": true,
+  "Code": "AssignQueueAtt",
+  "ExtraSearchProperties": [],
+  "IsChildEntity": true,
+  "Properties": [
+    {
+      "$type": "Sungero.Metadata.NavigationPropertyMetadata, Sungero.Metadata",
+      "NameGuid": "7fb70f71-a402-485e-86ec-17ad3ad85f1b",
+      "Name": "AssignmentQueue",
+      "CanBeSearch": false,
+      "Code": "AssignQueue",
+      "EntityGuid": "3dd1d2fe-f172-4a94-9d90-24ea7817b259",
+      "IsReferenceToRootEntity": true,
+      "IsShowedInList": false
+    },
+    {
+      "$type": "Sungero.Metadata.DataPropertyMetadata, Sungero.Metadata",
+      "NameGuid": "4fb6d196-d996-4d91-b72d-74368ea99da3",
+      "Name": "File",
+      "CanBeSearch": false,
+      "Code": "File",
+      "IsShowedInList": false,
+      "PreviousPropertyGuid": "7fb70f71-a402-485e-86ec-17ad3ad85f1b"
+    },
+    {
+      "$type": "Sungero.Metadata.StringPropertyMetadata, Sungero.Metadata",
+      "NameGuid": "45e00f8c-e0d0-428c-bff7-7bba2b170d01",
+      "Name": "FileName",
+      "CanBeSearch": false,
+      "Code": "FileName",
+      "Length": 500,
+      "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.StringEditorToStringBinder",
+      "PreviousPropertyGuid": "4fb6d196-d996-4d91-b72d-74368ea99da3"
+    },
+    {
+      "$type": "Sungero.Metadata.StringPropertyMetadata, Sungero.Metadata",
+      "NameGuid": "c652cced-827a-4f9f-9249-8b8e15eb7ce0",
+      "Name": "FileDescription",
+      "CanBeSearch": false,
+      "Code": "FileDescript",
+      "Length": 500,
+      "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.StringEditorToStringBinder",
+      "PreviousPropertyGuid": "45e00f8c-e0d0-428c-bff7-7bba2b170d01"
+    }
+  ],
+  "PublicStructures": [],
+  "RibbonCardMetadata": {
+    "NameGuid": "e5913289-caf5-4e92-9cbe-e54802f8cb58",
+    "Name": "RibbonCard",
+    "Categories": [],
+    "Elements": [],
+    "Groups": [],
+    "IsAncestorMetadata": true,
+    "Pages": [],
+    "RibbonKind": "Card"
+  },
+  "RibbonCollectionMetadata": {
+    "NameGuid": "e6d152a0-3e72-4494-b14b-c4e0b08c66f0",
+    "Name": "RibbonCollection",
+    "Categories": [],
+    "Elements": [],
+    "Groups": [],
+    "IsAncestorMetadata": true,
+    "Pages": []
+  },
+  "Versions": [
+    {
+      "Type": "EntityMetadata",
+      "Number": 11
+    }
+  ]
+}

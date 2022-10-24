@@ -1,0 +1,320 @@
+{
+  "$type": "Sungero.Metadata.EntityMetadata, Sungero.Metadata",
+  "NameGuid": "fb71b4dc-5048-4025-9522-2d65cfce731f",
+  "Name": "MailLogs",
+  "BaseGuid": "04581d26-0780-4cfd-b3cd-c2cafc5798b0",
+  "CanBeNavigationPropertyType": true,
+  "Code": "MailLogs",
+  "CreationAreaMetadata": {
+    "NameGuid": "f7766750-eee2-4fcd-8003-5c06a90d1f44",
+    "Name": "CreationArea",
+    "Buttons": [],
+    "IsAncestorMetadata": true
+  },
+  "ExtraSearchProperties": [],
+  "FilterPanel": {
+    "NameGuid": "b0125fbd-3b91-4dbb-914a-689276216404",
+    "Name": "FilterPanel",
+    "Controls": [],
+    "IsAncestorMetadata": true
+  },
+  "Forms": [
+    {
+      "$type": "Sungero.Metadata.StandaloneFormMetadata, Sungero.Metadata",
+      "NameGuid": "1f51ebeb-9d51-4f3c-80a0-81f13f129efe",
+      "Name": "Card",
+      "Controls": [
+        {
+          "$type": "Sungero.Metadata.ControlGroupMetadata, Sungero.Metadata",
+          "NameGuid": "ab346afe-8781-4fe0-a787-ff0f458347e5",
+          "Name": "ControlGroup",
+          "ColumnDefinitions": [
+            {
+              "Percentage": 49.37
+            },
+            {
+              "Percentage": 50.63
+            }
+          ]
+        },
+        {
+          "$type": "Sungero.Metadata.ControlMetadata, Sungero.Metadata",
+          "NameGuid": "52a0e5e4-d5ec-4daf-afb8-f9db2cb2cd0c",
+          "Name": "Control",
+          "ColumnNumber": 0,
+          "ColumnSpan": 1,
+          "DataBinderTypeName": "Sungero.Presentation.CommonDataBinders.StringEditorToStringBinder",
+          "ParentGuid": "ab346afe-8781-4fe0-a787-ff0f458347e5",
+          "PropertyGuid": "660d4cbc-12e6-47eb-85a9-f1a81e068e07",
+          "RowNumber": 0,
+          "RowSpan": 1,
+          "Settings": []
+        },
+        {
+          "$type": "Sungero.Metadata.ControlMetadata, Sungero.Metadata",
+          "NameGuid": "8a3e8c84-7871-4b21-86f6-91cfe6016e59",
+          "Name": "Assignment",
+          "ColumnNumber": 0,
+          "ColumnSpan": 1,
+          "DataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DropDownEditorToNavigationBinder",
+          "ParentGuid": "ab346afe-8781-4fe0-a787-ff0f458347e5",
+          "PropertyGuid": "3517ab32-fb63-4aa6-9251-d3b3a292011e",
+          "RowNumber": 1,
+          "RowSpan": 1,
+          "Settings": []
+        },
+        {
+          "$type": "Sungero.Metadata.ControlMetadata, Sungero.Metadata",
+          "NameGuid": "3dbebc03-01f0-4be9-ac68-e4735d3bb3ec",
+          "Name": "Employee",
+          "ColumnNumber": 1,
+          "ColumnSpan": 1,
+          "DataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DropDownEditorToNavigationBinder",
+          "ParentGuid": "ab346afe-8781-4fe0-a787-ff0f458347e5",
+          "PropertyGuid": "8d060796-fa03-4a1f-908e-a8da61d81be9",
+          "RowNumber": 1,
+          "RowSpan": 1,
+          "Settings": []
+        },
+        {
+          "$type": "Sungero.Metadata.ControlMetadata, Sungero.Metadata",
+          "NameGuid": "fe3c998c-2beb-4d55-9e8e-5e89b158d17b",
+          "Name": "SendState",
+          "ColumnNumber": 1,
+          "ColumnSpan": 1,
+          "DataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DropDownEditorToEnumerationBinder",
+          "ParentGuid": "ab346afe-8781-4fe0-a787-ff0f458347e5",
+          "PropertyGuid": "a8d2827c-9a1a-4f96-a46c-6222e007f6ae",
+          "RowNumber": 2,
+          "RowSpan": 1,
+          "Settings": []
+        },
+        {
+          "$type": "Sungero.Metadata.ControlMetadata, Sungero.Metadata",
+          "NameGuid": "78097222-3f7a-4030-9b20-8debcc5c1590",
+          "Name": "ReqNotifDate",
+          "ColumnNumber": 1,
+          "ColumnSpan": 1,
+          "DataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DateTimeEditorToDateTimeBinder",
+          "ParentGuid": "ab346afe-8781-4fe0-a787-ff0f458347e5",
+          "PropertyGuid": "24679d6c-a14b-4147-9ef9-1e81a317aa7b",
+          "RowNumber": 0,
+          "RowSpan": 1,
+          "Settings": []
+        },
+        {
+          "$type": "Sungero.Metadata.ControlMetadata, Sungero.Metadata",
+          "NameGuid": "b9992755-a683-4874-ba4b-5c1d9b7de198",
+          "Name": "SendType",
+          "ColumnNumber": 0,
+          "ColumnSpan": 1,
+          "DataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DropDownEditorToEnumerationBinder",
+          "ParentGuid": "ab346afe-8781-4fe0-a787-ff0f458347e5",
+          "PropertyGuid": "95f86b0f-0261-4f20-89a6-35d0032d3917",
+          "RowNumber": 2,
+          "RowSpan": 1,
+          "Settings": []
+        }
+      ]
+    }
+  ],
+  "IconName": "MailLogs.ico",
+  "IconResourcesKeys": [],
+  "IsAutoCreated": true,
+  "IsVisible": false,
+  "OperationsClass": "",
+  "Overridden": [
+    "IsVisible",
+    "IconName",
+    "IsAutoCreated"
+  ],
+  "Properties": [
+    {
+      "$type": "Sungero.Metadata.EnumPropertyMetadata, Sungero.Metadata",
+      "NameGuid": "1dcedc29-5140-4770-ac92-eabc212326a1",
+      "Name": "Status",
+      "IsAncestorMetadata": true,
+      "IsEnabled": false,
+      "Overridden": [
+        "IsEnabled"
+      ]
+    },
+    {
+      "$type": "Sungero.Metadata.StringPropertyMetadata, Sungero.Metadata",
+      "NameGuid": "660d4cbc-12e6-47eb-85a9-f1a81e068e07",
+      "Name": "Name",
+      "Code": "Name",
+      "IsDisplayValue": true,
+      "IsEnabled": false,
+      "IsQuickSearchAllowed": true,
+      "Length": 512,
+      "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.StringEditorToStringBinder",
+      "PreviousPropertyGuid": "1dcedc29-5140-4770-ac92-eabc212326a1"
+    },
+    {
+      "$type": "Sungero.Metadata.NavigationPropertyMetadata, Sungero.Metadata",
+      "NameGuid": "3517ab32-fb63-4aa6-9251-d3b3a292011e",
+      "Name": "Assignment",
+      "Code": "Assignment",
+      "EntityGuid": "ea683a63-273e-43ae-bcf1-7a443698008a",
+      "FlatListInStandaloneLookup": true,
+      "IsEnabled": false,
+      "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DropDownEditorToNavigationBinder",
+      "PreviousPropertyGuid": "660d4cbc-12e6-47eb-85a9-f1a81e068e07"
+    },
+    {
+      "$type": "Sungero.Metadata.NavigationPropertyMetadata, Sungero.Metadata",
+      "NameGuid": "8d060796-fa03-4a1f-908e-a8da61d81be9",
+      "Name": "Performer",
+      "Code": "Performer",
+      "EntityGuid": "243c2d26-f5f7-495f-9faf-951d91215c77",
+      "IsEnabled": false,
+      "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DropDownEditorToNavigationBinder",
+      "PreviousPropertyGuid": "3517ab32-fb63-4aa6-9251-d3b3a292011e"
+    },
+    {
+      "$type": "Sungero.Metadata.EnumPropertyMetadata, Sungero.Metadata",
+      "NameGuid": "a8d2827c-9a1a-4f96-a46c-6222e007f6ae",
+      "Name": "SendState",
+      "Code": "SendState",
+      "DirectValues": [
+        {
+          "NameGuid": "c48c1fcd-4421-425e-af91-f13322983175",
+          "Name": "Sent",
+          "Code": "Sent"
+        },
+        {
+          "NameGuid": "a4f2f007-7575-4cda-8192-321f642a9811",
+          "Name": "Error",
+          "Code": "Error"
+        },
+        {
+          "NameGuid": "829cb045-d0e2-463c-98fc-67eceb57e8f9",
+          "Name": "InProcess",
+          "Code": "InProcess"
+        }
+      ],
+      "IsEnabled": false,
+      "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DropDownEditorToEnumerationBinder",
+      "PreviousPropertyGuid": "8d060796-fa03-4a1f-908e-a8da61d81be9"
+    },
+    {
+      "$type": "Sungero.Metadata.DateTimePropertyMetadata, Sungero.Metadata",
+      "NameGuid": "24679d6c-a14b-4147-9ef9-1e81a317aa7b",
+      "Name": "ReqNotifDate",
+      "Code": "ReqNotifDate",
+      "DateTimeFormat": "DateTime",
+      "IsEnabled": false,
+      "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DateTimeEditorToDateTimeBinder",
+      "PreviousPropertyGuid": "a8d2827c-9a1a-4f96-a46c-6222e007f6ae"
+    },
+    {
+      "$type": "Sungero.Metadata.EnumPropertyMetadata, Sungero.Metadata",
+      "NameGuid": "95f86b0f-0261-4f20-89a6-35d0032d3917",
+      "Name": "SendType",
+      "Code": "SendType",
+      "DirectValues": [
+        {
+          "NameGuid": "ce6cce16-1ce3-44b7-b90d-a58cf8b73f93",
+          "Name": "Manual",
+          "Code": "Manual"
+        },
+        {
+          "NameGuid": "86c485f7-2376-4633-a5af-806e40ccacaf",
+          "Name": "Automatic",
+          "Code": "Automatic"
+        }
+      ],
+      "IsEnabled": false,
+      "ListDataBinderTypeName": "Sungero.Presentation.CommonDataBinders.DropDownEditorToEnumerationBinder",
+      "PreviousPropertyGuid": "24679d6c-a14b-4147-9ef9-1e81a317aa7b"
+    }
+  ],
+  "PublicFunctions": [
+    {
+      "Name": "CreateMailLog",
+      "IsRemote": true,
+      "Parameters": [
+        {
+          "Name": "assignment",
+          "ParameterType": "global::Sungero.Workflow.IAssignmentBase",
+          "ParameterTypeFullName": "Sungero.Workflow.IAssignmentBase, Sungero.Workflow.Interfaces"
+        },
+        {
+          "Name": "isManual",
+          "ParameterType": "global::System.Boolean",
+          "ParameterTypeFullName": "System.Boolean"
+        }
+      ],
+      "Placement": "Shared",
+      "ReturnType": "global::DirRX.MailAdapter.IMailLogs",
+      "ReturnTypeFullName": "DirRX.MailAdapter.IMailLogs, Sungero.Domain.Interfaces"
+    },
+    {
+      "Name": "CreateMailLogByTask",
+      "IsRemote": true,
+      "Parameters": [
+        {
+          "Name": "task",
+          "ParameterType": "global::Sungero.Workflow.ITask",
+          "ParameterTypeFullName": "Sungero.Workflow.ITask, Sungero.Workflow.Interfaces"
+        },
+        {
+          "Name": "isManual",
+          "ParameterType": "global::System.Boolean",
+          "ParameterTypeFullName": "System.Boolean"
+        }
+      ],
+      "Placement": "Shared",
+      "ReturnType": "void",
+      "ReturnTypeFullName": "System.Void"
+    },
+    {
+      "Name": "GetMailLogs",
+      "IsRemote": true,
+      "Parameters": [
+        {
+          "Name": "task",
+          "ParameterType": "global::Sungero.Workflow.ITask",
+          "ParameterTypeFullName": "Sungero.Workflow.ITask, Sungero.Workflow.Interfaces"
+        }
+      ],
+      "Placement": "Shared",
+      "ReturnType": "global::System.Linq.IQueryable<global::DirRX.MailAdapter.IMailLogs>",
+      "ReturnTypeFullName": "System.Linq.IQueryable"
+    }
+  ],
+  "PublicStructures": [],
+  "ResourcesKeys": [
+    "MailInQueue"
+  ],
+  "RibbonCardMetadata": {
+    "NameGuid": "46fa1ee7-75e8-44bd-9d12-ad636c5f26ca",
+    "Name": "RibbonCard",
+    "Categories": [],
+    "Elements": [],
+    "Groups": [],
+    "IsAncestorMetadata": true,
+    "Pages": [],
+    "RibbonKind": "Card"
+  },
+  "RibbonCollectionMetadata": {
+    "NameGuid": "b07c92e3-d479-4d13-8ed7-f35af476416e",
+    "Name": "RibbonCollection",
+    "Categories": [],
+    "Elements": [],
+    "Groups": [],
+    "IsAncestorMetadata": true,
+    "Pages": []
+  },
+  "Versions": [
+    {
+      "Type": "EntityMetadata",
+      "Number": 9
+    },
+    {
+      "Type": "DomainApi",
+      "Number": 2
+    }
+  ]
+}

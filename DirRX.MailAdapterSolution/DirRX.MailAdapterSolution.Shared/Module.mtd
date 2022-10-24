@@ -1,0 +1,178 @@
+{
+  "$type": "Sungero.Metadata.SolutionMetadata, Sungero.Metadata",
+  "NameGuid": "8269cf5c-4e05-46ad-9af3-a93c6a5fb81f",
+  "Name": "MailAdapterSolution",
+  "AsyncHandlers": [],
+  "ClientAssemblyName": "DirRX.MailAdapterSolution.Client",
+  "ClientBaseAssemblyName": "DirRX.MailAdapterSolution.ClientBase",
+  "ClientBaseNamespace": "DirRX.MailAdapterSolution.ClientBase",
+  "ClientNamespace": "DirRX.MailAdapterSolution.Client",
+  "Code": "MailAda",
+  "CompanyCode": "DirRX",
+  "Cover": {
+    "NameGuid": "14e7d99b-10eb-45ad-bdd5-379f79b24bbe",
+    "Actions": [],
+    "Background": null,
+    "Footer": {
+      "NameGuid": "cd638c29-7bb6-48e1-b922-c415cf25d748",
+      "BackgroundPosition": "Stretch"
+    },
+    "Groups": [],
+    "Header": {
+      "NameGuid": "c6581e2e-ca4e-4dc8-9121-de7b55c05f0a",
+      "BackgroundPosition": "Stretch"
+    }
+  },
+  "DesktopViews": [],
+  "ExplorerTreeOrder": [
+    {
+      "ItemId": "3280a299-3727-4009-a0c0-684acd4cf966"
+    },
+    {
+      "ItemId": "aa455738-774d-4719-a8a2-381f3b948927",
+      "PreviousItemId": "3280a299-3727-4009-a0c0-684acd4cf966"
+    },
+    {
+      "ItemId": "7df93253-5b97-487c-8a7d-5cd152e2d13f",
+      "PreviousItemId": "aa455738-774d-4719-a8a2-381f3b948927"
+    },
+    {
+      "ItemId": "c2a1ed5a-0e04-4246-9c75-5bd93327fdeb",
+      "PreviousItemId": "7df93253-5b97-487c-8a7d-5cd152e2d13f"
+    },
+    {
+      "ItemId": "afc96a15-1d1f-44c0-af4b-caee9b684198",
+      "PreviousItemId": "c2a1ed5a-0e04-4246-9c75-5bd93327fdeb"
+    },
+    {
+      "ItemId": "6982bb37-5a10-4bab-8c32-0253239a1f2f",
+      "PreviousItemId": "afc96a15-1d1f-44c0-af4b-caee9b684198"
+    },
+    {
+      "ItemId": "0bac822c-6a3f-43c1-ba10-13886d13dc73",
+      "PreviousItemId": "6982bb37-5a10-4bab-8c32-0253239a1f2f"
+    },
+    {
+      "ItemId": "fb3b8594-c183-493b-867b-dca0439d4488",
+      "PreviousItemId": "0bac822c-6a3f-43c1-ba10-13886d13dc73"
+    },
+    {
+      "ItemId": "92ad037f-0184-46a8-a906-67f515949b21",
+      "PreviousItemId": "fb3b8594-c183-493b-867b-dca0439d4488"
+    },
+    {
+      "ItemId": "d742571e-66af-4e6f-9098-604e3b58d1a7",
+      "PreviousItemId": "92ad037f-0184-46a8-a906-67f515949b21"
+    },
+    {
+      "ItemId": "7fb820d7-8999-43a3-92b5-56dd93730f41",
+      "PreviousItemId": "d742571e-66af-4e6f-9098-604e3b58d1a7"
+    },
+    {
+      "ItemId": "24a4f494-b6bd-417d-b850-df434a72b8d1",
+      "PreviousItemId": "7fb820d7-8999-43a3-92b5-56dd93730f41"
+    },
+    {
+      "ItemId": "7858450f-c953-4e98-8a68-164fed84a9ce",
+      "PreviousItemId": "24a4f494-b6bd-417d-b850-df434a72b8d1"
+    },
+    {
+      "ItemId": "25e51d96-bce2-45a4-a440-44d0939524a0",
+      "PreviousItemId": "7858450f-c953-4e98-8a68-164fed84a9ce"
+    },
+    {
+      "ItemId": "0ff6ebbe-900f-47de-9418-9c5d8d0b68d4",
+      "PreviousItemId": "25e51d96-bce2-45a4-a440-44d0939524a0"
+    },
+    {
+      "ItemId": "259f3778-b5aa-41f8-9f6e-326a994fd4c7",
+      "PreviousItemId": "0ff6ebbe-900f-47de-9418-9c5d8d0b68d4"
+    },
+    {
+      "ItemId": "d2da1b5b-ea16-4d12-877e-64532b5f6c3f",
+      "PreviousItemId": "259f3778-b5aa-41f8-9f6e-326a994fd4c7"
+    },
+    {
+      "ItemId": "06b49a95-6b00-45f9-8196-1bdbcc35480b",
+      "PreviousItemId": "d2da1b5b-ea16-4d12-877e-64532b5f6c3f"
+    },
+    {
+      "ItemId": "cc0903d6-d8f4-476b-9523-07880868d94d",
+      "PreviousItemId": "06b49a95-6b00-45f9-8196-1bdbcc35480b"
+    },
+    {
+      "ItemId": "051b2d7e-7e1b-4926-8174-825508f9940d",
+      "PreviousItemId": "cc0903d6-d8f4-476b-9523-07880868d94d"
+    },
+    {
+      "ItemId": "cf68ff39-324a-4ca9-9040-c03a6a3c7905",
+      "PreviousItemId": "051b2d7e-7e1b-4926-8174-825508f9940d"
+    },
+    {
+      "ItemId": "02c71162-0e98-4fec-9c4d-6a8e7056b68e",
+      "PreviousItemId": "cf68ff39-324a-4ca9-9040-c03a6a3c7905"
+    },
+    {
+      "ItemId": "f850dbd7-b736-4fa8-a21c-ac4f2829f4ce",
+      "PreviousItemId": "02c71162-0e98-4fec-9c4d-6a8e7056b68e"
+    },
+    {
+      "ItemId": "ca0a9de7-11c0-431f-8d60-6a65fbfc0182",
+      "PreviousItemId": "f850dbd7-b736-4fa8-a21c-ac4f2829f4ce"
+    },
+    {
+      "ItemId": "894a6f65-86c5-4d13-a0d1-6797ac27d84a",
+      "PreviousItemId": "ca0a9de7-11c0-431f-8d60-6a65fbfc0182"
+    },
+    {
+      "ItemId": "60c61f7b-bb9b-4592-a51b-1bf322bcef65",
+      "PreviousItemId": "894a6f65-86c5-4d13-a0d1-6797ac27d84a"
+    },
+    {
+      "ItemId": "a02f1c67-c2e8-4ced-81e3-d59d9686b43e",
+      "PreviousItemId": "60c61f7b-bb9b-4592-a51b-1bf322bcef65"
+    },
+    {
+      "ItemId": "c66daaf8-41de-444d-b474-6de4e8c3e6a6",
+      "PreviousItemId": "a02f1c67-c2e8-4ced-81e3-d59d9686b43e"
+    },
+    {
+      "ItemId": "7bb9c07a-9a69-42e3-b75b-c81a21db12fd",
+      "PreviousItemId": "c66daaf8-41de-444d-b474-6de4e8c3e6a6"
+    },
+    {
+      "ItemId": "99caf1a2-6508-4ea1-9c2b-0eee18921059",
+      "PreviousItemId": "7bb9c07a-9a69-42e3-b75b-c81a21db12fd"
+    }
+  ],
+  "IconResourcesKeys": [],
+  "Importance": "Medium",
+  "InterfaceAssemblyName": "Sungero.Domain.Interfaces",
+  "InterfaceNamespace": "DirRX.MailAdapterSolution",
+  "OrderedSpecialFolders": [],
+  "PublicStructures": [],
+  "ResourceInterfaceAssemblyName": "Sungero.Domain.Interfaces",
+  "ResourceInterfaceNamespace": "DirRX.MailAdapterSolution",
+  "ResourcesKeys": [],
+  "ServerAssemblyName": "DirRX.MailAdapterSolution.Server",
+  "ServerNamespace": "DirRX.MailAdapterSolution.Server",
+  "SharedAssemblyName": "DirRX.MailAdapterSolution.Shared",
+  "SharedNamespace": "DirRX.MailAdapterSolution.Shared",
+  "SpecialFolders": [],
+  "Version": "4.0.4323.1",
+  "Widgets": [],
+  "Versions": [
+    {
+      "Type": "SolutionMetadata",
+      "Number": 6
+    },
+    {
+      "Type": "ModuleMetadata",
+      "Number": 6
+    },
+    {
+      "Type": "DomainApi",
+      "Number": 3
+    }
+  ]
+}

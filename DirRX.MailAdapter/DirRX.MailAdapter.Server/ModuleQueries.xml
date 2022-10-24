@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<queries>
+  <query key="SelectDocflowParamsValue">
+    <mssql><![CDATA[SELECT [Value] FROM [Sungero_Docflow_Params] WHERE [Key] = '{0}']]></mssql>
+    <postgres><![CDATA[SELECT Value FROM Sungero_Docflow_Params WHERE Key = '{0}']]></postgres>
+  </query>
+  <query key="InsertOrUpdateDocflowParamsValue">
+    <mssql><![CDATA[if not exists(select 1 from [Sungero_Docflow_Params] where [Key] = '{0}')
+  insert [Sungero_Docflow_Params] ([Key],[Value]) values ('{0}', '{1}')
+else UPDATE [Sungero_Docflow_Params] SET [Value] = '{1}' WHERE [Key] = '{0}']]></mssql>
+    <postgres><![CDATA[do $$
+begin
+  if not exists(select 1 from Sungero_Docflow_Params where Key = '{0}')
+  then
+    insert into Sungero_Docflow_Params (Key, Value) values ('{0}', '{1}');
+  else
+    UPDATE Sungero_Docflow_Params SET Value = '{1}' WHERE Key = '{0}';
+  end if;
+end$$;]]></postgres>
+  </query>
+  <query key="CreateTableAssignmentsQueue">
+    <mssql><![CDATA[-- Создать таблицу заданий на выполнении.
+if not exists (select * from INFORMATION_SCHEMA.TABLES where [TABLE_NAME] = N'{0}')
+begin
+	create table {0}
+	(
+		Id int,
+		Result nvarchar(15),
+		ActiveText nvarchar(max),
+		MailInfo text
+	)
+end]]></mssql>
+    <postgres><![CDATA[do $$
+begin
+	if not exists (select * from INFORMATION_SCHEMA.TABLES where TABLE_NAME = lower('{0}')) 
+	then
+		create table {0}
+		(
+			Id int,
+			Result varchar(15),
+			ActiveText text,
+			MailInfo text
+		);
+	end if;
+end$$]]></postgres>
+  </query>
+  <query key="CreateTableAssignmentsAttachments">
+    <mssql><![CDATA[-- Создать таблицу вложений зданий на выполнении
+if not exists (select * from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'{0}')
+begin
+	create table {0}
+	(
+		AssignmentId int,
+		AttachmentId int
+	)
+end]]></mssql>
+    <postgres><![CDATA[do $$
+begin
+	if not exists (select * from INFORMATION_SCHEMA.TABLES where TABLE_NAME = lower('{0}'))
+	then
+		create table {0}
+		(
+			AssignmentId int,
+			AttachmentId int
+		);
+	end if;
+end$$]]></postgres>
+  </query>
+  <query key="InsertAssignmentsQueue">
+    <mssql><![CDATA[insert into {0} ([Id], [Result], [ActiveText], [MailInfo]) values ({1}, '{2}', '{3}', '{4}')]]></mssql>
+    <postgres><![CDATA[insert into {0} (Id, Result, ActiveText, MailInfo) values ({1}, '{2}', '{3}', '{4}')]]></postgres>
+  </query>
+  <query key="InsertIntoAssignmentsAttachments">
+    <mssql><![CDATA[insert into {0} ([AssignmentId], [AttachmentId]) values ({1}, {2})]]></mssql>
+    <postgres><![CDATA[insert into {0} (AssignmentId, AttachmentId) values ({1}, {2})]]></postgres>
+  </query>
+  <query key="DeleteAssigmentFromQueue">
+    <mssql><![CDATA[delete from {0} where [Id] = {1}]]></mssql>
+    <postgres><![CDATA[delete from {0} where Id = {1}]]></postgres>
+  </query>
+  <query key="DeleteAssigmentAttachments">
+    <mssql><![CDATA[delete from {0} where [AssignmentId] = {1}]]></mssql>
+    <postgres><![CDATA[delete from {0} where AssignmentId = {1}]]></postgres>
+  </query>
+  <query key="GetItemCountFromAssignmentQueue">
+    <default><![CDATA[select count(*) from {0}]]></default>
+  </query>
+  <query key="GetAssignmentAttachmentsItemCount">
+    <mssql><![CDATA[select count(*) from {0} where [AssignmentId] = {1}]]></mssql>
+    <postgres><![CDATA[select count(*) from {0} where AssignmentId = {1};]]></postgres>
+  </query>
+  <query key="GetNextAssignmentIdFromQueue">
+    <mssql><![CDATA[select TOP(1) {1} from {0} where [Id] > {2} order by [Id] asc]]></mssql>
+    <postgres><![CDATA[select {1} from {0} where Id > {2} order by Id asc limit 1;]]></postgres>
+  </query>
+  <query key="GetAssignmentParamFromQueue">
+    <mssql><![CDATA[select TOP(1) {1} from {0} where [Id] = {2}]]></mssql>
+    <postgres><![CDATA[select {1} from {0} where Id = {2} limit 1;]]></postgres>
+  </query>
+  <query key="GetNextAttachmentIdFromQueue">
+    <mssql><![CDATA[select TOP(1) 
+	[AttachmentId] 
+from 
+	{0} 
+where 
+	[AssignmentId] = {1}
+	and AttachmentId > {2} 
+order by 
+	AttachmentId asc]]></mssql>
+    <postgres><![CDATA[select
+	AttachmentId 
+from 
+	{0} 
+where 
+	AssignmentId = {1}
+	and AttachmentId > {2} 
+order by 
+	AttachmentId asc
+limit 1;]]></postgres>
+  </query>
+  <query key="CheckAssignmentInQueue">
+    <mssql><![CDATA[select 1 from {0} where [Id] = {1}]]></mssql>
+    <postgres><![CDATA[select 1 from {0} where Id = {1}]]></postgres>
+  </query>
+</queries>

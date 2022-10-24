@@ -1,0 +1,2 @@
+﻿update sungero_core_recipient set isexecutemail_mailada_dirrx = true where isexecutemail_mailada_dirrx is null;
+update sungero_core_recipient set mailadapterhtm_mailada_dirrx = false where mailadapterhtm_mailada_dirrx is null;

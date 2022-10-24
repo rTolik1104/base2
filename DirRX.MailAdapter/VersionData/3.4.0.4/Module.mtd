@@ -1,0 +1,407 @@
+{
+  "$type": "Sungero.Metadata.ModuleMetadata, Sungero.Metadata",
+  "NameGuid": "272a7a59-6748-4d87-8e5f-7200cd244e0a",
+  "Name": "MailAdapter",
+  "AsyncHandlers": [
+    {
+      "NameGuid": "391e2edb-d0c4-47ae-8daf-9528f1660cb8",
+      "Name": "ProcessAssignment",
+      "DelayPeriod": 15,
+      "DelayStrategy": "RegularDelayStrategy",
+      "IsHandlerGenerated": true,
+      "Parameters": [
+        {
+          "NameGuid": "06a9f6eb-ddfc-46d7-8b74-ced085d23c16",
+          "Name": "ID",
+          "ParameterType": "Integer"
+        }
+      ]
+    }
+  ],
+  "ClientAssemblyName": "DirRX.MailAdapter.Client",
+  "ClientBaseAssemblyName": "DirRX.MailAdapter.ClientBase",
+  "ClientBaseNamespace": "DirRX.MailAdapter.ClientBase",
+  "ClientNamespace": "DirRX.MailAdapter.Client",
+  "Code": "MailAd1",
+  "CompanyCode": "DirRX",
+  "Cover": {
+    "NameGuid": "fa0627ce-8177-4e3f-8aa1-9e4683c6e144",
+    "Actions": [],
+    "Background": null,
+    "Footer": {
+      "NameGuid": "1d0662fe-f93a-4fdc-893c-05c9094ef1f2",
+      "BackgroundPosition": "Stretch"
+    },
+    "Groups": [],
+    "Header": {
+      "NameGuid": "6546c51f-d7de-4a64-b609-1d979dff07ae",
+      "BackgroundPosition": "Stretch"
+    }
+  },
+  "Dependencies": [
+    {
+      "Id": "8269cf5c-4e05-46ad-9af3-a93c6a5fb81f",
+      "IsSolutionModule": true,
+      "MaxVersion": "",
+      "MinVersion": ""
+    },
+    {
+      "Id": "92491aa6-c4df-4f46-a807-ebdd337bda74",
+      "MaxVersion": "",
+      "MinVersion": "1.1.0.0"
+    },
+    {
+      "Id": "ec7b606a-21ee-4f16-aba8-ab8c2af76d12",
+      "MaxVersion": "",
+      "MinVersion": "0.0.1.0"
+    },
+    {
+      "Id": "df83a2ea-8d43-4ec4-a34a-2e61863014df",
+      "MaxVersion": "",
+      "MinVersion": "2.3.20.0"
+    },
+    {
+      "Id": "4e25caec-c722-4740-bcfd-c4f803840ac6",
+      "MaxVersion": "",
+      "MinVersion": "2.3.20.0"
+    }
+  ],
+  "ExplorerTreeOrder": [
+    {
+      "ItemId": "fb71b4dc-5048-4025-9522-2d65cfce731f"
+    },
+    {
+      "ItemId": "3dd1d2fe-f172-4a94-9d90-24ea7817b259",
+      "PreviousItemId": "fb71b4dc-5048-4025-9522-2d65cfce731f"
+    }
+  ],
+  "HandledEvents": [
+    "InitializingServer"
+  ],
+  "IconResourcesKeys": [],
+  "Importance": "Medium",
+  "InterfaceAssemblyName": "Sungero.Domain.Interfaces",
+  "InterfaceNamespace": "DirRX.MailAdapter",
+  "IsVisible": false,
+  "Jobs": [
+    {
+      "NameGuid": "7f0e3e8d-ed3b-4c1e-b5e1-763229aca2e7",
+      "Name": "SendMailNotification",
+      "Daily": "Repeat",
+      "GenerateHandler": true,
+      "MonthSchedule": "Monthly",
+      "TimePeriod": 15
+    }
+  ],
+  "Libraries": [
+    {
+      "NameGuid": "1b117f43-e6dd-4bf0-b719-118e49f4f527",
+      "Name": "Nustache",
+      "Scope": "Server"
+    }
+  ],
+  "Overridden": [
+    "IsVisible"
+  ],
+  "PublicFunctions": [
+    {
+      "Name": "GenerateBody",
+      "Parameters": [
+        {
+          "Name": "assignment",
+          "ParameterType": "global::Sungero.Workflow.IAssignmentBase",
+          "ParameterTypeFullName": "Sungero.Workflow.IAssignmentBase, Sungero.Workflow.Interfaces"
+        },
+        {
+          "Name": "isExpired",
+          "ParameterType": "global::System.Boolean",
+          "ParameterTypeFullName": "System.Boolean"
+        },
+        {
+          "Name": "htmlMailBody",
+          "ParameterType": "global::System.Nullable<global::System.Boolean>",
+          "ParameterTypeFullName": "System.Nullable"
+        }
+      ],
+      "ReturnType": "global::System.String",
+      "ReturnTypeFullName": "System.String"
+    },
+    {
+      "Name": "GetAssignmentResult",
+      "IsRemote": true,
+      "Parameters": [
+        {
+          "Name": "assignmentResultString",
+          "ParameterType": "global::System.String",
+          "ParameterTypeFullName": "System.String"
+        },
+        {
+          "Name": "activeText",
+          "ParameterType": "global::System.String",
+          "ParameterTypeFullName": "System.String"
+        },
+        {
+          "Name": "mailInfo",
+          "ParameterType": "global::System.String",
+          "ParameterTypeFullName": "System.String"
+        }
+      ],
+      "Placement": "Shared",
+      "ReturnType": "global::DirRX.MailAdapter.IAssignmentQueue",
+      "ReturnTypeFullName": "DirRX.MailAdapter.IAssignmentQueue, Sungero.Domain.Interfaces"
+    },
+    {
+      "Name": "GetDocumentsForEndorse",
+      "Parameters": [
+        {
+          "Name": "assignment",
+          "ParameterType": "global::Sungero.Workflow.IAssignment",
+          "ParameterTypeFullName": "Sungero.Workflow.IAssignment, Sungero.Workflow.Interfaces"
+        }
+      ],
+      "ReturnType": "global::System.Collections.Generic.List<global::Sungero.Content.IElectronicDocument>",
+      "ReturnTypeFullName": "System.Collections.Generic.List"
+    },
+    {
+      "Name": "ProcessingDCTS",
+      "Parameters": [
+        {
+          "Name": "lineSender",
+          "ParameterType": "global::System.String",
+          "ParameterTypeFullName": "System.String"
+        },
+        {
+          "Name": "instanceInfos",
+          "ParameterType": "global::System.String",
+          "ParameterTypeFullName": "System.String"
+        },
+        {
+          "Name": "deviceInfo",
+          "ParameterType": "global::System.String",
+          "ParameterTypeFullName": "System.String"
+        },
+        {
+          "Name": "inputFiles",
+          "ParameterType": "global::System.String",
+          "ParameterTypeFullName": "System.String"
+        },
+        {
+          "Name": "folder",
+          "ParameterType": "global::System.String",
+          "ParameterTypeFullName": "System.String"
+        }
+      ],
+      "Placement": "Client",
+      "ReturnType": "void",
+      "ReturnTypeFullName": "System.Void"
+    },
+    {
+      "Name": "SendMailNotification",
+      "IsRemote": true,
+      "Placement": "Shared",
+      "ReturnType": "void",
+      "ReturnTypeFullName": "System.Void"
+    },
+    {
+      "Name": "TrySendExpiredAssignmentsMailing",
+      "Parameters": [
+        {
+          "Name": "mailClient",
+          "ParameterType": "System.Net.Mail.SmtpClient"
+        },
+        {
+          "Name": "previousRun",
+          "ParameterType": "global::System.DateTime",
+          "ParameterTypeFullName": "System.DateTime"
+        },
+        {
+          "Name": "notificationDate",
+          "ParameterType": "global::System.DateTime",
+          "ParameterTypeFullName": "System.DateTime"
+        }
+      ],
+      "ReturnType": "global::System.Nullable<global::System.Boolean>",
+      "ReturnTypeFullName": "System.Nullable"
+    },
+    {
+      "Name": "TrySendMailByAssignment",
+      "Parameters": [
+        {
+          "Name": "assignment",
+          "ParameterType": "global::Sungero.Workflow.IAssignmentBase",
+          "ParameterTypeFullName": "Sungero.Workflow.IAssignmentBase, Sungero.Workflow.Interfaces"
+        },
+        {
+          "Name": "subject",
+          "ParameterType": "global::System.String",
+          "ParameterTypeFullName": "System.String"
+        },
+        {
+          "Name": "isExpired",
+          "ParameterType": "global::System.Boolean",
+          "ParameterTypeFullName": "System.Boolean"
+        },
+        {
+          "Name": "mailClient",
+          "ParameterType": "System.Net.Mail.SmtpClient"
+        },
+        {
+          "Name": "addressees",
+          "ParameterType": "global::System.Collections.Generic.List<global::DirRX.MailAdapterSolution.IEmployee>",
+          "ParameterTypeFullName": "System.Collections.Generic.List"
+        }
+      ],
+      "ReturnType": "global::DirRX.MailAdapter.Structures.Module.IMailSendResult",
+      "ReturnTypeFullName": "DirRX.MailAdapter.Structures.Module.IMailSendResult"
+    },
+    {
+      "Name": "TrySendNewAssignmentsMailing",
+      "Parameters": [
+        {
+          "Name": "mailClient",
+          "ParameterType": "System.Net.Mail.SmtpClient"
+        },
+        {
+          "Name": "previousRun",
+          "ParameterType": "global::System.DateTime",
+          "ParameterTypeFullName": "System.DateTime"
+        },
+        {
+          "Name": "notificationDate",
+          "ParameterType": "global::System.DateTime",
+          "ParameterTypeFullName": "System.DateTime"
+        }
+      ],
+      "ReturnType": "global::System.Nullable<global::System.Boolean>",
+      "ReturnTypeFullName": "System.Nullable"
+    },
+    {
+      "Name": "UpdateLastNotificationDate",
+      "Parameters": [
+        {
+          "Name": "notificationDate",
+          "ParameterType": "global::System.DateTime",
+          "ParameterTypeFullName": "System.DateTime"
+        }
+      ],
+      "ReturnType": "void",
+      "ReturnTypeFullName": "System.Void"
+    }
+  ],
+  "PublicStructures": [
+    {
+      "Name": "AssignmentResult",
+      "IsPublic": true,
+      "Properties": [
+        {
+          "Name": "AssignmentId",
+          "IsNullable": true,
+          "TypeFullName": "global::System.Nullable<global::System.Int32>"
+        },
+        {
+          "Name": "Result",
+          "IsNullable": true,
+          "TypeFullName": "global::System.String"
+        },
+        {
+          "Name": "ActiveText",
+          "IsNullable": true,
+          "TypeFullName": "global::System.String"
+        },
+        {
+          "Name": "MailInfo",
+          "IsNullable": true,
+          "TypeFullName": "global::System.String"
+        }
+      ],
+      "StructureNamespace": "DirRX.MailAdapter.Structures.Module"
+    },
+    {
+      "Name": "HyperlinkExecuteAssigment",
+      "IsPublic": true,
+      "Properties": [
+        {
+          "Name": "DisplayValue",
+          "IsNullable": true,
+          "TypeFullName": "global::System.String"
+        },
+        {
+          "Name": "HyperLinkItem",
+          "IsNullable": true,
+          "TypeFullName": "global::System.String"
+        },
+        {
+          "Name": "FillColor",
+          "IsNullable": true,
+          "TypeFullName": "global::System.String"
+        }
+      ],
+      "StructureNamespace": "DirRX.MailAdapter.Structures.Module"
+    },
+    {
+      "Name": "MailSendResult",
+      "IsPublic": true,
+      "Properties": [
+        {
+          "Name": "IsSendMailSuccess",
+          "TypeFullName": "global::System.Boolean"
+        },
+        {
+          "Name": "IsAnyMailSended",
+          "TypeFullName": "global::System.Boolean"
+        }
+      ],
+      "StructureNamespace": "DirRX.MailAdapter.Structures.Module"
+    }
+  ],
+  "ResourceInterfaceAssemblyName": "Sungero.Domain.Interfaces",
+  "ResourceInterfaceNamespace": "DirRX.MailAdapter",
+  "ResourcesKeys": [
+    "MailTemplate",
+    "MailSubject",
+    "DctsDeviceTypeIncorrect",
+    "FileNotFoundTemplate",
+    "IncomingInstructionTextSimpleAssignment",
+    "ReplyInstructionTextSimpleAssignmentComplete",
+    "IncomingInstructionTextApprovalAssignment",
+    "ReplyInstructionTextApprovalAssignmentForRework",
+    "ResultTemplateCompleteByMail",
+    "IncomingInstructionTextActionItemExecutionAssignment",
+    "IncomingInstructionTextApprovalSendingAssignment",
+    "ReplyInstructionTextApprovalSendingAssignment",
+    "ReplyInstructionTextActionItemExecutionAssignment",
+    "ReplyInstructionTextApprovalAssignmentApproved",
+    "ServiceInformationText",
+    "ActiveTextTemplateFormat",
+    "BadMailBodyTemplate",
+    "IncomingMailProcessedSuccessTemplate",
+    "MailInfoTemplate",
+    "IncomingMailProcessedErrorTemplate",
+    "LogNameTpl",
+    "IncomingInstructionTextAcquaintanceAssignment",
+    "ReplyInstructionTextAcquaintanceAssignment",
+    "CustomConfigSettingNotFoundTemplate",
+    "ConfigurationElementValueNotSpecified",
+    "IncomingInstructionTextActionItemSupervisorAssignment",
+    "ReplyInstructionTextActionItemSupervisorAssignmentAgree",
+    "ReplyInstructionTextActionItemSupervisorAssignmentForRework",
+    "ReplyInstructionTextCustomActionComplete"
+  ],
+  "ServerAssemblyName": "DirRX.MailAdapter.Server",
+  "ServerNamespace": "DirRX.MailAdapter.Server",
+  "SharedAssemblyName": "DirRX.MailAdapter.Shared",
+  "SharedNamespace": "DirRX.MailAdapter.Shared",
+  "SpecialFolders": [],
+  "Version": "3.4.0.4",
+  "Widgets": [],
+  "Versions": [
+    {
+      "Type": "ModuleMetadata",
+      "Number": 6
+    },
+    {
+      "Type": "DomainApi",
+      "Number": 3
+    }
+  ]
+}

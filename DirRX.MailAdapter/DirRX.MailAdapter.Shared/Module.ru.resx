@@ -1,0 +1,294 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="MailTemplate" xml:space="preserve">
+    <value>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;style type="text/css"&gt;
+      body table tr td { border-collapse: collapse; vertical-align:text-top; } 
+    &lt;/style&gt;
+  &lt;/head&gt;
+{{&lt; hr}}
+&lt;hr size="1" width="99%" noshade="" style="color:#D0D0D0" align="center"&gt;
+{{/hr}}
+  &lt;body&gt;
+    &lt;img border="0" height="25" src="cid:logo.png@01D004A6.A303C580" /&gt;
+    &lt;p style="margin-bottom:0"&gt;
+ &lt;!-- Описание выполнения задания. --&gt;
+ {{{HeaderBodyMail}}}
+   &lt;/p&gt;
+&lt;!-- Кнопки по выполнению задания. --&gt;
+ {{#HasHyperlinkResults}}
+&lt;table style="margin-bottom:0;margin-top:15px;margin-left:15px;" border="0" cellspacing="0" cellpadding="0"&gt;
+  &lt;tr&gt;
+   {{#HyperlinkResults}}
+ &lt;td&gt;
+&lt;div&gt;&lt;!--[if mso]&gt;
+  &lt;v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{HyperLinkItem}}" style="height:40px;v-text-anchor:middle;width:140px;" arcsize="3%" stroke="f" fillcolor="{{FillColor}}"&gt;
+    &lt;w:anchorlock/&gt;
+    &lt;center&gt;
+  &lt;![endif]--&gt;
+      &lt;a href="{{HyperLinkItem}}"
+style="background-color:{{FillColor}};border-radius:0px;color:#ffffff;display:inline-block;line-height:40px;text-align:center;text-decoration:none;width:140px;-webkit-text-size-adjust:none;"&gt;{{DisplayValue}}&lt;/a&gt;
+  &lt;!--[if mso]&gt;
+    &lt;/center&gt;
+  &lt;/v:roundrect&gt;
+&lt;![endif]--&gt;&lt;/div&gt;
+&lt;/td&gt;
+&lt;td width="10"&gt;&lt;/td&gt;
+   {{/HyperlinkResults}}
+&lt;/tr&gt; 
+&lt;/table&gt;
+{{/HasHyperlinkResults}}     
+    {{&gt; hr}}
+  &lt;table style="margin-left:15px;"&gt;
+    &lt;tr&gt;
+      &lt;td&gt;{{GetAssignmentTypeName Assignment}}:&lt;/td&gt;
+      &lt;td&gt;&lt;a href="{{Hyperlinks.Get Assignment}}"&gt;{{Assignment.Subject}}&lt;/a&gt; (ссылка откроется в системе DirectumRX)&lt;/td&gt; 
+    &lt;/tr&gt;
+
+    {{#Author}}
+      &lt;tr&gt;
+        &lt;td&gt;От:&lt;/td&gt;
+        &lt;td&gt;{{.}}&lt;/td&gt;
+      &lt;/tr&gt;
+    {{/Author}}
+    {{#if Assignment.Deadline.HasValue}}
+    &lt;tr&gt;
+      &lt;td&gt;Срок:&lt;/td&gt;
+      &lt;td&gt;{{Assignment.Deadline.ToShortDateString}} {{#if Assignment.Deadline.TimeOfDay.TotalSeconds}}{{Assignment.Deadline.ToShortTimeString}}{{/if}}&lt;/td&gt;
+    &lt;/tr&gt;
+    {{/if}}
+  &lt;/table&gt;
+  {{&gt; hr}}
+&lt;!-- Текст задания. --&gt;
+ {{&lt; ActiveText}}
+    &lt;p style="margin-bottom:0;margin-top:0"&gt;
+      {{#process_text Assignment.Task.ActiveText}}
+        {{#IsNewLine}}  
+         &lt;/p&gt;&lt;p style="margin-bottom:0;margin-top:0"&gt;
+        {{/IsNewLine}}
+        {{#IsHyperlink}}
+          &lt;a href = "{{Text}}"&gt;{{DisplayValue}}&lt;/a&gt;
+        {{/IsHyperlink}}
+        {{^IsHyperlink}}
+          {{Text}}
+        {{/IsHyperlink}}
+      {{/process_text}}
+    &lt;/p&gt;
+    {{#if Assignment.Task.ActiveText}}
+      {{^Attachments}}
+      {{/Attachments}}
+    {{/if}}
+  {{/ActiveText}}
+   {{&gt; ActiveText}}
+&lt;/body&gt;
+&lt;/html&gt;</value>
+  </data>
+  <data name="MailSubject" xml:space="preserve">
+    <value>DirectumRX. {0}</value>
+  </data>
+  <data name="DctsDeviceTypeIncorrect" xml:space="preserve">
+    <value>Тип устройства должен быть Mail.</value>
+  </data>
+  <data name="FileNotFoundTemplate" xml:space="preserve">
+    <value>Не найден файл {0}</value>
+  </data>
+  <data name="IncomingInstructionTextSimpleAssignment" xml:space="preserve">
+    <value>Не отвечайте на это письмо. 
+После завершения работы по заданию нажмите на кнопку "Выполнить".</value>
+  </data>
+  <data name="ReplyInstructionTextSimpleAssignmentComplete" xml:space="preserve">
+    <value>Добавьте выше комментарий по результатам выполнения задания и вложите созданные документы. </value>
+  </data>
+  <data name="IncomingInstructionTextApprovalAssignment" xml:space="preserve">
+    <value>Не отвечайте на это письмо. 
+Рассмотрите документ. Если у вас нет замечаний к нему, нажмите на кнопку "Согласовать".
+Если у вас есть замечания, нажмите на кнопку "На доработку" и перечислите замечания в тексте открывшегося письма.</value>
+  </data>
+  <data name="ReplyInstructionTextApprovalAssignmentForRework" xml:space="preserve">
+    <value>Укажите выше замечания по результатам рассмотрения документа.
+Не вкладывайте файлы в письмо: вложения в систему занесены не будут.</value>
+  </data>
+  <data name="ResultTemplateCompleteByMail" xml:space="preserve">
+    <value>{0} Задание выполнено по электронной почте.</value>
+  </data>
+  <data name="IncomingInstructionTextActionItemExecutionAssignment" xml:space="preserve">
+    <value>Не отвечайте на это письмо.
+После завершения работ по поручению нажмите на кнопку "Выполнить".</value>
+  </data>
+  <data name="IncomingInstructionTextApprovalSendingAssignment" xml:space="preserve">
+    <value>Не отвечайте на это письмо. 
+Отправьте документы контрагенту и нажмите на кнопку "Выполнить".</value>
+  </data>
+  <data name="ReplyInstructionTextApprovalSendingAssignment" xml:space="preserve">
+    <value>Добавьте выше комментарий по отправке документов контрагенту.</value>
+  </data>
+  <data name="ReplyInstructionTextActionItemExecutionAssignment" xml:space="preserve">
+    <value>Добавьте комментарий по результатам выполнения поручения.
+Не вкладывайте файлы в письмо: вложения в систему занесены не будут.</value>
+  </data>
+  <data name="ReplyInstructionTextApprovalAssignmentApproved" xml:space="preserve">
+    <value>Добавьте выше комментарий по результатам согласования документа.
+Не вкладывайте файлы в письмо: вложения в систему занесены не будут.</value>
+  </data>
+  <data name="ServiceInformationText" xml:space="preserve">
+    <value>Не удалять:</value>
+  </data>
+  <data name="ActiveTextTemplateFormat" xml:space="preserve">
+    <value>Ответ получен по почте от {0}. 
+{1} </value>
+  </data>
+  <data name="LogNameTpl" xml:space="preserve">
+    <value>Отправка письма пользователю {0} о задании {1}</value>
+  </data>
+  <data name="IncomingInstructionTextAcquaintanceAssignment" xml:space="preserve">
+    <value>Не отвечайте на это письмо.
+Ознакомьтесь с документом и нажмите на кнопку "Ознакомлен".</value>
+  </data>
+  <data name="ReplyInstructionTextAcquaintanceAssignment" xml:space="preserve">
+    <value>Добавьте выше комментарий по результатам ознакомления с документом.</value>
+  </data>
+  <data name="CustomConfigSettingNotFoundTemplate" xml:space="preserve">
+    <value>Конфигурационный файл {0} не найден. Обратитесь к администратору системы</value>
+  </data>
+  <data name="ConfigurationElementValueNotSpecified" xml:space="preserve">
+    <value>В конфигурационном файле не указано значение элемента "{0}".</value>
+  </data>
+  <data name="IncomingInstructionTextActionItemSupervisorAssignment" xml:space="preserve">
+    <value>Не отвечайте на это письмо. 
+Рассмотрите выполненные работы. Если у вас нет замечаний нажмите на кнопку "Принято".
+Если у вас есть замечания, нажмите на кнопку "На доработку" и перечислите замечания в тексте открывшегося письма.</value>
+  </data>
+  <data name="ReplyInstructionTextActionItemSupervisorAssignmentAgree" xml:space="preserve">
+    <value>Добавьте выше комментарий по результатам проверки.
+Не вкладывайте файлы в письмо: вложения в систему занесены не будут.</value>
+  </data>
+  <data name="ReplyInstructionTextActionItemSupervisorAssignmentForRework" xml:space="preserve">
+    <value>Укажите выше замечания по результатам проверки.
+Не вкладывайте файлы в письмо: вложения в систему занесены не будут.</value>
+  </data>
+  <data name="ReplyInstructionTextCustomActionComplete" xml:space="preserve">
+    <value>Добавьте выше комментарий по результатам выполнения задания.</value>
+  </data>
+  <data name="IncomingMailProcessedErrorTemplate" xml:space="preserve">
+    <value>{0} was ignored: Assignment  not found or already completed.</value>
+  </data>
+</root>
